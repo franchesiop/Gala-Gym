@@ -57,9 +57,16 @@
                 <input type="hidden" id="accion" name="accion"> <input type="hidden" id="id_metodo" name="id_metodo">
                 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">BANCO</label>
-                    <input type="text" class="form-control rounded-0" id="banco" name="banco" required>
-                </div>
+				<label class="form-label small fw-bold">MÉTODO DE PAGO / BANCO</label>
+					<select class="form-select rounded-0" id="banco" name="banco" required>
+						<option value="" selected disabled>Seleccione una opción...</option>
+						<option value="Pago Móvil - Mercantil">Pago Móvil - Mercantil</option>
+						<option value="Pago Móvil - Banesco">Pago Móvil - Banesco</option>
+						<option value="Pago Móvil - Venezuela">Pago Móvil - Venezuela</option>
+						<option value="Transferencia Bancaria">Transferencia Bancaria</option>
+						<option value="Efectivo / Divisas">Efectivo / Divisas</option>
+					</select>
+				</div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold">CÉDULA</label>
                     <input type="text" class="form-control rounded-0" id="cedula" name="cedula" required>
