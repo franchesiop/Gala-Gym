@@ -10,7 +10,7 @@
             <div class="mt-2">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">DASHBOARD</a>
+                        <a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">REPORTES</a>
                     </li>
                     <li class="nav-item">
                         <a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR CLIENTES</a>
@@ -24,6 +24,7 @@
                     <li class="nav-item">
                         <a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">Gestionar Membresias</a>
                     </li>
+                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">GESTIONAR ROLES</a></li>
                 </ul>
             </div>
 

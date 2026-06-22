@@ -8,11 +8,11 @@
             </div>
             <div class="mt-2">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">DASHBOARD</a></li>
+                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">REPORTES</a></li>
                     <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR CLIENTES</a></li>
                     <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EMPLEADOS</a></li>
                     <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR METODOS DE PAGO</a></li>
-                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">GESTIONAR ROLES</a></li>
+                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">GESTIONAR MEMBRESIAS</a></li>
                     <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">GESTIONAR ROLES</a></li>
                 </ul>
             </div>
@@ -34,7 +34,7 @@
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaRoles">
                         <thead class="table-light text-muted">
-                            <tr><th>ID</th><th>TIPO DE ROL</th><th>Descripcion</th><th class="text-center">ACCIONES</th></tr>
+                            <tr><th style="display:none">ID</th><th>TIPO DE ROL</th><th>Descripcion</th><th class="text-center">ACCIONES</th></tr>
                         </thead>
                         <tbody class="fw-bold" id="cuerpoTablaRoles"></tbody>
                     </table>
@@ -57,11 +57,18 @@
                 <div class="mb-3">
                     <label class="form-label small fw-bold">Tipo de Rol / Nombre</label>
                     <input type="text" class="form-control rounded-0" id="nombreRol" required>
+                    <span id="snombreRol" class="text-danger small"></span>
                 </div>
+                <div class="row">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">DESCRIPCION</label>
+                        <input type="text" class="form-control rounded-0" id="descripcionRol" name="descripcionRol" required>
+                        <span id="sdescripcionRol" class="text-danger small"></span>
+                    </div>
             </form>
        </div>
        <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger rounded-0 small fw-bold" id="eliminar">ELIMINAR</button>
+          <button type="button" class="btn btn-danger rounded-0 small fw-bold" id="btnEliminar">ELIMINAR</button>
           <div>
             <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold">CANCELAR</button>
             <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4" id="btnGuardar">MODIFICAR</button>
@@ -71,5 +78,8 @@
    </div>
 </div>
 
-<?php require_once("comunes/pie.php"); ?>
+<?php
+require_once("comunes/modal.php"); 
+ require_once("comunes/pie.php"); 
+ ?>
 <script src="js/roles.js"></script>

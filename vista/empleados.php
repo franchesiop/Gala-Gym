@@ -11,11 +11,12 @@ require_once("comunes/encabezado.php");
             
             <div class="mt-2">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">DASHBOARD</a></li>
+                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">REPORTES</a></li>
                     <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR CLIENTES</a></li>
                     <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EMPLEADOS</a></li>
                     <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR METODOS DE PAGO</a></li>
                     <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">Gestionar Membresias</a></li>
+                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">GESTIONAR ROLES</a></li>
                 </ul>
             </div>
 
@@ -100,7 +101,7 @@ require_once("comunes/encabezado.php");
             </form>
        </div>
        <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger rounded-0 small fw-bold" id="eliminar" style="display:none;">ELIMINAR</button>
+          <button type="button" class="btn btn-danger rounded-0 small fw-bold" id="btnEliminar" style="display:none;">ELIMINAR</button>
           <div>
             <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold">CANCELAR</button>
             <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4" id="btnGuardar">INCLUIR</button>
@@ -111,6 +112,7 @@ require_once("comunes/encabezado.php");
 </div>
 
 <?php 
+require_once("comunes/modal.php"); 
 require_once("comunes/pie.php"); 
 ?>
 <script src="js/empleados.js"></script>
