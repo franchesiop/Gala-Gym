@@ -16,6 +16,9 @@
                         <a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR CLIENTES</a>
                     </li>
                     <li class="nav-item">
+                        <a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EJERCICIOS</a>
+                    </li>
+                    <li class="nav-item">
                         <a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EMPLEADOS</a>
                     </li>
                     <li class="nav-item">
