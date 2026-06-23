@@ -5,11 +5,13 @@ function consultar(){
 }
 
 $(document).ready(function(){
+
+    consultar();
     $("#formEjercicios").on("submit", function(e){
         e.preventDefault();
         });
 
-    consultar();
+    
     
     // Validacion de datos
     // Validacion nombre
@@ -42,7 +44,7 @@ $(document).ready(function(){
                 enviaAjax(datos);
             }
         }
-    }); // <-- Aquí se cerró correctamente el evento de btnGuardar
+    }); // 
 
     // Botón Nuevo Ejercicio
     $("#btnNuevoEjercicio").on("click", function(){
@@ -63,7 +65,7 @@ $(document).ready(function(){
         }
     });
 
-    // Botón Incluir alternativo (si existe en tu vista)
+    // Botón Incluir alternativo 
     $("#incluir").on("click", function(){
         limpia();
         $("#btnGuardar").text("incluir");
@@ -145,7 +147,7 @@ function enviaAjax(datos){
         processData: false,
         cache: false,
         success: function (respuesta){
-            console.log("Respuesta del servidor:", respuesta); // <-- REVISA ESTO EN LA CONSOLA (F12)
+            console.log("Respuesta del servidor:", respuesta); //
             try {
                 var lee = JSON.parse(respuesta);
                 
@@ -161,7 +163,21 @@ function enviaAjax(datos){
                         consultar(); // <-- Vuelve a llamar a la base de datos para actualizar la vista
                     }
                 }
-                // ... (resto de validaciones de modificar o eliminar)
+               else if(lee.resultado == 'modificar'){
+                    mostrarMensaje(lee.mensaje);
+                    if(lee.mensaje == 'Ejercicio Modificado'){
+                        $("#modalUsuario").modal("hide");
+                        consultar();
+                    }
+                }
+                else if(lee.resultado == 'eliminar'){
+                    mostrarMensaje(lee.mensaje);
+                    if(lee.mensaje == 'Ejercicio Eliminado'){
+                        $("#modalUsuario").modal("hide");
+                        $("#modal_eliminar").modal("hide");
+                        consultar();
+                    }
+                } 
             } catch(e) {
                 alert("Error procesando los datos del servidor (JSON): " + e.message);
             }

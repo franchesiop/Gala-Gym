@@ -36,10 +36,12 @@ require_once("comunes/encabezado.php"); ?>
     <table class="table table-hover align-middle small">
         <thead class="table-light">
             <tr class="text-muted">
-                <th>ID DEL EJERCICIO</th><th>NOMBRE DEL EJERCICIO</th><th class="text-center">OPCIONES</th>
+                <th>ID DEL EJERCICIO</th>
+                <th>NOMBRE DEL EJERCICIO</th>
+                <th class="text-center">OPCIONES</th>
             </tr>
         </thead>
-        <tbody class="fw-bold" id="#tablaEjercicios"></tbody>
+        <tbody class="fw-bold" id="tablaEjercicios"></tbody>
     </table>
 </div>
             </div>

@@ -107,10 +107,8 @@ class ejercicio extends datos {
                    
                     $respuesta .= "<td>";
                     $respuesta .= "<div class='d-flex justify-content-center'>";
-                    // CORRECCIÓN: Se cambió 'consultar(this)' por 'pone(this)' para que abra el modal con los datos
+        
                     $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i> CONSULTAR</button>";
-                    // CORRECCIÓN: Se cambió 'eliminar(id)' por 'eliminar(this)' para que coincida con el JS y lea la fila
-                    $respuesta .= "<button type='button' class='btn btn-danger text-white w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash-fill'></i> Eliminar</button>";
                     $respuesta .= "</div>";
                     $respuesta .= "</td>";
                     $respuesta .= "</tr>";
