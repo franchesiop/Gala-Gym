@@ -115,7 +115,7 @@ class empleados extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
         try{
-            $resultado = $co->query("SELECT * FROM empleado WHERE estado = 1");
+            $resultado = $co->query("SELECT e.*, c.nombre_cargo FROM empleado e LEFT JOIN cargo c ON e.id_cargo = c.id_cargo WHERE e.estado = 1");
             if($resultado){
                 $respuesta = '';
                 foreach($resultado as $fila){

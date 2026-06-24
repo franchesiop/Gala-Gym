@@ -199,6 +199,7 @@ function pone(pos){
     $("#tlfEmpleado").val(linea.find("td:eq(4)").text());      
     $("#correoEmpleado").val(linea.find("td:eq(5)").text()); 
     var idCargo = linea.find("td:eq(6)").text();               
+    
     cargarCargos(idCargo); 
     
     $("#contraEmpleado").val(""); 

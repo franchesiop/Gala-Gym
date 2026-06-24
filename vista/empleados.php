@@ -42,10 +42,16 @@ require_once("comunes/encabezado.php");
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaEmpleados">
                         <thead class="table-light">
-                            <tr class="text-muted">
-                                <th>CÉDULA <i class="bi bi-person-badge"></i></th><th>NOMBRE <i class="bi bi-person-circle"></th><th>APELLIDO <i class="bi bi-person-circle"></th><th>CARGO</th><th>TELÉFONO <i class="bi bi-telephone"></th><th class="text-center">OPCIONES <i class="bi bi-gear"></i></th>
-                            </tr>
-                        </thead>
+    <tr class="text-muted">
+        <th>CÉDULA <i class="bi bi-person-badge"></i></th>
+        <th>NOMBRE <i class="bi bi-person-circle"></i></th>
+        <th>APELLIDO <i class="bi bi-person-circle"></i></th>
+        <th>CARGO <i class="bi bi-briefcase"></i></th>
+        <th>TELÉFONO <i class="bi bi-telephone"></i></th>
+        <th>CORREO <i class="bi bi-envelope"></i></th>
+        <th class="text-center">OPCIONES <i class="bi bi-gear"></i></th>
+    </tr>
+</thead>
                         <tbody class="fw-bold" id="cuerpoTablaEmpleados"></tbody>
                     </table>
                 </div>
