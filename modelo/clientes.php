@@ -129,8 +129,8 @@ class clientes extends datos {
                    // $respuesta .= "<td>" . $fila['contrasena'] . "</td>";
                     $respuesta .= "<td>";
                         $respuesta .= "<div class='d-flex justify-content-center'>";
-                        $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i>CONSULTAR</button>";
-                       $respuesta .= "<button type='button' class='btn btn-danger text-white w-80 small-width m-1 d-none' onclick='eliminar(this)'><i class='bi bi-trash-fill'></i> Eliminar</button>";
+                        $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>";
+                        $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>";
                     $respuesta .= "</td>";
                     $respuesta .= "</tr>";
                 }
@@ -181,7 +181,7 @@ class clientes extends datos {
     $datos = [];
     try {
         $resultado = $co->query("SELECT id_membresia, tipo FROM membresia");
-        $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); // Trae todo de una vez
+        $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
     } catch(Exception $e) {
         
         $datos = [];

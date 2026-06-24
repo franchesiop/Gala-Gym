@@ -111,8 +111,8 @@ class roles extends datos {
                     
                     $respuesta .= "<td>";
                         $respuesta .= "<div class='d-flex justify-content-center'>";
-                        $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i>CONSULTAR</button>";
-                       $respuesta .= "<button type='button' class='btn btn-danger text-white w-80 small-width m-1 d-none' onclick='eliminar(this)'><i class='bi bi-trash-fill'></i> Eliminar</button>";
+                        $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>";
+                        $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>";
                     $respuesta .= "</td>";
                     $respuesta .= "</tr>";
                 }

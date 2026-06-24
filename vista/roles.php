@@ -9,11 +9,12 @@
             <div class="mt-2">
                 <ul class="nav flex-column">
                     <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">REPORTES</a></li>
-                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR CLIENTES</a></li>
-                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EMPLEADOS</a></li>
-                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR METODOS DE PAGO</a></li>
-                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">GESTIONAR MEMBRESIAS</a></li>
-                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">GESTIONAR ROLES</a></li>
+                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">CLIENTES</a></li>
+                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EMPLEADOS</a></li>
+                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">METODOS DE PAGO</a></li>
+                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">MEMBRESIAS</a></li>
+                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">ROLES</a></li>
+                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EJERCICIOS</a></li>
                 </ul>
             </div>
             <div class="p-4 mt-5">
@@ -28,8 +29,8 @@
 
             <div class="bg-white p-4 shadow-sm border">
                 <div class="d-flex justify-content-between mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase">Tipos de Roles</h6>
-                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoRol">NUEVO ROL</button>
+                    <h6 class="fw-bold m-0 text-uppercase">Roles</h6>
+                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoRol"><i class="bi bi-person-rolodex"></i> REGISTRAR</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaRoles">
@@ -65,10 +66,10 @@
                         <input type="text" class="form-control rounded-0" id="descripcionRol" name="descripcionRol" required>
                         <span id="sdescripcionRol" class="text-danger small"></span>
                     </div>
+                </div>
             </form>
        </div>
        <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger rounded-0 small fw-bold" id="btnEliminar">ELIMINAR</button>
           <div>
             <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold">CANCELAR</button>
             <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4" id="btnGuardar">MODIFICAR</button>

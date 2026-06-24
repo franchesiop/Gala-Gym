@@ -97,6 +97,7 @@ class pagos extends datos {
                     <td>{$r_row['telefono']}</td>
                     <td class='text-center'>
                         <button type='button' class='btn btn-sm btn-dark btn-consultar-pago fw-bold' data-id='{$r_row['id_metodo']}'>CONSULTAR</button>
+                        
                     </td>
                 </tr>";
             }

@@ -2,7 +2,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
     <div class="container">
-        <a class="navbar-brand fw-bold text-uppercase" href="index.php" style="letter-spacing: 1px; font-size: 1.4rem;">GIMNASIO GALA</a>
+        <a class="navbar-brand fw-bold text-uppercase" href="index.php" style="letter-spacing: 1px; font-size: 1.4rem;">GALA GYM</a>
         <div class="ms-auto">
             <a class="btn btn-outline-dark fw-bold small px-4 rounded-0" href="?pagina=login">INICIAR SESIÓN</a>
         </div>
@@ -18,7 +18,7 @@
             <p class="text-muted mb-5 fw-bold" style="letter-spacing: 0.5px; font-size: 0.85rem; opacity: 0.8;">
                 UN DEDICADO GRUPO DE ENTRENADORES DISPUESTOS A GUIARTE.
             </p>
-            <a href="?pagina=login" class="btn btn-dark rounded-0 px-5 py-3 fw-bold shadow-sm text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">
+            <a href="?pagina=registro" class="btn btn-dark rounded-0 px-5 py-3 fw-bold shadow-sm text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">
                 EMPEZAR AHORA
             </a>
         </div>

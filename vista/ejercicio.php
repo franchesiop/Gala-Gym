@@ -9,12 +9,13 @@ require_once("comunes/encabezado.php"); ?>
             </div>
             <div class="mt-2">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">DASHBOARD</a></li>
-                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR CLIENTES</a></li>
-                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EJERCICIOS</a></li>
-                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EMPLEADOS</a></li>
-                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR METODOS DE PAGO</a></li>
-                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">Gestionar Membresias</a></li>
+                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">REPORTES</a></li>
+                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">CLIENTES</a></li>
+                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EMPLEADOS</a></li>
+                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">METODOS DE PAGO</a></li>
+                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">MEMBRESIAS</a></li>
+                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">ROLES</a></li>
+                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EJERCICIOS</a></li>
                 </ul>
             </div>
             <div class="p-4 mt-5">
@@ -27,16 +28,15 @@ require_once("comunes/encabezado.php"); ?>
             </div>
             <div class="bg-white p-4 shadow-sm border">
                 <div class="d-flex justify-content-between mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase">Gestión de Ejercicios</h6>
-                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoEjercicio">
-                        NUEVO EJERCICIO
+                    <h6 class="fw-bold m-0 text-uppercase">Ejercicios</h6><button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoEjercicio"><i class="bi bi-activity"></i>
+                        REGISTRAR
                     </button>
                 </div>
                 <div class="table-responsive">
     <table class="table table-hover align-middle small">
         <thead class="table-light">
             <tr class="text-muted">
-                <th>ID DEL EJERCICIO</th>
+                <th style="display:none">ID DEL EJERCICIO</th>
                 <th>NOMBRE DEL EJERCICIO</th>
                 <th class="text-center">OPCIONES</th>
             </tr>
@@ -70,7 +70,7 @@ require_once("comunes/encabezado.php"); ?>
             </form>
        </div>
        <div class="modal-footer d-flex justify-content-between">
-            <button type="button" class="btn btn-danger rounded-0 small fw-bold px-3" id="btnEliminar" style="display: none;">ELIMINAR</button>
+            
             
             <div class="ms-auto">
                 <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold me-2">CANCELAR</button>

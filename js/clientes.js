@@ -99,23 +99,6 @@ $(document).ready(function(){
      $("#modalUsuario").modal("show");
 });
 
-        $("#btnEliminar").on("click", function(){
-        var cedula = $("#cedulaCliente").val(); 
-        if(confirm("¿Seguro que desea eliminar a este cliente?")){
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('cedulaCliente', cedula);
-        enviaAjax(datos);
-    }
-});
-        
-
-        $("#incluir").on("click", function(){
-        limpia();
-        $("#btnGuardar").text("incluir");
-        $("#modalUsuario").modal("show");
-        });
-
 });
 
 //validar antes de enviar
@@ -202,7 +185,7 @@ function pone(pos){
     cargarMembresias(idMembresia); 
     $("#contraCliente").val();
     $("#btnGuardar").text('modificar');
-    $("#btnEliminar").show();
+   
     $("#modalUsuario").modal("show");
 }
 
@@ -210,8 +193,14 @@ function eliminar(pos){
     var linea = $(pos).closest('tr');
     var cedula = $(linea).find("td:eq(0)").text();
 
-    $("#cedulaEliminar").val(cedula);
-    $("#modal_eliminar").modal("show");
+    if(confirm("¿Seguro que deseas eliminar al cliente con cédula " + cedula + "?")){
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('cedulaCliente', cedula);
+        
+        // Esto es lo que faltaba: ¡Enviar la petición al servidor!
+        enviaAjax(datos);
+    }
 }
 
 function enviaAjax(datos){
@@ -251,7 +240,6 @@ function enviaAjax(datos){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Cliente Eliminado'){
                         $("#modalUsuario").modal("hide");
-                        $("#modal_eliminar").modal("hide");
                         consultar();
                     }
                 } 

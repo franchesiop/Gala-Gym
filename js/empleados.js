@@ -191,16 +191,17 @@ function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
 
 // funcion para llenar el formulario
 function pone(pos){
-    linea = $(pos).closest('tr');
+    var linea = $(pos).closest('tr');
     
     $("#cedulaEmpleado").val(linea.find("td:eq(0)").text());
     $("#nombreEmpleado").val(linea.find("td:eq(1)").text());   
     $("#apellidoEmpleado").val(linea.find("td:eq(2)").text()); 
-    $("#tlfEmpleado").val(linea.find("td:eq(3)").text());      
-    $("#correoEmpleado").val(linea.find("td:eq(4)").text()); 
-    var idCargo = linea.find("td:eq(5)").text();
+    $("#tlfEmpleado").val(linea.find("td:eq(4)").text());      
+    $("#correoEmpleado").val(linea.find("td:eq(5)").text()); 
+    var idCargo = linea.find("td:eq(6)").text();               
     cargarCargos(idCargo); 
-    $("#contraEmpleado").val();
+    
+    $("#contraEmpleado").val(""); 
     $("#btnGuardar").text('modificar');
     $("#btnEliminar").show();
     $("#modalUsuario").modal("show");
@@ -210,8 +211,13 @@ function eliminar(pos){
     var linea = $(pos).closest('tr');
     var cedula = $(linea).find("td:eq(0)").text();
 
-    $("#cedulaEliminar").val(cedula);
-    $("#modal_eliminar").modal("show");
+    if(confirm("¿Seguro que deseas eliminar al empleado con cédula " + cedula + "?")){
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('cedulaEmpleado', cedula);
+        
+        enviaAjax(datos);
+    }
 }
 
 function enviaAjax(datos){

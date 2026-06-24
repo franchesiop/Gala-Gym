@@ -12,12 +12,12 @@ require_once("comunes/encabezado.php");
             <div class="mt-2">
                 <ul class="nav flex-column">
                     <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">REPORTES</a></li>
-                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR CLIENTES</a></li>
-                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EJERCICIOS</a></li>
-                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR EMPLEADOS</a></li>
-                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">GESTIONAR METODOS DE PAGO</a></li>
-                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">Gestionar Membresias</a></li>
-                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">GESTIONAR ROLES</a></li>
+                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">CLIENTES</a></li>
+                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EMPLEADOS</a></li>
+                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">METODOS DE PAGO</a></li>
+                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">MEMBRESIAS</a></li>
+                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">ROLES</a></li>
+                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EJERCICIOS</a></li>
                 </ul>
             </div>
 
@@ -33,17 +33,17 @@ require_once("comunes/encabezado.php");
 
             <div class="bg-white p-4 shadow-sm border">
                 <div class="d-flex justify-content-between mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase">Gestión de Empleados</h6>
+                    <h6 class="fw-bold m-0 text-uppercase">Empleados</h6>
                     <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" 
-                            data-bs-toggle="modal" data-bs-target="#modalUsuario" id="btnNuevoEmpleado">
-                        NUEVO EMPLEADO
+                            data-bs-toggle="modal" data-bs-target="#modalUsuario" id="btnNuevoEmpleado"><i class="bi bi-person"></i>
+                        REGISTRAR
                     </button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaEmpleados">
                         <thead class="table-light">
                             <tr class="text-muted">
-                                <th>CÉDULA</th><th>NOMBRE</th><th>APELLIDO</th><th>CARGO</th><th>TELÉFONO</th><th class="text-center">OPCIONES</th>
+                                <th>CÉDULA <i class="bi bi-person-badge"></i></th><th>NOMBRE <i class="bi bi-person-circle"></th><th>APELLIDO <i class="bi bi-person-circle"></th><th>CARGO</th><th>TELÉFONO <i class="bi bi-telephone"></th><th class="text-center">OPCIONES <i class="bi bi-gear"></i></th>
                             </tr>
                         </thead>
                         <tbody class="fw-bold" id="cuerpoTablaEmpleados"></tbody>
@@ -91,9 +91,13 @@ require_once("comunes/encabezado.php");
                     <input type="email" class="form-control rounded-0" id="correoEmpleado" name="correoEmpleado" required>
                     <span id="scorreoEmpleado" class="text-danger small"></span>
                 </div>
-                <select id="cargoEmpleado" name="cargoEmpleado" class="form-select rounded-0">
-                        <option value="" disabled selected>Seleccione un cargo...</option>
-                    </select>
+                <div class="mb-3">
+    <label class="form-label small fw-bold">CARGO</label>
+    <select id="cargoEmpleado" name="cargoEmpleado" class="form-select rounded-0">
+        <option value="" disabled selected>Seleccione un cargo...</option>
+    </select>
+    <span id="scargoEmpleado" class="text-danger small"></span>
+</div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold">CONTRASEÑA</label>
                     <input type="password" class="form-control rounded-0" id="contraEmpleado" name="contraEmpleado" required>
@@ -102,7 +106,7 @@ require_once("comunes/encabezado.php");
             </form>
        </div>
        <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger rounded-0 small fw-bold" id="btnEliminar" style="display:none;">ELIMINAR</button>
+        
           <div>
             <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold">CANCELAR</button>
             <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4" id="btnGuardar">INCLUIR</button>

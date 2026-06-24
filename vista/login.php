@@ -5,7 +5,7 @@
         <div class="card-body p-5">
             <div class="text-center mb-5">
                 <h2 class="fw-bold text-uppercase" style="letter-spacing: 2px;">INICIO SESION</h2>
-                <p class="text-muted small text-uppercase">Ingresa tus credenciales</p>
+                <p class="text-muted small text-uppercase">Ingresa tus datos</p>
             </div>
 
             <form action="?pagina=login" method="POST">
@@ -35,4 +35,7 @@
     </div>
 </div>
 
-<?php require_once("comunes/pie.php"); ?>
+<?php
+ require_once("comunes/pie.php");
+?>
+<script src="js/login.js"></script>

@@ -6,5 +6,6 @@
     <title>Gala Gym - Sistema de Gestión</title>
     
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="icons/bootstrap-icons.css">
     </head>
 <body>

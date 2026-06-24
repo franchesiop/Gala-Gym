@@ -56,20 +56,7 @@ $("#btnGuardar").on("click", function() {
      $("#modalRol").modal("show");
 });
 
-    $("#btnEliminar").on("click", function(){
-        var idRol = $("#idRol").val(); 
-        if(confirm("¿Seguro que desea eliminar a este cliente?")){
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('idRol', idRol);
-        enviaAjax(datos);
-    }
-});
-     $("#incluir").on("click", function(){
-        limpia();
-        $("#btnGuardar").text("incluir");
-        $("#modalUsuario").modal("show");
-        });
+     
 });
 
 // validar antes de enviar
@@ -123,10 +110,14 @@ function pone(pos){
 }
 function eliminar(pos){
     var linea = $(pos).closest('tr');
-    var cedula = $(linea).find("td:eq(0)").text();
+    var id_rol = $(linea).find("td:eq(0)").text();
 
-    $("#nombreEliminar").val(nombre);
-    $("#modal_eliminar").modal("show");
+    if(confirm("¿Seguro que deseas eliminar el rol?")){
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('idRol', id_rol);
+        enviaAjax(datos);
+    }
 }
 
 function enviaAjax(datos){
@@ -165,8 +156,7 @@ function enviaAjax(datos){
                 else if(lee.resultado == 'eliminar'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Rol eliminado'){
-                        $("#modalRol").modal("hide");
-                        $("#modal_eliminar").modal("hide");
+                        
                         consultar();
                     }
                 } 

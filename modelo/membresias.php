@@ -47,7 +47,7 @@ class membresias extends datos {
         $tabla = '';
         foreach($resultado as $f) {
             $tabla .= "<tr>
-                <td>{$f['id_membresia']}</td>
+                <td style='display:none'>{$f['id_membresia']}</td>
                 <td>{$f['tipo']}</td>
                 <td>{$f['monto']}$</td>
                 <td class='text-center'>
