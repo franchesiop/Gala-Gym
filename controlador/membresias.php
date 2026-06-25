@@ -1,47 +1,43 @@
 <?php
-
-if (!is_file("modelo/".$pagina.".php")) {
-    echo "Falta definir la clase membresias";
-    exit;
+if (!is_file("modelo/".$pagina.".php")){
+    echo "Falta definir la clase ".$pagina;
+	exit;
 }
 require_once("modelo/".$pagina.".php");
 
-$o = new membresias();
+if(is_file("vista/".$pagina.".php")){
+    $o = new membresias();
+    if(!empty($_POST)){
+        $accion = $_POST['accion'];
 
-if (!empty($_POST)) {
-    $accion = $_POST['accion'];
+        switch($accion){
 
-    if (isset($_POST['id']))      $o->set_id_membresia($_POST['id']);
-    if (isset($_POST['nombre']))  $o->set_tipo($_POST['nombre']);
-    if (isset($_POST['costo']))   $o->set_monto($_POST['costo']);
+            case 'consultar':
+                echo json_encode($o->consultar());
+                break;
 
-    switch ($accion) {
-        case 'consultar':
-            echo json_encode($o->consultar());
-            break;
+            case 'eliminar':
+                $o->set_id_membresia($_POST['id_membresia']);
+                echo json_encode($o->eliminar());
+                break;
 
-        case 'incluir':
-            echo json_encode($o->incluir());
-            break;
+            case 'incluir':
+                $o->set_tipo($_POST['tipo']);
+                $o->set_monto($_POST['monto']);
+                echo json_encode($o->incluir());
+                break;
 
-        case 'modificar':
-            echo json_encode($o->modificar());
-            break;
-
-        case 'eliminar':
-            echo json_encode($o->eliminar());
-            break;
-
-        default:
-            echo json_encode(['resultado' => 'error', 'mensaje' => 'Acción no permitida']);
-            break;
+            case 'modificar':
+                $o->set_id_membresia($_POST['id_membresia']);
+                $o->set_tipo($_POST['tipo']);
+                $o->set_monto($_POST['monto']);
+                echo json_encode($o->modificar());
+                break;
+        }
+        exit();
     }
-    exit;
-}
-
-if (is_file("vista/".$pagina.".php")) {
-    require_once("vista/".$pagina.".php");
+    require_once("vista/".$pagina.".php"); 
 } else {
-    echo "Vista de membresias en construcción";
+    echo "pagina en construccion";
 }
 ?>

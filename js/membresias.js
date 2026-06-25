@@ -1,77 +1,200 @@
+function consultar(){
+    var datos = new FormData();
+    datos.append('accion', 'consultar');
+    enviaAjax(datos);
+}
+
 $(document).ready(function(){
-    cargarTablaMembresias();
 
-    $("#btnGuardar").on("click", function(e){
+    consultar();
+    $("#formMembresia").on("submit", function(e){
         e.preventDefault();
-        var accion = $(this).text().toLowerCase() == "guardar" ? "modificar" : "incluir";
-        var datos = new FormData();
-        datos.append('accion', accion);
-        datos.append('id', $("#idMembresia").val());
-        datos.append('nombre', $("#nombrePlan").val());
-        datos.append('costo', $("#costoPlan").val());
-        
-        enviaAjaxMembresias(datos);
+        });
+
+    
+    
+    // Validacion de datos
+    // Validacion nombre
+    $("#nombre_membresia").on("keypress",function(e){
+        validarkeypress(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
+    });
+    
+    $("#nombre_membresia").on("keyup",function(){
+        validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this),$("#snombre_membresia"),"Nombre inválido - entre 3 y 100 caracteres");
     });
 
-    $("#eliminar").on("click", function(e){
-        e.preventDefault();
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('id', $("#idMembresia").val());
-        enviaAjaxMembresias(datos);
-    });
+    // Botón Guardar / Modificar
+    $("#btnGuardar").on("click", function() {
+        // Guardar (Incluir)
+        if($(this).text().toLowerCase() == 'incluir'){
+            if(validarEnvio()){
+                var datos = new FormData();
+                datos.append('accion', 'incluir');
+                datos.append('tipo', $("#nombrePlan").val());
+                datos.append('monto', $("#costoPlan").val());
+                enviaAjax(datos);
+            }
+        }
+        // Modificar
+        else if($(this).text().toLowerCase() == 'modificar'){
+            if(validarEnvio()){
+                var datos = new FormData();
+                datos.append('accion', 'modificar');
+                datos.append('id_membresia', $("#idMembresia").val());
+                datos.append('tipo', $("#nombrePlan").val());
+                datos.append('monto', $("#costoPlan").val());
+                enviaAjax(datos);
+            }
+        }
+    }); // 
 
+    // Botón Nuevo Ejercicio
     $("#btnNuevoPlan").on("click", function(){
-        $("#idMembresia").val("");
-        $("#nombrePlan").val("");
-        $("#costoPlan").val("");
-        $("#btnGuardar").text("Incluir");
-        $("#eliminar").hide();
-        $("#modalMembresia").modal("show");
+        limpia();
+        $("#btnGuardar").text("incluir"); 
+        $("#modalMembresia").modal("show"); // El ID de tu modal en la vista
     });
-});
 
-$(document).on('click', '.btn-modificar', function(){
-    let linea = $(this).closest('tr');
+    // Botón Eliminar del Modal
+    $("#btnEliminar").on("click", function(){
+        var id_membresia = $("#id_membresia").val(); 
+        if(confirm("¿Seguro que desea eliminar esta membresía?")){
+            var datos = new FormData();
+            datos.append('accion', 'eliminar');
+            datos.append('id_membresia', id_membresia);
+            enviaAjax(datos);
+        }
+    });
+
+    // Botón Incluir alternativo 
+    $("#incluir").on("click", function(){
+        limpia();
+        $("#btnGuardar").text("incluir");
+        $("#modalUsuario").modal("show");
+    });
+}); // Fin del $(document).ready
+
+// Validar antes de enviar
+function validarEnvio() {
+    if(validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $("#nombrePlan"),$("#snombrePlan"),"Nombre Invalido - (Solo letras entre 3 y 100 caracteres)")==0){
+        mostrarMensaje("Nombre de Membresía Invalido <br>" + "(Solo letras entre 3 y 100 caracteres)");
+        return false;
+    }
+    if($("#costoPlan").val() == ""){
+        mostrarMensaje("El costo no puede estar vacío");
+        return false;
+    }
+    return true;
+}
+
+// Función para mostrar el mensaje modal
+function mostrarMensaje(mensaje){
+    $("#contenidoModal").html(mensaje);
+    $("#mostrarModal").modal("show");
+    setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
+}
+
+// Función para validar por keypress
+function validarkeypress(er,e){
+    var key = e.keyCode || e.which;
+    var tecla = String.fromCharCode(key);
+    var a = er.test(tecla);
+    if(!a){
+        e.preventDefault();
+    }
+}
+
+// Función para validar por keyup
+function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
+    var a = er.test(etiqueta.val());
+    if(a){
+        etiquetamensaje.text("");
+        return 1;
+    } else{
+        etiquetamensaje.text(mensaje);
+        return 0;
+    }
+}
+
+// Función para llenar el formulario al editar
+function pone(pos){
+    var linea = $(pos).closest('tr');
     
     $("#idMembresia").val(linea.find("td:eq(0)").text());
-    $("#nombrePlan").val(linea.find("td:eq(1)").text());
-    $("#costoPlan").val(linea.find("td:eq(2)").text().replace('$', ''));
-    
-    $("#btnGuardar").text("Guardar");
-    $("#eliminar").show();
-    $("#modalMembresia").modal("show");
-});
+    $("#nombrePlan").val(linea.find("td:eq(1)").text()); 
+    $("#costoPlan").val(linea.find("td:eq(2)").text()); // Agregamos el costo
 
-function enviaAjaxMembresias(datos){
+    $("#btnGuardar").text('modificar');
+    $("#modalMembresia").modal("show");
+}
+
+// Función eliminar directa desde la tabla
+function eliminar(pos){
+    var linea = $(pos).closest('tr');
+    var id_membresia = $(linea).find("td:eq(0)").text();
+
+    if(confirm("¿Seguro que desea eliminar esta membresía?")){
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('id_membresia', id_membresia);
+        enviaAjax(datos);
+    }
+}
+
+// Función AJAX
+function enviaAjax(datos){
     $.ajax({
         async: true,
-        url: '?pagina=membresias',
-        type: 'POST',
+        url: "index.php?pagina=membresias",
+        type: "POST",
         contentType: false,
         data: datos,
         processData: false,
         cache: false,
-        success: function(respuesta) {
+        success: function (respuesta){
+            console.log("Respuesta del servidor:", respuesta); //
             try {
-                let lee = JSON.parse(respuesta);
+                var lee = JSON.parse(respuesta);
+                
+                // Si la acción fue consultar, dibuja las filas en la tabla
                 if(lee.resultado == 'consultar'){
                     $("#cuerpoTablaMembresias").html(lee.mensaje);
-                } else {
-                    alert(lee.mensaje); 
-                    $("#modalMembresia").modal("hide");
-                    cargarTablaMembresias();
+                } 
+                // Si se incluyó con éxito, limpia, cierra el modal y recarga la tabla
+                else if(lee.resultado == 'incluir'){
+                    mostrarMensaje(lee.mensaje);
+                    if(lee.mensaje == 'Membresía Registrada'){
+                        $("#modalMembresia").modal("hide");
+                        consultar(); // <-- Vuelve a llamar a la base de datos para actualizar la vista
+                    }
                 }
-            } catch (e) {
-                console.error("Error al procesar: ", respuesta);
+               else if(lee.resultado == 'modificar'){
+                    mostrarMensaje(lee.mensaje);
+                    if(lee.mensaje == 'Membresía Modificada'){
+                        $("#modalMembresia").modal("hide");
+                        consultar();
+                    }
+                }
+                else if(lee.resultado == 'eliminar'){
+                    mostrarMensaje(lee.mensaje);
+                    if(lee.mensaje == 'Membresía Eliminada'){
+                        $("#modalMembresia").modal("hide");
+                        $("#modal_eliminar").modal("hide");
+                        consultar();
+                    }
+                } 
+            } catch(e) {
+                alert("Error procesando los datos del servidor (JSON): " + e.message);
             }
         },
-        error: function(){ alert("Error de conexión"); }
-    }); 
+        error: function(request, status, err){
+            mostrarMensaje("ERROR DE RED o SERVIDOR: <br/>" + err);
+        }
+    });
 }
-
-function cargarTablaMembresias() {
-    var d = new FormData(); 
-    d.append('accion', 'consultar');
-    enviaAjaxMembresias(d);
+// Limpiar formulario
+function limpia(){
+    $("#idMembresia").val("");
+    $("#nombrePlan").val("");
+    $("#costoPlan").val("");
 }

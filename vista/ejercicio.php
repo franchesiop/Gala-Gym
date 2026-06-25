@@ -5,17 +5,17 @@ require_once("comunes/encabezado.php"); ?>
     <div class="row">
         <nav class="col-md-3 col-lg-2 d-md-block bg-dark text-white min-vh-100 p-0 shadow">
             <div class="p-4 border-bottom border-secondary text-center">
-                <h4 class="fw-bold m-0 text-uppercase" style="letter-spacing: 2px;">Admin</h4>
+                <h4 class="fw-bold m-0 text-uppercase" style="letter-spacing: 2px;">GALA GYM</h4>
             </div>
             <div class="mt-2">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">REPORTES</a></li>
-                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">CLIENTES</a></li>
-                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EMPLEADOS</a></li>
-                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">METODOS DE PAGO</a></li>
-                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">MEMBRESIAS</a></li>
-                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">ROLES</a></li>
-                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EJERCICIOS</a></li>
+                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-bank"></i> REPORTES</a></li>
+                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-person-standing"></i> CLIENTES</a></li>
+                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-person-lines-fill"></i> EMPLEADOS</a></li>
+                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-wallet2"></i> METODOS DE PAGO</a></li>
+                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase"><i class="bi bi-currency-dollar"></i> MEMBRESIAS</a></li>
+                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase"><i class="bi bi-person-workspace"></i> ROLES</a></li>
+                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-lungs"></i> EJERCICIOS</a></li>
                 </ul>
             </div>
             <div class="p-4 mt-5">
@@ -37,8 +37,8 @@ require_once("comunes/encabezado.php"); ?>
         <thead class="table-light">
             <tr class="text-muted">
                 <th style="display:none">ID DEL EJERCICIO</th>
-                <th>NOMBRE DEL EJERCICIO</th>
-                <th class="text-center">OPCIONES</th>
+                <th>NOMBRE <i class="bi bi-card-text"></i></th>
+                <th class="text-center">OPCIONES <i class="bi bi-gear"></i></th>
             </tr>
         </thead>
         <tbody class="fw-bold" id="tablaEjercicios"></tbody>
@@ -62,7 +62,7 @@ require_once("comunes/encabezado.php"); ?>
                 
                 <div class="row">
                     <div class="col-12 mb-3">
-                        <label class="form-label small fw-bold">NOMBRE DEL EJERCICIO</label>
+                        <label class="form-label small fw-bold">NOMBRE</label>
                         <input type="text" class="form-control rounded-0" id="nombre_ejercicio" name="nombre_ejercicio" required autocomplete="off">
                         <span id="snombre_ejercicio" class="text-danger small"></span>
                     </div>

@@ -43,8 +43,8 @@ if(is_file("vista/".$pagina.".php")){
                 echo json_encode($o->modificar());
                 break;
 
-            case 'listar_cargos':
-             echo json_encode($o->listar_cargos());
+            case 'listar_roles':
+             echo json_encode($o->listar_roles());
              break;
         }
         exit();

@@ -124,7 +124,7 @@ class clientes extends datos {
                     $respuesta .= "<td>" . $fila['nombre'] . "</td>";
                     $respuesta .= "<td>" . $fila['apellido'] . "</td>";
                     $respuesta .= "<td>" . $fila['telefono'] . "</td>";
-                    $respuesta .= "<td>" . $fila['correo'] . "</td>";
+                    $respuesta .= "<td style='display:none'>" . $fila['correo'] . "</td>";
                     $respuesta .= "<td style='display:none'>" . $fila['id_membresia'] . "</td>";
                    // $respuesta .= "<td>" . $fila['contrasena'] . "</td>";
                     $respuesta .= "<td>";

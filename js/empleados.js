@@ -287,13 +287,13 @@ function cargarCargos(valorSeleccionado = "") {
     $.ajax({
         url: "index.php?pagina=empleados",
         type: "POST",
-        data: { accion: 'listar_cargos' },
+        data: { accion: 'listar_roles' },
         success: function(respuesta){
             var data = JSON.parse(respuesta);
             var select = $("#cargoEmpleado");
             select.find('option:not(:first)').remove();
             $.each(data, function(index, item) {
-                select.append('<option value="' + item.id_cargo + '">' + item.nombre_cargo + '</option>');
+                select.append('<option value="' + item.id_rol + '">' + item.nombre + '</option>');
             });
             if(valorSeleccionado != "") {
                 select.val(valorSeleccionado);

@@ -115,7 +115,7 @@ class empleados extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
         try{
-            $resultado = $co->query("SELECT e.*, c.nombre_cargo FROM empleado e LEFT JOIN cargo c ON e.id_cargo = c.id_cargo WHERE e.estado = 1");
+            $resultado = $co->query("SELECT e.*, r.nombre AS nombre_rol FROM empleado e LEFT JOIN rol r ON e.id_cargo = r.id_rol WHERE e.estado = 1");
             if($resultado){
                 $respuesta = '';
                 foreach($resultado as $fila){
@@ -123,9 +123,9 @@ class empleados extends datos {
                     $respuesta .= "<td>" . $fila['cedula'] . "</td>";
                     $respuesta .= "<td>" . $fila['nombre'] . "</td>";
                     $respuesta .= "<td>" . $fila['apellido'] . "</td>";
-                    $respuesta .= "<td>" . $fila['nombre_cargo'] . "</td>";
+                    $respuesta .= "<td>" . $fila['nombre_rol'] . "</td>";
                     $respuesta .= "<td>" . $fila['telefono'] . "</td>";
-                    $respuesta .= "<td>" . $fila['correo'] . "</td>";
+                    $respuesta .= "<td style='display:none'>" . $fila['correo'] . "</td>";
                     $respuesta .= "<td style='display:none'>" . $fila['id_cargo'] . "</td>";
                    // $respuesta .= "<td>" . $fila['contrasena'] . "</td>";
                     $respuesta .= "<td>";
@@ -176,18 +176,18 @@ class empleados extends datos {
         }
     }
 
-    function listar_cargos(){
-    $co = $this->conecta(); 
-    $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $datos = [];
-    try {
-        $resultado = $co->query("SELECT id_cargo, nombre_cargo FROM cargo");
-        $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
-    } catch(Exception $e) {
-        
+    function listar_roles(){
+        $co = $this->conecta(); 
+        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
+        try {
+            // Hacemos el select a tu tabla 'rol' según la imagen de phpMyAdmin
+            $resultado = $co->query("SELECT id_rol, nombre FROM rol");
+            $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
+        } catch(Exception $e) {
+            $datos = [];
+        }
+        return $datos;
     }
-    return $datos;
-}
 }
 ?>

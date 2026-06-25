@@ -4,17 +4,17 @@
     <div class="row">
         <nav class="col-md-3 col-lg-2 d-md-block bg-dark text-white min-vh-100 p-0 shadow">
             <div class="p-4 border-bottom border-secondary text-center">
-                <h4 class="fw-bold m-0 text-uppercase" style="letter-spacing: 2px;">Admin</h4>
+                <h4 class="fw-bold m-0 text-uppercase" style="letter-spacing: 2px;">GALA GYM</h4>
             </div>
             <div class="mt-2">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">REPORTES</a></li>
-                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">CLIENTES</a></li>
-                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EMPLEADOS</a></li>
-                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">METODOS DE PAGO</a></li>
-                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">MEMBRESIAS</a></li>
-                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase">ROLES</a></li>
-                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">EJERCICIOS</a></li>
+                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-bank"></i>  REPORTES</a></li>
+                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-person-standing"></i> CLIENTES</a></li>
+                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-person-lines-fill"></i> EMPLEADOS</a></li>
+                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-wallet2"></i> METODOS DE PAGO</a></li>
+                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase"><i class="bi bi-currency-dollar"></i> MEMBRESIAS</a></li>
+                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase"><i class="bi bi-person-workspace"></i> ROLES</a></li>
+                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-lungs"></i> EJERCICIOS</a></li>
                 </ul>
             </div>
             <div class="p-4 mt-5">
@@ -35,7 +35,7 @@
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaMembresias">
                         <thead class="table-light text-muted">
-                            <tr><th style="display:none">ID</th><th>TIPO DE PLAN</th><th>COSTO</th><th class="text-center">ACCIONES</th></tr>
+                            <tr><th style="display:none">ID</th><th>TIPO DE PLAN <i class="bi bi-briefcase-fill"></i></th><th>COSTO <i class="bi bi-cash-coin"></i></th><th class="text-center">OPCIONES <i class="bi bi-gear"></i></th></tr>
                         </thead>
                         <tbody class="fw-bold" id="cuerpoTablaMembresias"></tbody>
                     </table>
@@ -66,7 +66,6 @@
             </form>
        </div>
        <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger rounded-0 small fw-bold" id="eliminar">ELIMINAR</button>
           <div>
             <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold">CANCELAR</button>
             <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4" id="btnGuardar">MODIFICAR</button>
@@ -76,5 +75,8 @@
    </div>
 </div>
 
-<?php require_once("comunes/pie.php"); ?>
+<?php 
+require_once("comunes/pie.php"); 
+require_once("comunes/modal.php");
+?>
 <script src="js/membresias.js"></script>
