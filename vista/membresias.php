@@ -29,13 +29,13 @@
 
             <div class="bg-white p-4 shadow-sm border">
                 <div class="d-flex justify-content-between mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase">Membresías</h6>
-                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoPlan"><i class="bi bi-cash-stack"></i> REGISTRAR</button>
+                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-cash-stack"></i> Membresías</h6>
+                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoPlan">REGISTRAR</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaMembresias">
                         <thead class="table-light text-muted">
-                            <tr><th style="display:none">ID</th><th>TIPO DE PLAN <i class="bi bi-briefcase-fill"></i></th><th>COSTO <i class="bi bi-cash-coin"></i></th><th class="text-center">OPCIONES <i class="bi bi-gear"></i></th></tr>
+                            <tr><th style="display:none">ID</th><th>TIPO DE PLAN <i class="bi bi-briefcase-fill"></i></th><th><i class="bi bi-cash-coin"></i> COSTO</th><th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th></tr>
                         </thead>
                         <tbody class="fw-bold" id="cuerpoTablaMembresias"></tbody>
                     </table>

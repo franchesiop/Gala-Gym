@@ -28,7 +28,7 @@ require_once("comunes/encabezado.php"); ?>
             </div>
             <div class="bg-white p-4 shadow-sm border">
                 <div class="d-flex justify-content-between mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase">Ejercicios</h6><button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoEjercicio"><i class="bi bi-activity"></i>
+                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-activity"></i> Ejercicios</h6><button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoEjercicio">
                         REGISTRAR
                     </button>
                 </div>
@@ -37,8 +37,8 @@ require_once("comunes/encabezado.php"); ?>
         <thead class="table-light">
             <tr class="text-muted">
                 <th style="display:none">ID DEL EJERCICIO</th>
-                <th>NOMBRE <i class="bi bi-card-text"></i></th>
-                <th class="text-center">OPCIONES <i class="bi bi-gear"></i></th>
+                <th><i class="bi bi-card-text"></i> NOMBRE</th>
+                <th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th>
             </tr>
         </thead>
         <tbody class="fw-bold" id="tablaEjercicios"></tbody>

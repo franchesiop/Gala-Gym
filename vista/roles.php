@@ -29,13 +29,13 @@
 
             <div class="bg-white p-4 shadow-sm border">
                 <div class="d-flex justify-content-between mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase">Roles</h6>
-                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoRol"><i class="bi bi-person-rolodex"></i> REGISTRAR</button>
+                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-person-rolodex"></i> Roles</h6>
+                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoRol">REGISTRAR</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaRoles">
                         <thead class="table-light text-muted">
-                            <tr><th style="display:none">ID</th><th>TIPO DE ROL <i class="bi bi-ui-checks-grid"></i></th><th>Descripcion <i class="bi bi-text-paragraph"></i></th><th class="text-center">OPCIONES <i class="bi bi-gear"></i></th></tr>
+                            <tr><th style="display:none">ID</th><th><i class="bi bi-ui-checks-grid"></i>TIPO DE ROL</th><th><i class="bi bi-text-paragraph"></i> DESCRIPCION</th><th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th></tr>
                         </thead>
                         <tbody class="fw-bold" id="cuerpoTablaRoles"></tbody>
                     </table>

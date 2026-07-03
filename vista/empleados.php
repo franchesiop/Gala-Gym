@@ -33,9 +33,9 @@ require_once("comunes/encabezado.php");
 
             <div class="bg-white p-4 shadow-sm border">
                 <div class="d-flex justify-content-between mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase">Empleados</h6>
+                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-person"></i> Empleados</h6>
                     <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" 
-                            data-bs-toggle="modal" data-bs-target="#modalUsuario" id="btnNuevoEmpleado"><i class="bi bi-person"></i>
+                            data-bs-toggle="modal" data-bs-target="#modalUsuario" id="btnNuevoEmpleado">
                         REGISTRAR
                     </button>
                 </div>
@@ -43,13 +43,13 @@ require_once("comunes/encabezado.php");
                     <table class="table table-hover align-middle small" id="tablaEmpleados">
                         <thead class="table-light">
     <tr class="text-muted">
-        <th>CÉDULA <i class="bi bi-person-badge"></i></th>
-        <th>NOMBRE <i class="bi bi-person-circle"></i></th>
-        <th>APELLIDO <i class="bi bi-person-circle"></i></th>
-        <th>ROL <i class="bi bi-briefcase"></i></th>
-        <th>TELÉFONO <i class="bi bi-telephone"></i></th>
-        <th style="display:none">CORREO <i class="bi bi-envelope"></i></th>
-        <th class="text-center">OPCIONES <i class="bi bi-gear"></i></th>
+        <th><i class="bi bi-person-badge"></i> CÉDULA</th>
+        <th><i class="bi bi-person-circle"></i> NOMBRE</th>
+        <th><i class="bi bi-person-circle"></i> APELLIDO</th>
+        <th><i class="bi bi-briefcase"></i> ROL</th>
+        <th><i class="bi bi-telephone"></i> TELÉFONO</th>
+        <th style="display:none"> <i class="bi bi-envelope"></i> CORREO</th>
+        <th class="text-center"> <i class="bi bi-gear"></i> OPCIONES</th>
     </tr>
 </thead>
                         <tbody class="fw-bold" id="cuerpoTablaEmpleados"></tbody>

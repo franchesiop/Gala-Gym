@@ -1,51 +1,62 @@
 <?php
-if (!is_file("modelo/".$pagina.".php")) {
-    echo "Falta definir la clase pagos";
+if (!is_file("modelo/".$pagina.".php")){
+    echo "Falta definir la clase ".$pagina;
     exit;
 }
 require_once("modelo/".$pagina.".php");
 
-$o = new pagos();
+if(is_file("vista/".$pagina.".php")){
+    $o = new metodos_pago();
+    if(!empty($_POST)){
+        $accion = $_POST['accion'];
 
-if (!empty($_POST)) {
-    $accion = $_POST['accion'];
+        switch($accion){
 
-    if (isset($_POST['id_metodo'])) $o->set_id_metodo($_POST['id_metodo']);
-    if (isset($_POST['banco'])) $o->set_banco($_POST['banco']);
-    if (isset($_POST['cedula'])) $o->set_cedula($_POST['cedula']);
-    if (isset($_POST['telefono'])) $o->set_telefono($_POST['telefono']);
+            case 'consultar':
+                echo json_encode($o->consultar());
+                break;
 
-    switch ($accion) {
-        case 'consultar':
-            echo json_encode($o->consultar());
-            break;
+            case 'eliminar':
+                $o->set_id_metodo($_POST['id_metodo']);
+                echo json_encode($o->eliminar());
+                break;
 
-        case 'obtener_pago':
-            echo json_encode($o->obtener_pago_array()); 
-            break;
+            case 'incluir':
+                // logica condicional de si es zelle o pago movil
+                if($_POST['banco'] === 'Zelle'){
+                    $o->set_banco('Zelle');
+                    $o->set_cedula($_POST['correo_zelle']);
+                    $o->set_telefono($_POST['titular_zelle']);
+                } else {
+                    $o->set_banco($_POST['nombre_banco']);
+                    $o->set_cedula($_POST['cedula']);
+                    $o->set_telefono($_POST['telefono']);
+                }
+                
+                echo json_encode($o->incluir());
+                break;
 
-        case 'incluir':
-            echo json_encode($o->incluir());
-            break;
-
-        case 'modificar':
-            echo json_encode($o->modificar());
-            break;
-
-        case 'eliminar':
-            echo json_encode($o->eliminar());
-            break;
-
-        default:
-            echo json_encode(['resultado' => 'error', 'mensaje' => 'Acción no válida']);
-            break;
+            case 'modificar':
+                $o->set_id_metodo($_POST['id_metodo']);
+                
+                // logica condicional de si es zelle o pago movil
+                if($_POST['banco'] === 'Zelle'){
+                    $o->set_banco('Zelle');
+                    $o->set_cedula($_POST['correo_zelle']);
+                    $o->set_telefono($_POST['titular_zelle']);
+                } else {
+                    $o->set_banco($_POST['nombre_banco']);
+                    $o->set_cedula($_POST['cedula']);
+                    $o->set_telefono($_POST['telefono']);
+                }
+                
+                echo json_encode($o->modificar());
+                break;
+        }
+        exit();
     }
-    exit; 
-}
-
-if (is_file("vista/".$pagina.".php")) {
-    require_once("vista/".$pagina.".php");
+    require_once("vista/".$pagina.".php"); 
 } else {
-    echo "Vista de pagos en construcción";
+    echo "pagina en construccion";
 }
 ?>

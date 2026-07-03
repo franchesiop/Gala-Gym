@@ -29,15 +29,15 @@
 
             <div class="bg-white p-4 shadow-sm border">
                 <div class="d-flex justify-content-between mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase">Métodos de Pago</h6>
-                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoPago" data-bs-toggle="modal" data-bs-target="#modalPago"><i class="bi bi-piggy-bank"></i>
+                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-credit-card-2-front"></i> Métodos de Pago</h6>
+                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoPago" data-bs-toggle="modal" data-bs-target="#modalPago">
                         REGISTRAR
                     </button>
                 </div>
                 <table class="table table-hover align-middle small" id="tablaPagos">
                     <thead class="table-light">
                         <tr class="text-muted">
-                            <th>ID</th><th>MÉTODO DE PAGO</th><th>CÉDULA</th><th>TELÉFONO</th><th class="text-center">ACCIONES</th>
+                            <th><i class="bi bi-currency-euro"></i> TIPO</th><th><i class="bi bi-coin"></i> BANCO / NOMBRE</th><th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th>
                         </tr>
                     </thead>
                     <tbody class="fw-bold" id="cuerpoTablaPagos"></tbody>
@@ -56,32 +56,43 @@
        </div>
        <div class="modal-body p-4">
             <form id="formPago">
-                <input type="hidden" id="accion" name="accion"> <input type="hidden" id="id_metodo" name="id_metodo">
+                <input type="hidden" id="accion" name="accion"> 
+                <input type="hidden" id="id_metodo" name="id_metodo">
                 
                 <div class="mb-3">
-				<label class="form-label small fw-bold">MÉTODO DE PAGO / BANCO</label>
-					<select class="form-select rounded-0" id="banco" name="banco" required>
-						<option value="" selected disabled>Seleccione una opción...</option>
-						<option value="Pago Móvil - Mercantil">Pago Móvil - Mercantil</option>
-						<option value="Pago Móvil - Banesco">Pago Móvil - Banesco</option>
-						<option value="Pago Móvil - Venezuela">Pago Móvil - Venezuela</option>
-						<option value="Transferencia Bancaria">Transferencia Bancaria</option>
-						<option value="Efectivo / Divisas">Efectivo / Divisas</option>
-					</select>
-				</div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">CÉDULA</label>
-                    <input type="text" class="form-control rounded-0" id="cedula" name="cedula" required>
-                    <span id="scedula" class="text-danger small"></span>
+                    <label class="form-label small fw-bold">MÉTODO DE PAGO</label>
+                    <select class="form-select rounded-0" id="banco" name="banco" required>
+                        <option value="Pago Móvil" selected>Pago Móvil</option>
+                        <option value="Zelle">Zelle</option>
+                    </select>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">TELÉFONO</label>
-                    <input type="text" class="form-control rounded-0" id="telefono" name="telefono" required>
+
+                // contenedor unico dinamico
+                <div id="contenedor_campos">
+                    
+                    <div class="mb-3" id="contenedor_dato_1">
+                         <label class="form-label small fw-bold" id="label_dato_1">BANCO</label>
+                         <input type="text" class="form-control rounded-0" id="input_dato_1" name="input_dato_1" placeholder="Ej: Banesco, Mercantil...">
+                         <span id="sinput_dato_1" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold" id="label_dato_2">CÉDULA</label>
+                        <input type="text" class="form-control rounded-0" id="input_dato_2" name="input_dato_2">
+                        <span id="sinput_dato_2" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold" id="label_dato_3">TELÉFONO</label>
+                        <input type="text" class="form-control rounded-0" id="input_dato_3" name="input_dato_3">
+                        <span id="sinput_dato_3" class="text-danger small"></span>
+                    </div>
+
                 </div>
+
             </form>
        </div>
        <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger rounded-0 small fw-bold" id="eliminar" style="display:none;">ELIMINAR</button>
           <div>
             <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold">CANCELAR</button>
             <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4" id="btnGuardar">GUARDAR</button>
@@ -91,5 +102,8 @@
    </div>
 </div>
 
-<?php require_once("comunes/pie.php"); ?>
+<?php 
+require_once("comunes/pie.php"); 
+require_once("comunes/modal.php"); 
+?>
 <script src="js/pagos.js"></script>
