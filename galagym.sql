@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 22-06-2026 a las 14:59:32
+-- Tiempo de generación: 03-07-2026 a las 03:38:02
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -80,7 +80,7 @@ CREATE TABLE `cliente` (
 
 INSERT INTO `cliente` (`id_cliente`, `cedula`, `nombre`, `apellido`, `telefono`, `correo`, `contrasena`, `id_membresia`, `estado`, `id_rol`) VALUES
 (3, '32600068', 'jesus', 'corderoo', '044444', 'jesus@hotmail.com', 'CONSULTAR Eliminar', 2, 0, 2),
-(12, '31560041', 'franchesco', 'ereuu', '04128574348', 'ereublade@gmail.com', '', 2, 1, 2),
+(12, '31560041', 'franchesco', 'ereu', '04128574348', 'ereublade@gmail.com', '', 2, 1, 2),
 (14, '31560042', 'franchesco', 'ereu', '04128574348', 'nosenose@gmail.com', 'sisisisi', NULL, 0, 2),
 (15, '34560098', 'elcapitan', 'rogerss', '04227866766', 'capitan@gmail.com', '', 1, 1, 2),
 (16, '320494994', 'djfjfjfjjfj', 'jfjfjfjfjf', '22222222222', 'sssssssssss@gmail.com', 'dddddddd', NULL, 0, 2),
@@ -96,9 +96,10 @@ INSERT INTO `cliente` (`id_cliente`, `cedula`, `nombre`, `apellido`, `telefono`,
 (26, '11001007', 'Sofia', 'Vega', '04149990011', 'sofia.v@mail.com', '1234', 4, 1, 2),
 (27, '11001008', 'Carlos', 'Mora', '04142223344', 'carlos.m@mail.com', '1234', 5, 1, 2),
 (28, '11001009', 'Elena', 'Ruiz', '04145556677', 'elena.r@mail.com', '1234', 1, 1, 2),
-(29, '11001010', 'Jose', 'Perez', '04148889900', 'jose.p@mail.com', '1234', 2, 1, 2),
-(30, '31930248', 'luis', 'durannn', '04145229957', 'luisalvaradod-2006@hotmail.com', '', 3, 1, 2),
-(31, '45679908', 'cristiano', 'ronaldo', '04120000000', 'sisassisas@gmail.com', 'sssssssssssss', 6, 0, 2);
+(29, '11001010', 'Jose', 'Perez', '04148889900', 'jose.p@mail.com', '', 2, 1, 2),
+(30, '31930248', 'luis', 'durannn', '04145229957', 'luisalvaradod-2006@hotmail.com', '', 3, 0, 2),
+(31, '45679908', 'cristiano', 'ronaldo', '04120000000', 'sisassisas@gmail.com', 'sssssssssssss', 6, 0, 2),
+(32, '32456435', 'juanito', 'juanitero', '04128798754', 'sjjsj@gmail.com', 'kkkkkkkkkk', 8, 0, 2);
 
 -- --------------------------------------------------------
 
@@ -146,7 +147,7 @@ CREATE TABLE `ejercicio` (
 --
 
 INSERT INTO `ejercicio` (`id_ejercicio`, `nombre`) VALUES
-(1, 'Press Bancaaa'),
+(1, 'Press Banca'),
 (2, 'Sentadilla'),
 (3, 'Peso Muerto'),
 (4, 'Dominadas'),
@@ -156,8 +157,7 @@ INSERT INTO `ejercicio` (`id_ejercicio`, `nombre`) VALUES
 (8, 'Curl Biceps'),
 (9, 'Extensiones'),
 (10, 'Abdominales'),
-(11, 'fondos'),
-(13, 'Remo Unilateral');
+(11, 'fondos');
 
 -- --------------------------------------------------------
 
@@ -184,9 +184,10 @@ CREATE TABLE `empleado` (
 
 INSERT INTO `empleado` (`id_empleado`, `cedula`, `nombre`, `apellido`, `telefono`, `correo`, `contrasena`, `id_cargo`, `estado`, `id_rol`) VALUES
 (4, '99999999', 'Iron', 'Mannn', '04128574648', 'sisisi@gmail.com', '', 2, 1, 2),
-(5, '31560098', 'luisillo', 'ereu', '04128675678', 'luiselpillo@gmail.com', 'megustanloshombres', 2, 1, 2),
-(6, '32046165', 'jose', 'uribe', '04245783165', 'joseuribe@gmail.com', 'soyelmasgei', 3, 1, 2),
-(7, '31560043', 'cristianito', 'ronaldinhjo', '01287873377', 'sisasisas@gmail.com', 'sssssssssssssss', 1, 0, 2);
+(5, '31560098', 'luisillo', 'elpillo', '04128675678', 'luiselpillo@gmail.com', '', 2, 1, 2),
+(6, '32046165', 'jose', 'uribe', '04245783165', 'joseuribe@gmail.com', 'soyelmasgei', 3, 0, 2),
+(7, '31560043', 'cristianito', 'ronaldinhjo', '01287873377', 'sisasisas@gmail.com', 'sssssssssssssss', 1, 0, 2),
+(8, '31560041', 'franchesco', 'ereu', '04128574348', 'ereublade@gmail.com', 'santiagoereu', 1, 1, 2);
 
 -- --------------------------------------------------------
 
@@ -224,16 +225,18 @@ CREATE TABLE `metodos_pago` (
   `id_metodo` int(11) NOT NULL,
   `banco` varchar(100) NOT NULL,
   `cedula` varchar(20) NOT NULL,
-  `telefono` varchar(20) NOT NULL
+  `telefono` varchar(20) NOT NULL,
+  `status` int(11) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `metodos_pago`
 --
 
-INSERT INTO `metodos_pago` (`id_metodo`, `banco`, `cedula`, `telefono`) VALUES
-(2, 'Venezuela', '31560041', '04128574348'),
-(3, 'Venezuela', '32600068', '04245174317');
+INSERT INTO `metodos_pago` (`id_metodo`, `banco`, `cedula`, `telefono`, `status`) VALUES
+(2, 'Venezuela', '31560041', '04128574348', 1),
+(3, 'Venezuela', '32600068', '04245174317', 0),
+(9, 'Zelle', 'galagym@gmail.com', 'Gala Gym', 1);
 
 -- --------------------------------------------------------
 
@@ -279,7 +282,7 @@ CREATE TABLE `rol` (
 INSERT INTO `rol` (`id_rol`, `nombre`, `descripcion`) VALUES
 (1, 'Administrador', 'Acceso a todo el sistema'),
 (2, 'Usuario', 'Solo vista sin acceso a gestiones'),
-(4, 'Recepcionista', 'Acceso a reportese'),
+(4, 'Recepcionista', 'Acceso a reportes y gestion de dinero'),
 (5, 'Entrenador', 'Gestiona los ejercicios y rutinas de los clientes');
 
 -- --------------------------------------------------------
@@ -416,7 +419,7 @@ ALTER TABLE `cargo`
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `detalleRutina`
@@ -428,25 +431,25 @@ ALTER TABLE `detalleRutina`
 -- AUTO_INCREMENT de la tabla `ejercicio`
 --
 ALTER TABLE `ejercicio`
-  MODIFY `id_ejercicio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_ejercicio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `empleado`
 --
 ALTER TABLE `empleado`
-  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `membresia`
 --
 ALTER TABLE `membresia`
-  MODIFY `id_membresia` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_membresia` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `metodos_pago`
 --
 ALTER TABLE `metodos_pago`
-  MODIFY `id_metodo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_metodo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `pago`
@@ -458,7 +461,7 @@ ALTER TABLE `pago`
 -- AUTO_INCREMENT de la tabla `rol`
 --
 ALTER TABLE `rol`
-  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `rutina`
