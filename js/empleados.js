@@ -69,7 +69,7 @@ $(document).ready(function(){
               datos.append('tlfEmpleado', $("#tlfEmpleado").val());
               datos.append('correoEmpleado', $("#correoEmpleado").val());
               datos.append('contraEmpleado', $("#contraEmpleado").val());
-              datos.append('cargoEmpleado', $("#cargoEmpleado").val());
+              datos.append('rolEmpleado', $("#rolEmpleado").val());
               enviaAjax(datos);
             }
         }
@@ -84,7 +84,7 @@ $(document).ready(function(){
                 datos.append('tlfEmpleado', $("#tlfEmpleado").val());
                 datos.append('correoEmpleado', $("#correoEmpleado").val());
                 datos.append('contraEmpleado', $("#contraEmpleado").val());
-                datos.append('cargoEmpleado', $("#cargoEmpleado").val());
+                datos.append('rolEmpleado', $("#rolEmpleado").val());
                 enviaAjax(datos);
             }
         }
@@ -95,7 +95,7 @@ $(document).ready(function(){
      limpia();
      $("#btnGuardar").text("incluir"); 
      $("#btnEliminar").hide();
-     cargarCargos(); 
+     cargarRoles(); 
      $("#modalUsuario").modal("show");
 });
 
@@ -198,9 +198,9 @@ function pone(pos){
     $("#apellidoEmpleado").val(linea.find("td:eq(2)").text()); 
     $("#tlfEmpleado").val(linea.find("td:eq(4)").text());      
     $("#correoEmpleado").val(linea.find("td:eq(5)").text()); 
-    var idCargo = linea.find("td:eq(6)").text();               
+    var idRol = linea.find("td:eq(6)").text();               
     
-    cargarCargos(idCargo); 
+    cargarRoles(idRol); 
     
     $("#contraEmpleado").val(""); 
     $("#btnGuardar").text('modificar');
@@ -283,14 +283,14 @@ function enviaAjax(datos){
     });
 }
 
-function cargarCargos(valorSeleccionado = "") {
+function cargarRoles(valorSeleccionado = "") {
     $.ajax({
         url: "index.php?pagina=empleados",
         type: "POST",
         data: { accion: 'listar_roles' },
         success: function(respuesta){
             var data = JSON.parse(respuesta);
-            var select = $("#cargoEmpleado");
+            var select = $("#rolEmpleado");
             select.find('option:not(:first)').remove();
             $.each(data, function(index, item) {
                 select.append('<option value="' + item.id_rol + '">' + item.nombre + '</option>');
@@ -308,7 +308,7 @@ function limpia(){
 	$("#apellidoEmpleado").val("");
     $("#tlfEmpleado").val("");
     $("#correoEmpleado").val("");
-    $("#cargoEmpleado").val("");
+    $("#rolEmpleado").val("");
     $("#contraEmpleado").val("");
 }
 

@@ -18,25 +18,40 @@ class login extends datos {
     public function ingresar() {
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $r = array();
         
         try {
+            // 1. Buscamos al empleado por su correo y verificamos que esté activo (estado = 1)
+            $stmt = $co->prepare("SELECT * FROM empleado WHERE correo = :correo AND estado = 1");
+            $stmt->bindParam(':correo', $this->correo);
+            $stmt->execute();
             
-            $resultado = $co->prepare("SELECT * FROM cliente WHERE correo = :correo AND contrasena = :pass");
-            $resultado->bindValue(':correo', $this->correo);
-            $resultado->bindValue(':pass', $this->contrasena);
-            $resultado->execute();
-            
-            $usuario = $resultado->fetch(PDO::FETCH_ASSOC);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
+            // 2. Si el usuario existe en la base de datos
             if ($usuario) {
-            
-                return "Bienvenido " . $usuario['nombre'];
+                // 3. Verificamos la contraseña. 
+                // OJO: password_verify requiere que la contraseña en la BD haya sido guardada con password_hash()
+                if (password_verify($this->contrasena, $usuario['contrasena'])) {
+                    
+                    $r['resultado'] = 'exito';
+                    $r['mensaje'] = 'Bienvenido ' . $usuario['nombre'];
+                    $r['datos'] = $usuario; // Devolvemos todos los datos (incluyendo id_rol) para el controlador
+                    
+                } else {
+                    $r['resultado'] = 'error';
+                    $r['mensaje'] = 'Contraseña incorrecta.';
+                }
             } else {
-                return "Correo o contraseña incorrectos.";
+                $r['resultado'] = 'error';
+                $r['mensaje'] = 'El correo no existe o el usuario está inactivo.';
             }
         } catch (Exception $e) {
-            return "Error de conexión: " . $e->getMessage();
+            $r['resultado'] = 'error';
+            $r['mensaje'] = 'Error de conexión: ' . $e->getMessage();
         }
+        
+        return $r;
     }
 }
 ?>

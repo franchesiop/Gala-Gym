@@ -99,10 +99,10 @@ require_once("comunes/encabezado.php");
                 </div>
                 <div class="mb-3">
     <label class="form-label small fw-bold">ROL</label>
-    <select id="cargoEmpleado" name="cargoEmpleado" class="form-select rounded-0">
+    <select id="rolEmpleado" name="rolEmpleado" class="form-select rounded-0">
         <option value="" disabled selected>Seleccione un rol...</option>
     </select>
-    <span id="scargoEmpleado" class="text-danger small"></span>
+    <span id="srolEmpleado" class="text-danger small"></span>
 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold">CONTRASEÑA</label>

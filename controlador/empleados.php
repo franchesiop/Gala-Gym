@@ -28,7 +28,7 @@ if(is_file("vista/".$pagina.".php")){
                 $o->set_tlfEmpleado($_POST['tlfEmpleado']);
                 $o->set_correoEmpleado($_POST['correoEmpleado']);
                 $o->set_contraEmpleado($_POST['contraEmpleado']);
-                $o->set_cargoEmpleado($_POST['cargoEmpleado']);
+                $o->set_rolEmpleado($_POST['rolEmpleado']);
                 echo json_encode($o->incluir());
                 break;
 
@@ -39,7 +39,7 @@ if(is_file("vista/".$pagina.".php")){
                 $o->set_tlfEmpleado($_POST['tlfEmpleado']);
                 $o->set_correoEmpleado($_POST['correoEmpleado']);
                 $o->set_contraEmpleado($_POST['contraEmpleado']);
-                $o->set_cargoEmpleado($_POST['cargoEmpleado']);
+                $o->set_rolEmpleado($_POST['rolEmpleado']);
                 echo json_encode($o->modificar());
                 break;
 

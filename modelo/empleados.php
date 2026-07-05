@@ -2,7 +2,7 @@
 require_once('modelo/datos.php');
 
 class empleados extends datos {
-    private $cedulaEmpleado, $nombreEmpleado, $apellidoEmpleado, $tlfEmpleado, $correoEmpleado, $contraEmpleado, $cargoEmpleado, $estado;
+    private $cedulaEmpleado, $nombreEmpleado, $apellidoEmpleado, $tlfEmpleado, $correoEmpleado, $contraEmpleado, $rolEmpleado, $estado;
 
     // setters
     function set_cedulaEmpleado($v) { $this->cedulaEmpleado = $v; }
@@ -11,7 +11,7 @@ class empleados extends datos {
     function set_tlfEmpleado($v) { $this->tlfEmpleado = $v; }
     function set_correoEmpleado($v) { $this->correoEmpleado = $v; }
     function set_contraEmpleado($v) { $this->contraEmpleado = $v; }
-    function set_cargoEmpleado($v) { $this->cargoEmpleado = $v;}
+    function set_rolEmpleado($v) { $this->rolEmpleado = $v;}
     function set_estado($valor) {$this->estado = $valor; }
 
     // getters
@@ -21,25 +21,26 @@ class empleados extends datos {
     function get_tlfEmpleado(){ return $this->tlfEmpleado; }
     function get_correoEmpleado(){ return $this->correoEmpleado;}
     function get_contraEmpleado(){ return $this->contraEmpleado;}
-    function get_cargoEmpleado(){ return $this->cargoEmpleado;}
+    function get_rolEmpleado(){ return $this->rolEmpleado;}
     function get_estado(){ return $this->estado; }
 
    function incluir(){
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $passwordHasheado = password_hash($this->contraEmpleado, PASSWORD_DEFAULT);
         $r = array();
         if(!$this->existe($this->cedulaEmpleado)){
             try{
-                $inc = $co->prepare("INSERT INTO empleado(cedula, nombre, apellido, telefono, correo, id_cargo, contrasena)
-                VALUES (:cedula, :nombre, :apellido, :telefono, :correo, :id_cargo, :contrasena)");
+                $inc = $co->prepare("INSERT INTO empleado(cedula, nombre, apellido, telefono, correo, id_rol, contrasena)
+                VALUES (:cedula, :nombre, :apellido, :telefono, :correo, :id_rol, :contrasena)");
 
                 $inc->bindParam(':cedula', $this->cedulaEmpleado);
                 $inc->bindParam(':nombre', $this->nombreEmpleado);
                 $inc->bindParam(':apellido', $this->apellidoEmpleado);
                 $inc->bindParam(':telefono', $this->tlfEmpleado);
                 $inc->bindParam(':correo', $this->correoEmpleado);
-                $inc->bindParam(':id_cargo', $this->cargoEmpleado);
-                $inc->bindParam(':contrasena', $this->contraEmpleado);
+                $inc->bindParam(':id_rol', $this->rolEmpleado);
+                $inc->bindParam(':contrasena', $passwordHasheado);
                 $inc->execute();
 
                 $r['resultado'] = 'incluir';
@@ -56,36 +57,48 @@ class empleados extends datos {
     }
 
      function modificar(){
-        $co = $this->conecta();
-        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $r = array();
-        if($this->existe($this->cedulaEmpleado)){
-            try{
-                $mod = $co->prepare("UPDATE empleado
-                    SET cedula = :cedula, nombre = :nombre, apellido = :apellido, telefono = :telefono, correo = :correo, id_cargo = :id_cargo, contrasena = :contrasena 
-                    WHERE cedula = :cedula");
+    $co = $this->conecta();
+    $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $r = array();
 
-                $mod->bindParam(':cedula', $this->cedulaEmpleado);
-                $mod->bindParam(':nombre', $this->nombreEmpleado);
-                $mod->bindParam(':apellido', $this->apellidoEmpleado);
-                $mod->bindParam(':telefono', $this->tlfEmpleado);
-                $mod->bindParam(':correo', $this->correoEmpleado);
-                $mod->bindParam(':id_cargo', $this->cargoEmpleado);
-                $mod->bindParam(':contrasena', $this->contraEmpleado);
-                $mod->execute();
-                
-                $r['resultado'] = 'modificar';
-                $r['mensaje'] = 'Empleado Modificado';
-            } catch(Exception $e){
-                $r['resultado'] = 'error';
-                $r['mensaje'] = $e->getMessage();
+    if($this->existe($this->cedulaEmpleado)){
+        try{
+            // 1. Verificamos si se escribió una nueva contraseña
+            if (!empty($this->contraEmpleado)) {
+                // Si hay contraseña, la hasheamos y la incluimos en el update
+                $passwordHasheado = password_hash($this->contraEmpleado, PASSWORD_DEFAULT);
+                $sql = "UPDATE empleado SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
+                        correo = :correo, id_rol = :id_rol, contrasena = :contrasena WHERE cedula = :cedula";
+                $mod = $co->prepare($sql);
+                $mod->bindParam(':contrasena', $passwordHasheado);
+            } else {
+                // Si NO hay contraseña, hacemos update de todo MENOS la contraseña
+                $sql = "UPDATE empleado SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
+                        correo = :correo, id_rol = :id_rol WHERE cedula = :cedula";
+                $mod = $co->prepare($sql);
             }
-        } else{
+
+            // Bind comunes a ambos casos
+            $mod->bindParam(':cedula', $this->cedulaEmpleado);
+            $mod->bindParam(':nombre', $this->nombreEmpleado);
+            $mod->bindParam(':apellido', $this->apellidoEmpleado);
+            $mod->bindParam(':telefono', $this->tlfEmpleado);
+            $mod->bindParam(':correo', $this->correoEmpleado);
+            $mod->bindParam(':id_rol', $this->rolEmpleado);
+            $mod->execute();
+            
             $r['resultado'] = 'modificar';
-            $r['mensaje'] = 'La Cedula No Existe';
+            $r['mensaje'] = 'Empleado Modificado';
+        } catch(Exception $e){
+            $r['resultado'] = 'error';
+            $r['mensaje'] = $e->getMessage();
         }
-        return $r;
+    } else {
+        $r['resultado'] = 'modificar';
+        $r['mensaje'] = 'La Cedula No Existe';
     }
+    return $r;
+}
 
      function eliminar(){
         $co = $this->conecta();
@@ -115,7 +128,7 @@ class empleados extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
         try{
-            $resultado = $co->query("SELECT e.*, r.nombre AS nombre_rol FROM empleado e LEFT JOIN rol r ON e.id_cargo = r.id_rol WHERE e.estado = 1");
+            $resultado = $co->query("SELECT e.*, r.nombre AS nombre_rol FROM empleado e LEFT JOIN rol r ON e.id_rol = r.id_rol WHERE e.estado = 1");
             if($resultado){
                 $respuesta = '';
                 foreach($resultado as $fila){
@@ -126,7 +139,7 @@ class empleados extends datos {
                     $respuesta .= "<td>" . $fila['nombre_rol'] . "</td>";
                     $respuesta .= "<td>" . $fila['telefono'] . "</td>";
                     $respuesta .= "<td style='display:none'>" . $fila['correo'] . "</td>";
-                    $respuesta .= "<td style='display:none'>" . $fila['id_cargo'] . "</td>";
+                    $respuesta .= "<td style='display:none'>" . $fila['id_rol'] . "</td>";
                    // $respuesta .= "<td>" . $fila['contrasena'] . "</td>";
                     $respuesta .= "<td>";
                         $respuesta .= "<div class='d-flex justify-content-center'>";

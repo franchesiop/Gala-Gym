@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 03-07-2026 a las 03:38:02
+-- Tiempo de generación: 06-07-2026 a las 00:15:57
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -173,7 +173,6 @@ CREATE TABLE `empleado` (
   `telefono` varchar(20) DEFAULT NULL,
   `correo` varchar(50) DEFAULT NULL,
   `contrasena` varchar(100) DEFAULT NULL,
-  `id_cargo` int(11) DEFAULT NULL,
   `estado` tinyint(1) DEFAULT 1,
   `id_rol` int(11) DEFAULT 2
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -182,12 +181,13 @@ CREATE TABLE `empleado` (
 -- Volcado de datos para la tabla `empleado`
 --
 
-INSERT INTO `empleado` (`id_empleado`, `cedula`, `nombre`, `apellido`, `telefono`, `correo`, `contrasena`, `id_cargo`, `estado`, `id_rol`) VALUES
-(4, '99999999', 'Iron', 'Mannn', '04128574648', 'sisisi@gmail.com', '', 2, 1, 2),
-(5, '31560098', 'luisillo', 'elpillo', '04128675678', 'luiselpillo@gmail.com', '', 2, 1, 2),
-(6, '32046165', 'jose', 'uribe', '04245783165', 'joseuribe@gmail.com', 'soyelmasgei', 3, 0, 2),
-(7, '31560043', 'cristianito', 'ronaldinhjo', '01287873377', 'sisasisas@gmail.com', 'sssssssssssssss', 1, 0, 2),
-(8, '31560041', 'franchesco', 'ereu', '04128574348', 'ereublade@gmail.com', 'santiagoereu', 1, 1, 2);
+INSERT INTO `empleado` (`id_empleado`, `cedula`, `nombre`, `apellido`, `telefono`, `correo`, `contrasena`, `estado`, `id_rol`) VALUES
+(4, '99999999', 'Iron', 'Mannn', '04128574648', 'sisisi@gmail.com', '$2y$10$RNF39NXbKCJ9qbX0tkWLBeLvTis7DviXNWDG//GCxKKhB/hlGW2Di', 1, 2),
+(5, '31560098', 'luisillo', 'elpillo', '04128675678', 'luiselpillo@gmail.com', '$2y$10$3zVNPjd4nSfc/x/LSpyS6OoZjlq/yUZDWMwV6HbzAT6/OnWLFtfbW', 1, 2),
+(6, '32046165', 'jose', 'uribe', '04245783165', 'joseuribe@gmail.com', '$2y$10$s5FhnVqyxKvKckeRlU2EOOHebbyF9SdMEZIYFQdyRCVGSzOfeU3vm', 0, 2),
+(7, '31560043', 'cristianito', 'ronaldinhjo', '01287873377', 'sisasisas@gmail.com', '$2y$10$qFo1W1k30Pkke.WncgPBhe7GnJcZD4Pp.BCw5F4V/0N/szI..0qQe', 0, 2),
+(8, '31560041', 'franchesco', 'ereu', '04128574348', 'ereublade@gmail.com', '$2y$10$xMDhvpuOHmZIINFqgstOw.LHjp1fUpf3bRspYXnOD4brmoumAAuN6', 1, 1),
+(9, '31560008', 'administrador', 'admin', '04128675940', 'correo@gmail.com', '$2y$10$L7a1AbBqtyYmdu/A8W.42.R4XO6eRln9eIVZOzzfP..LLSkxOodo2', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -362,7 +362,6 @@ ALTER TABLE `ejercicio`
 ALTER TABLE `empleado`
   ADD PRIMARY KEY (`id_empleado`),
   ADD UNIQUE KEY `cedula` (`cedula`),
-  ADD KEY `fk_empleado_cargo` (`id_cargo`),
   ADD KEY `fk_empleado_rol` (`id_rol`);
 
 --
@@ -437,7 +436,7 @@ ALTER TABLE `ejercicio`
 -- AUTO_INCREMENT de la tabla `empleado`
 --
 ALTER TABLE `empleado`
-  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_empleado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `membresia`
@@ -499,7 +498,6 @@ ALTER TABLE `detalleRutina`
 -- Filtros para la tabla `empleado`
 --
 ALTER TABLE `empleado`
-  ADD CONSTRAINT `fk_empleado_cargo` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id_cargo`),
   ADD CONSTRAINT `fk_empleado_rol` FOREIGN KEY (`id_rol`) REFERENCES `rol` (`id_rol`);
 
 --
