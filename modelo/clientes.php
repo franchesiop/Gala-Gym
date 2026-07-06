@@ -27,6 +27,7 @@ class clientes extends datos {
    function incluir(){
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $passwordHasheado = password_hash($this->contraCliente, PASSWORD_DEFAULT);
         $r = array();
         if(!$this->existe($this->cedulaCliente)){
             try{
@@ -39,7 +40,7 @@ class clientes extends datos {
                 $inc->bindParam(':telefono', $this->tlfCliente);
                 $inc->bindParam(':correo', $this->correoCliente);
                 $inc->bindParam(':id_membresia', $this->membresiaCliente);
-                $inc->bindParam(':contrasena', $this->contraCliente);
+                $inc->bindParam(':contrasena', $passwordHasheado);
                 $inc->execute();
 
                 $r['resultado'] = 'incluir';
@@ -59,19 +60,34 @@ class clientes extends datos {
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
+
         if($this->existe($this->cedulaCliente)){
             try{
-                $mod = $co->prepare("UPDATE cliente
-                    SET cedula = :cedula, nombre = :nombre, apellido = :apellido, telefono = :telefono, correo = :correo, id_membresia = :id_membresia, contrasena = :contrasena 
-                    WHERE cedula = :cedula");
+                // Verificamos si se escribió una nueva contraseña
+                if (!empty($this->contraCliente)) {
+                    $passwordHasheado = password_hash($this->contraCliente, PASSWORD_DEFAULT);
+                    $sql = "UPDATE cliente 
+                            SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
+                                correo = :correo, id_membresia = :id_membresia, contrasena = :contrasena 
+                            WHERE cedula = :cedula";
+                    $mod = $co->prepare($sql);
+                    $mod->bindParam(':contrasena', $passwordHasheado);
+                } else {
+                    // Si NO hay contraseña, actualizamos todo menos la clave
+                    $sql = "UPDATE cliente 
+                            SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
+                                correo = :correo, id_membresia = :id_membresia 
+                            WHERE cedula = :cedula";
+                    $mod = $co->prepare($sql);
+                }
 
+                // Bind comunes a ambos casos
                 $mod->bindParam(':cedula', $this->cedulaCliente);
                 $mod->bindParam(':nombre', $this->nombreCliente);
                 $mod->bindParam(':apellido', $this->apellidoCliente);
                 $mod->bindParam(':telefono', $this->tlfCliente);
                 $mod->bindParam(':correo', $this->correoCliente);
                 $mod->bindParam(':id_membresia', $this->membresiaCliente);
-                $mod->bindParam(':contrasena', $this->contraCliente);
                 $mod->execute();
                 
                 $r['resultado'] = 'modificar';

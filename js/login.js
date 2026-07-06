@@ -60,16 +60,13 @@ function enviaAjax(datos){
         beforeSend: function () {},
         timeout: 10000,
         success: function (respuesta){
-            console.log(respuesta); // Útil para depurar en la consola
+            console.log(respuesta);
             try {
                 var lee = JSON.parse(respuesta);
                 
-                // Si el controlador devuelve éxito (y envía la ruta)
                 if(lee.resultado == 'exito'){
-                    // Redirigimos al panel correspondiente según el rol
                     window.location.href = lee.ruta;
                 } 
-                // Si las credenciales fallan o el usuario no existe
                 else if(lee.resultado == "error"){
                     mostrarMensaje(lee.mensaje);
                 }
@@ -89,10 +86,7 @@ function enviaAjax(datos){
     });
 }
 
-// Funciones heredadas de tu plantilla para UI y validaciones
-
 function mostrarMensaje(mensaje){
-    // Utiliza el modal que ya tienes en tus archivos comunes/pie.php
     $("#contenidoModal").html(mensaje);
     $("#mostrarModal").modal("show");
     setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);

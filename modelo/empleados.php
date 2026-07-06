@@ -63,22 +63,21 @@ class empleados extends datos {
 
     if($this->existe($this->cedulaEmpleado)){
         try{
-            // 1. Verificamos si se escribió una nueva contraseña
+            // verifica si se escribio una nueva contraseña
             if (!empty($this->contraEmpleado)) {
-                // Si hay contraseña, la hasheamos y la incluimos en el update
+                // si hay contrasena se hashea y la incluye en el update
                 $passwordHasheado = password_hash($this->contraEmpleado, PASSWORD_DEFAULT);
                 $sql = "UPDATE empleado SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
                         correo = :correo, id_rol = :id_rol, contrasena = :contrasena WHERE cedula = :cedula";
                 $mod = $co->prepare($sql);
                 $mod->bindParam(':contrasena', $passwordHasheado);
             } else {
-                // Si NO hay contraseña, hacemos update de todo MENOS la contraseña
+                // si no hay contrasena hacemos update de todo menos la contr
                 $sql = "UPDATE empleado SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
                         correo = :correo, id_rol = :id_rol WHERE cedula = :cedula";
                 $mod = $co->prepare($sql);
             }
 
-            // Bind comunes a ambos casos
             $mod->bindParam(':cedula', $this->cedulaEmpleado);
             $mod->bindParam(':nombre', $this->nombreEmpleado);
             $mod->bindParam(':apellido', $this->apellidoEmpleado);
@@ -194,7 +193,6 @@ class empleados extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            // Hacemos el select a tu tabla 'rol' según la imagen de phpMyAdmin
             $resultado = $co->query("SELECT id_rol, nombre FROM rol");
             $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
         } catch(Exception $e) {

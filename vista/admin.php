@@ -1,40 +1,26 @@
-<?php require_once("comunes/encabezado.php"); ?>
+<?php 
+require_once("comunes/encabezado.php"); 
+?>
 
+<!-- El contenedor debe envolver a ambos: menú y main -->
 <div class="container-fluid">
     <div class="row">
-        <nav class="col-md-3 col-lg-2 d-md-block bg-dark text-white min-vh-100 p-0 shadow">
-            <div class="p-4 border-bottom border-secondary text-center">
-                <h4 class="fw-bold m-0 text-uppercase" style="letter-spacing: 2px;">GALA GYM</h4>
-            </div>
-            
-            <div class="mt-2">
-                <ul class="nav flex-column">
-                    <li class="nav-item"><a href="?pagina=admin" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-bank"></i> REPORTES</a></li>
-                    <li class="nav-item"><a href="?pagina=clientes" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-person-standing"></i> CLIENTES</a></li>
-                    <li class="nav-item"><a href="?pagina=empleados" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-person-lines-fill"></i> EMPLEADOS</a></li>
-                    <li class="nav-item"><a href="?pagina=pagos" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-wallet2"></i> METODOS DE PAGO</a></li>
-                    <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase"><i class="bi bi-currency-dollar"></i> MEMBRESIAS</a></li>
-                    <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase"><i class="bi bi-person-workspace"></i> ROLES</a></li>
-                    <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-lungs"></i> EJERCICIOS</a></li>
-                </ul>
-            </div>
+        
+        <?php require_once("comunes/menu.php"); ?>
 
-            <div class="p-4 mt-5">
-                <a href="?pagina=principal" class="btn btn-outline-danger btn-sm w-100 rounded-0 fw-bold">CERRAR SESIÓN</a>
-            </div>
-        </nav>
-
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light">
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light min-vh-100">
+            <!-- Barra superior -->
             <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom bg-white px-3 mt-3 shadow-sm">
                 <h5 class="fw-bold text-uppercase m-0 small">Panel / Dashboard</h5>
                 <div class="d-flex align-items-center">
-                    <span class="small fw-bold me-3 text-muted">Hola, Admin</span>
+                    <span class="small fw-bold me-3 text-muted">Hola, <?php echo $_SESSION['nombre']; ?></span>
                     <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 35px; height: 35px; font-size: 0.8rem;">
-                        CE
+                        <?php echo substr($_SESSION['nombre'], 0, 2); ?>
                     </div>
                 </div>
             </div>
 
+            <!-- Contenido -->
             <div class="p-2">
                 <div class="row g-4">
                     <div class="col-md-4">
@@ -52,6 +38,7 @@
                 </div>
             </div>
         </main>
+        
     </div>
 </div>
 

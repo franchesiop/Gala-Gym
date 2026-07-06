@@ -10,24 +10,28 @@
             </div>
 
             <form action="?pagina=login" method="POST">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Correo Electrónico</label>
-                    <input type="email" name="correo" class="form-control rounded-pill border-light bg-light py-2 px-3" 
-                           placeholder="nombre@ejemplo.com" required>
-                </div>
+    <div class="mb-3">
+        <label class="form-label small fw-bold">Correo Electrónico</label>
+        <!-- Agregado id="correo" -->
+        <input type="email" name="correo" id="correo" class="form-control rounded-pill border-light bg-light py-2 px-3" 
+               placeholder="nombre@ejemplo.com" required>
+        <!-- Agregado span para los mensajes de validación del JS -->
+        <span id="scorreo" class="text-danger small fw-bold"></span>
+    </div>
 
-                <div class="mb-4">
-                    <label class="form-label small fw-bold">Contraseña</label>
-                    <input type="password" name="contrasena" class="form-control rounded-pill border-light bg-light py-2 px-3" 
-                           placeholder="••••••••" required>
-                </div>
+    <div class="mb-4">
+        <label class="form-label small fw-bold">Contraseña</label>
+        <!-- Agregado id="contrasena" -->
+        <input type="password" name="contrasena" id="contrasena" class="form-control rounded-pill border-light bg-light py-2 px-3" 
+               placeholder="••••••••" required>
+    </div>
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-dark rounded-pill py-2 fw-bold text-uppercase">
-                        Entrar
-                    </button>
-                </div>
-            </form>
+    <div class="d-grid">
+        <button type="submit" class="btn btn-dark rounded-pill py-2 fw-bold text-uppercase">
+            Entrar
+        </button>
+    </div>
+</form>
 
             <div class="text-center mt-3">
                 <a href="?pagina=registro" class="text-decoration-none text-muted small fw-bold">¿No tienes cuenta? Regístrate</a>
@@ -36,5 +40,8 @@
     </div>
 </div>
 
-<?php require_once("comunes/pie.php"); ?>
+<?php 
+require_once("comunes/pie.php");
+require_once("comunes/modal.php");
+?>
 <script src="js/login.js"></script>

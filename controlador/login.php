@@ -20,46 +20,47 @@ if(is_file("vista/".$pagina.".php")){
             $o->set_correo($_POST['correo']);
             $o->set_contrasena($_POST['contrasena']);
 
-            // Llamamos al método ingresar() del modelo (que devuelve un arreglo)
             $respuesta = $o->ingresar();
-            
-            // Verificamos si el modelo indicó que el login fue un éxito
+        
             if($respuesta['resultado'] == 'exito'){
                 
-                // Extraemos los datos del usuario del arreglo que envió el modelo
                 $usuario = $respuesta['datos'];
+                $tipo_usuario = $respuesta['tipo_usuario']; 
                 
-                // Creamos las variables de sesión
-                $_SESSION['id_empleado'] = $usuario['id_empleado'];
-                $_SESSION['id_rol']      = $usuario['id_rol'];
-                $_SESSION['nombre']      = $usuario['nombre'];
-                
-                $rol = $_SESSION['id_rol'];
-                
-                // Asignamos la ruta a la que JS debe redirigir según el rol
-                if ($rol == 1) {
-                    $respuesta['ruta'] = "?pagina=admin"; 
-                } 
-                elseif ($rol == 2) {
-                    $respuesta['ruta'] = "?pagina=usuario_dashboard"; 
-                } 
-                elseif ($rol == 4) {
-                    $respuesta['ruta'] = "?pagina=recepcion_dashboard"; 
-                } 
-                elseif ($rol == 5) {
-                    $respuesta['ruta'] = "?pagina=entrenador_dashboard"; 
-                } 
-                else {
-                    // Prevenir acceso si tiene un rol no mapeado
-                    $respuesta['resultado'] = 'error';
-                    $respuesta['mensaje'] = 'Rol desconocido o sin permisos.';
+                session_regenerate_id(true);
+
+                if ($tipo_usuario == 'empleado') {
+                    $_SESSION['id_empleado'] = $usuario['id_empleado'] ?? $usuario['cedula'];
+                    $_SESSION['id_rol']      = $usuario['id_rol'];
+                    $_SESSION['nombre']      = $usuario['nombre'];
+                    
+                    $rol = $_SESSION['id_rol'];
+                    
+                    if ($rol == 1) {
+                        $respuesta['ruta'] = "?pagina=admin"; 
+                    } elseif ($rol == 4) {
+                        $respuesta['ruta'] = "?pagina=recepcion_dashboard"; 
+                    } elseif ($rol == 5) {
+                        $respuesta['ruta'] = "?pagina=entrenador"; 
+                    } else {
+                        $respuesta['resultado'] = 'error';
+                        $respuesta['mensaje'] = 'Rol de empleado desconocido.';
+                    }
+
+                } else if ($tipo_usuario == 'cliente') {
+            
+                    $_SESSION['id_cliente'] = $usuario['id_cliente'] ?? $usuario['cedula']; 
+                    $_SESSION['id_rol']     = 2;
+                    $_SESSION['nombre']     = $usuario['nombre'];
+                  
+                    $respuesta['ruta'] = "?pagina=principal_cliente"; 
                 }
                 
-                // Removemos los datos sensibles antes de enviar el JSON al frontend (opcional pero recomendado)
+                // remueve los datos sensibles
                 unset($respuesta['datos']); 
+                unset($respuesta['tipo_usuario']);
             }
             
-            // Imprimimos la respuesta en formato JSON para que el AJAX lo procese
             echo json_encode($respuesta);
         }
         exit;
