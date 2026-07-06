@@ -15,6 +15,7 @@
                     <li class="nav-item"><a href="?pagina=membresias" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase"><i class="bi bi-currency-dollar"></i> MEMBRESIAS</a></li>
                     <li class="nav-item"><a href="?pagina=roles" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold text-uppercase"><i class="bi bi-person-workspace"></i> ROLES</a></li>
                     <li class="nav-item"><a href="?pagina=ejercicio" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-lungs"></i> EJERCICIOS</a></li>
+                    <li class="nav-item"><a href="?pagina=rutinas" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold"><i class="bi bi-lungs"></i> RUTINAS</a></li>
                 </ul>
             </div>
             <div class="p-4 mt-5">
