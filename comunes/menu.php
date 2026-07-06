@@ -40,6 +40,11 @@
                     <i class="bi bi-lungs"></i> EJERCICIOS
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="?pagina=rutinas" class="nav-link text-white py-3 px-4 border-bottom border-secondary small fw-bold">
+                    <i class="bi bi-list-nested"></i> RUTINAS
+                </a>
+            </li>
         </ul>
     </div>
 
