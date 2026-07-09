@@ -1,8 +1,8 @@
-<nav class="col-md-3 col-lg-2 d-md-block bg-dark text-white min-vh-100 p-0 shadow">
+<nav class="col-md-3 col-lg-2 d-md-block bg-dark text-white min-vh-100 p-0 shadow" id="sidebarMenu">
     <div class="p-4 border-bottom border-secondary text-center">
         <h4 class="fw-bold m-0 text-uppercase" style="letter-spacing: 2px;">GALA GYM</h4>
     </div>
-    
+
     <div class="mt-2">
         <ul class="nav flex-column">
             <li class="nav-item">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 06-07-2026 a las 00:15:57
+-- Tiempo de generación: 09-07-2026 a las 21:36:23
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -38,26 +38,6 @@ CREATE TABLE `asignacionRutina` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `cargo`
---
-
-CREATE TABLE `cargo` (
-  `id_cargo` int(11) NOT NULL,
-  `nombre_cargo` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `cargo`
---
-
-INSERT INTO `cargo` (`id_cargo`, `nombre_cargo`) VALUES
-(1, 'Administrador'),
-(2, 'Entrenador'),
-(3, 'Recepcionista');
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `cliente`
 --
 
@@ -79,27 +59,11 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`id_cliente`, `cedula`, `nombre`, `apellido`, `telefono`, `correo`, `contrasena`, `id_membresia`, `estado`, `id_rol`) VALUES
-(3, '32600068', 'jesus', 'corderoo', '044444', 'jesus@hotmail.com', 'CONSULTAR Eliminar', 2, 0, 2),
-(12, '31560041', 'franchesco', 'ereu', '04128574348', 'ereublade@gmail.com', '', 2, 1, 2),
-(14, '31560042', 'franchesco', 'ereu', '04128574348', 'nosenose@gmail.com', 'sisisisi', NULL, 0, 2),
-(15, '34560098', 'elcapitan', 'rogerss', '04227866766', 'capitan@gmail.com', '', 1, 1, 2),
-(16, '320494994', 'djfjfjfjjfj', 'jfjfjfjfjf', '22222222222', 'sssssssssss@gmail.com', 'dddddddd', NULL, 0, 2),
-(17, '21560042', 'franchesquino', 'franchesquines', '04126786464', 'ereuebladee@gmail.com', 'jejejejjejeje', NULL, 0, 2),
-(18, '15095615', 'luis', 'alvarado', '04243371838', 'luisalvarado@gmail.com', 'luisluisluis', 4, 1, 2),
-(19, '314509876', 'pedro', 'montilla da silva', '04146785480', 'pedro@gmail.com', 'jdjdjdjdjd', 5, 0, 2),
-(20, '11001001', 'Juan', 'Perez', '04141112233', 'juan.p@mail.com', '1234', 1, 1, 2),
-(21, '11001002', 'Juan', 'Gomez', '04144445566', 'juan.g@mail.com', '1234', 2, 1, 2),
-(22, '11001003', 'Maria', 'Lopez', '04147778899', 'maria.l@mail.com', '1234', 1, 1, 2),
-(23, '11001004', 'Pedro', 'Ruiz', '04140001122', 'pedro.r@mail.com', '1234', 3, 1, 2),
-(24, '11001005', 'Ana', 'Soto', '04143334455', 'ana.s@mail.com', '1234', 1, 1, 2),
-(25, '11001006', 'Luis', 'Diaz', '04146667788', 'luis.d@mail.com', '1234', 2, 1, 2),
-(26, '11001007', 'Sofia', 'Vega', '04149990011', 'sofia.v@mail.com', '1234', 4, 1, 2),
-(27, '11001008', 'Carlos', 'Mora', '04142223344', 'carlos.m@mail.com', '1234', 5, 1, 2),
-(28, '11001009', 'Elena', 'Ruiz', '04145556677', 'elena.r@mail.com', '1234', 1, 1, 2),
-(29, '11001010', 'Jose', 'Perez', '04148889900', 'jose.p@mail.com', '', 2, 1, 2),
-(30, '31930248', 'luis', 'durannn', '04145229957', 'luisalvaradod-2006@hotmail.com', '', 3, 0, 2),
-(31, '45679908', 'cristiano', 'ronaldo', '04120000000', 'sisassisas@gmail.com', 'sssssssssssss', 6, 0, 2),
-(32, '32456435', 'juanito', 'juanitero', '04128798754', 'sjjsj@gmail.com', 'kkkkkkkkkk', 8, 0, 2);
+(18, '15095615', 'luis', 'alvarado', '04243371838', 'luisalvarado@gmail.com', '$2y$10$F99C10YGeQ.MXNa1wynEp.hf7RN6wDEKurNm4dP1Z9abMjrOLEBD2', NULL, 1, 2),
+(28, '11001009', 'Elena', 'Ruizz', '04145556677', 'elena.r@mail.com', '$2y$10$DJOcrYGphGiKNM1CMYgpPuDTHLOE..47upH2a07H2mI.UeijMnClu', 1, 0, 2),
+(33, '32600069', 'elena', 'de ereu', '04125734567', 'elenajevadeereu@gmail.com', '$2y$10$F44SGbn8HTB6FAtEoCdAr.Y1W.Rr5gtJvKeIoZrmjYXTD2cbTSq9e', 2, 1, 2),
+(34, '11264587', 'LERIDA', 'FIGUEROA', '04128574522', 'uptaeb.lerida.figueroa@gmail.com', '$2y$10$mEHNK0oVM4WIsO2ul73K4.PT.C136Spe.LPCnisC.hpt06IYeHcAe', 1, 1, 2),
+(37, '14859745', 'ANA', 'PEREZ', '04125845632', 'anaperez1197@gmail.com', '$2y$10$6eafhAPjwJFPUYfzZUATN.sSFigDdQFERRx5dzGCzjSlTW7Yi.Tme', 3, 0, 2);
 
 -- --------------------------------------------------------
 
@@ -182,8 +146,8 @@ CREATE TABLE `empleado` (
 --
 
 INSERT INTO `empleado` (`id_empleado`, `cedula`, `nombre`, `apellido`, `telefono`, `correo`, `contrasena`, `estado`, `id_rol`) VALUES
-(4, '99999999', 'Iron', 'Mannn', '04128574648', 'sisisi@gmail.com', '$2y$10$RNF39NXbKCJ9qbX0tkWLBeLvTis7DviXNWDG//GCxKKhB/hlGW2Di', 1, 2),
-(5, '31560098', 'luisillo', 'elpillo', '04128675678', 'luiselpillo@gmail.com', '$2y$10$3zVNPjd4nSfc/x/LSpyS6OoZjlq/yUZDWMwV6HbzAT6/OnWLFtfbW', 1, 2),
+(4, '99999999', 'Iron', 'Man', '04128574648', 'sisisi@gmail.com', '$2y$10$RNF39NXbKCJ9qbX0tkWLBeLvTis7DviXNWDG//GCxKKhB/hlGW2Di', 1, 2),
+(5, '31560098', 'luisillo', 'elpillo', '04128675678', 'luiselpillo@gmail.com', '$2y$10$EffFLHZGF4V/.MpKOx.qdul7PaS/4uGCxDCNnTEBnAbMoF0yOTthS', 0, 2),
 (6, '32046165', 'jose', 'uribe', '04245783165', 'joseuribe@gmail.com', '$2y$10$s5FhnVqyxKvKckeRlU2EOOHebbyF9SdMEZIYFQdyRCVGSzOfeU3vm', 0, 2),
 (7, '31560043', 'cristianito', 'ronaldinhjo', '01287873377', 'sisasisas@gmail.com', '$2y$10$qFo1W1k30Pkke.WncgPBhe7GnJcZD4Pp.BCw5F4V/0N/szI..0qQe', 0, 2),
 (8, '31560041', 'franchesco', 'ereu', '04128574348', 'ereublade@gmail.com', '$2y$10$xMDhvpuOHmZIINFqgstOw.LHjp1fUpf3bRspYXnOD4brmoumAAuN6', 1, 1),
@@ -208,12 +172,7 @@ CREATE TABLE `membresia` (
 INSERT INTO `membresia` (`id_membresia`, `tipo`, `monto`) VALUES
 (1, 'Mensualidad Estándar', 30.00),
 (2, 'Semanal Estándar', 10.00),
-(3, 'Diario Estándar', 3.00),
-(4, 'Convenio: Cardenales', 0.00),
-(5, 'Convenio: PromarTV', 0.00),
-(6, 'Convenio: Emisora', 0.00),
-(7, 'Convenio: Academia Básquet', 0.00),
-(8, 'Convenio: Gratis', 0.00);
+(3, 'Diario Estándar', 3.00);
 
 -- --------------------------------------------------------
 
@@ -251,17 +210,9 @@ CREATE TABLE `pago` (
   `id_cliente` int(11) NOT NULL,
   `id_membresia` int(11) NOT NULL,
   `referencia` varchar(20) NOT NULL,
-  `id_metodo` int(11) NOT NULL
+  `id_metodo` int(11) NOT NULL,
+  `cantidad_periodos` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `pago`
---
-
-INSERT INTO `pago` (`id_pago`, `fecha`, `monto`, `id_cliente`, `id_membresia`, `referencia`, `id_metodo`) VALUES
-(2, '2026-06-12', 3.00, 3, 1, '123456789122', 2),
-(3, '2026-06-10', 50.00, 3, 1, 'REF001', 3),
-(4, '2026-06-11', 80.00, 12, 2, 'REF002', 2);
 
 -- --------------------------------------------------------
 
@@ -325,12 +276,6 @@ ALTER TABLE `asignacionRutina`
   ADD KEY `id_cliente` (`id_cliente`),
   ADD KEY `id_rutina` (`id_rutina`),
   ADD KEY `fk_asignacion_empleado` (`id_empleado`);
-
---
--- Indices de la tabla `cargo`
---
-ALTER TABLE `cargo`
-  ADD PRIMARY KEY (`id_cargo`);
 
 --
 -- Indices de la tabla `cliente`
@@ -409,16 +354,10 @@ ALTER TABLE `asignacionRutina`
   MODIFY `id_asignacion` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `cargo`
---
-ALTER TABLE `cargo`
-  MODIFY `id_cargo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de la tabla `detalleRutina`

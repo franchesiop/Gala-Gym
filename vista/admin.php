@@ -2,16 +2,18 @@
 require_once("comunes/encabezado.php"); 
 ?>
 
-<!-- El contenedor debe envolver a ambos: menú y main -->
 <div class="container-fluid">
     <div class="row">
         
         <?php require_once("comunes/menu.php"); ?>
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light min-vh-100">
-            <!-- Barra superior -->
             <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom bg-white px-3 mt-3 shadow-sm">
-                <h5 class="fw-bold text-uppercase m-0 small">Panel / Dashboard</h5>
+                
+                <div class="d-flex align-items-center">
+                   
+                    <h5 class="fw-bold text-uppercase m-0 small">Panel / Dashboard</h5>
+                </div>
                 <div class="d-flex align-items-center">
                     <span class="small fw-bold me-3 text-muted">Hola, <?php echo $_SESSION['nombre']; ?></span>
                     <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 35px; height: 35px; font-size: 0.8rem;">
@@ -20,7 +22,6 @@ require_once("comunes/encabezado.php");
                 </div>
             </div>
 
-            <!-- Contenido -->
             <div class="p-2">
                 <div class="row g-4">
                     <div class="col-md-4">
@@ -43,3 +44,4 @@ require_once("comunes/encabezado.php");
 </div>
 
 <?php require_once("comunes/pie.php"); ?>
+<script src="js/admin.js"></script>
