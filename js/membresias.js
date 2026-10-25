@@ -56,14 +56,27 @@ $(document).ready(function(){
     });
 
     // Botón Eliminar del Modal
+   // Reemplaza el botón Eliminar viejo por este:
     $("#btnEliminar").on("click", function(){
-        var id_membresia = $("#id_membresia").val(); 
-        if(confirm("¿Seguro que desea eliminar esta membresía?")){
-            var datos = new FormData();
-            datos.append('accion', 'eliminar');
-            datos.append('id_membresia', id_membresia);
-            enviaAjax(datos);
-        }
+        var id_membresia = $("#idMembresia").val(); 
+        
+        // Pasa el ID al modal de confirmación
+        $("#id_eliminar_global").val(id_membresia);
+        
+        // Oculta el modal de edición y abre el de confirmación
+        $("#modalMembresia").modal("hide");
+        $("#modal_eliminar").modal("show");
+    });
+
+    // Evento del botón "SÍ, ELIMINAR" del modal genérico
+    $("#btnConfirmarEliminar").on("click", function(){
+        var id_membresia = $("#id_eliminar_global").val(); 
+        
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('id_membresia', id_membresia);
+        
+        enviaAjax(datos);
     });
 
     // Botón Incluir alternativo 
@@ -129,16 +142,16 @@ function pone(pos){
 }
 
 // Función eliminar directa desde la tabla
+// Función eliminar directa desde la tabla
 function eliminar(pos){
     var linea = $(pos).closest('tr');
     var id_membresia = $(linea).find("td:eq(0)").text();
 
-    if(confirm("¿Seguro que desea eliminar esta membresía?")){
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('id_membresia', id_membresia);
-        enviaAjax(datos);
-    }
+    // Guardamos el ID en el input oculto del modal genérico
+    $("#id_eliminar_global").val(id_membresia);
+    
+    // Mostramos el modal de Bootstrap
+    $("#modal_eliminar").modal("show");
 }
 
 // Función AJAX

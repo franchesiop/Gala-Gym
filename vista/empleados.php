@@ -105,6 +105,7 @@ require_once("comunes/encabezado.php");
 
 <?php 
 require_once("comunes/modal.php"); 
+require_once("comunes/modal_eliminar.php");
 require_once("comunes/pie.php"); 
 ?>
 <script src="js/empleados.js"></script>

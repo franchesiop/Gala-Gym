@@ -2,74 +2,56 @@
 require_once('modelo/datos.php');
 
 class login extends datos {
-    private $correo;
-    private $contrasena;
+    private $correo, $contrasena;
 
-    // setters
-    public function set_correo($valor){
-        $this->correo = $valor;
-    }
-    
-    public function set_contrasena($valor){
-        $this->contrasena = $valor;
-    }
+    function set_correo($v) { $this->correo = $v; }
+    function set_contrasena($v) { $this->contrasena = $v; }
 
-    // validar al usuario
-    public function ingresar() {
+    function ingresar() {
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
-        
+
         try {
-            // buscamos primero en la tabla empleado
-            $stmt = $co->prepare("SELECT * FROM empleado WHERE correo = :correo AND estado = 1");
-            $stmt->bindParam(':correo', $this->correo);
-            $stmt->execute();
-            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Buscamos al empleado por su correo y verificamos que esté activo (estado = 1)
+            $sql = "SELECT * FROM empleado WHERE correo = :correo AND estado = 1";
+            $consulta = $co->prepare($sql);
+            $consulta->bindParam(':correo', $this->correo);
+            $consulta->execute();
 
-            if ($usuario) {
-                // es un empleado verificamos contrasena
-                if (password_verify($this->contrasena, $usuario['contrasena'])) {
+            $fila = $consulta->fetch(PDO::FETCH_ASSOC);
+
+            // Si encontró un registro con ese correo...
+            if ($fila) {
+                // Verificamos si la contraseña tipeada coincide con el Hash guardado
+                if (password_verify($this->contrasena, $fila['contrasena'])) {
+                    
+                    // ¡Seguridad Primero! Regeneramos el ID de la sesión para evitar hackeos por robo de cookies
+                    if(session_status() !== PHP_SESSION_ACTIVE) {
+                        session_start();
+                    }
+                    session_regenerate_id(true);
+
+                    // Levantamos las variables de sesión que usaremos en todo el sistema
+                    $_SESSION['id_empleado'] = $fila['id_empleado'];
+                    $_SESSION['nombre_empleado'] = $fila['nombre'] . " " . $fila['apellido'];
+                    $_SESSION['id_rol'] = $fila['id_rol'];
+
                     $r['resultado'] = 'exito';
-                    $r['mensaje'] = 'Bienvenido ' . $usuario['nombre'];
-                    $r['datos'] = $usuario;
-                    $r['tipo_usuario'] = 'empleado'; 
-                    return $r;
+                    $r['mensaje'] = 'Bienvenido';
                 } else {
-                    return ['resultado' => 'error', 'mensaje' => 'Contraseña incorrecta.'];
+                    // Mismo mensaje genérico para que el atacante no sepa si falló el correo o la clave
+                    $r['resultado'] = 'error';
+                    $r['mensaje'] = 'Correo o contraseña incorrectos';
                 }
+            } else {
+                $r['resultado'] = 'error';
+                $r['mensaje'] = 'Correo o contraseña incorrectos';
             }
-
-            // si no es empleado buscamos en cliente
-            $stmt2 = $co->prepare("SELECT * FROM cliente WHERE correo = :correo AND estado = 1");
-            $stmt2->bindParam(':correo', $this->correo);
-            $stmt2->execute();
-            $cliente = $stmt2->fetch(PDO::FETCH_ASSOC);
-
-            if ($cliente) {
-                // es un cliente verificamos su contrasena
-                if (password_verify($this->contrasena, $cliente['contrasena'])) {
-                    $r['resultado'] = 'exito';
-                    $r['mensaje'] = 'Bienvenido ' . $cliente['nombre'];
-                    $r['datos'] = $cliente;
-                    $r['tipo_usuario'] = 'cliente'; 
-                    return $r;
-                } else {
-                    return ['resultado' => 'error', 'mensaje' => 'Contraseña incorrecta.'];
-                }
-            }
-
-            
-            // si no esta en ninguna de las dos ta blas
-            
+        } catch(Exception $e) {
             $r['resultado'] = 'error';
-            $r['mensaje'] = 'El correo no existe o el usuario está inactivo.';
-            
-        } catch (Exception $e) {
-            $r['resultado'] = 'error';
-            $r['mensaje'] = 'Error de conexión: ' . $e->getMessage();
+            $r['mensaje'] = $e->getMessage();
         }
-        
         return $r;
     }
 }

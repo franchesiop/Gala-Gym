@@ -55,14 +55,27 @@ $(document).ready(function(){
     });
 
     // Botón Eliminar del Modal
+   // Reemplaza el Botón Eliminar del Modal de edición por este:
     $("#btnEliminar").on("click", function(){
         var id_ejercicio = $("#id_ejercicio").val(); 
-        if(confirm("¿Seguro que desea eliminar este ejercicio?")){
-            var datos = new FormData();
-            datos.append('accion', 'eliminar');
-            datos.append('id_ejercicio', id_ejercicio);
-            enviaAjax(datos);
-        }
+        
+        // Pasa el ID al modal de confirmación
+        $("#id_eliminar_global").val(id_ejercicio);
+        
+        // Oculta el modal de edición y abre el de confirmación
+        $("#modalUsuario").modal("hide");
+        $("#modal_eliminar").modal("show");
+    });
+
+    // Añade el evento del botón "SÍ, ELIMINAR" del nuevo modal
+    $("#btnConfirmarEliminar").on("click", function(){
+        var id_ejercicio = $("#id_eliminar_global").val(); 
+        
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('id_ejercicio', id_ejercicio);
+        
+        enviaAjax(datos);
     });
 
     // Botón Incluir alternativo 
@@ -124,16 +137,16 @@ function pone(pos){
 }
 
 // Función eliminar directa desde la tabla
+// Función eliminar directa desde la tabla
 function eliminar(pos){
     var linea = $(pos).closest('tr');
     var id_ejercicio = $(linea).find("td:eq(0)").text();
 
-    if(confirm("¿Seguro que desea eliminar este ejercicio?")){
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('id_ejercicio', id_ejercicio);
-        enviaAjax(datos);
-    }
+    // Guardamos el ID en el input oculto del nuevo modal
+    $("#id_eliminar_global").val(id_ejercicio);
+    
+    // Mostramos el modal de Bootstrap
+    $("#modal_eliminar").modal("show");
 }
 
 // Función AJAX

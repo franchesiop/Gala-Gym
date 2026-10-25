@@ -1,20 +1,28 @@
 <?php require_once("comunes/encabezado.php"); ?>
 
-<nav class="navbar navbar-expand-lg bg-white py-3 shadow-sm mb-5">
-    <div class="container">
-        <span class="navbar-brand fw-bold text-dark fs-4 text-uppercase">BIENVENIDO</span>
-        <div class="d-flex ms-auto align-items-center gap-4">
-            <a href="?pagina=principal_cliente" class="text-decoration-none text-dark fw-bold small">RUTINA</a>
-            <a href="?pagina=pago" class="text-decoration-none text-primary fw-bold small">PAGOS</a>
-            <a href="?pagina=logout" class="text-decoration-none text-danger fw-bold small">CERRAR SESIÓN</a>
+<!-- Menú Superior Blanco (Fijo) -->
+<nav class="bg-white border-bottom py-4 sticky-top">
+    <div class="container d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold m-0 text-dark text-uppercase" style="letter-spacing: 3px;">GALA GYM</h4>
+        
+        <div class="d-flex align-items-center gap-4">
+            <!-- Enlace inactivo: texto gris -->
+            <a href="?pagina=clientes_rutina" class="text-secondary text-decoration-none text-uppercase fw-bold small pb-1">Rutinas</a>
+            
+            <!-- Indicador visual de página activa: borde inferior oscuro -->
+            <a href="?pagina=pago" class="text-dark text-decoration-none text-uppercase fw-bold small pb-1 border-bottom border-2 border-dark">Pagos</a>
+            
+            <div class="vr text-dark opacity-25"></div>
+            
+            
         </div>
     </div>
 </nav>
 
-<div class="container mb-5">
+<div class="container py-5 min-vh-100">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card shadow-lg border-0 rounded-4">
+            <div class="card shadow border-0 rounded-4">
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
                         <h4 class="fw-bold mb-1">REGISTRAR PAGO</h4>
@@ -37,7 +45,7 @@
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-dark">Banco</label>
                             <select class="form-select bg-light border-0 rounded-pill py-2 px-3 shadow-none" id="id_metodo" name="id_metodo" required>
-                                <option value="" disabled selected>Selecciona el banco</placeholder>
+                                <option value="" disabled selected>Selecciona el banco</option>
                             </select>
                         </div>
 
@@ -54,7 +62,7 @@
 
                         <div class="d-flex flex-column gap-3 mt-4 text-center">
                             <button type="button" class="btn btn-dark rounded-pill py-2 fw-bold w-100" id="btnPagar">ENVIAR</button>
-                            <a href="?pagina=principal_cliente" class="text-muted text-decoration-none small fw-bold">Regresar a inicio</a>
+                            <a href="?pagina=clientes_rutina" class="text-muted text-decoration-none small fw-bold">Regresar a rutinas</a>
                         </div>
                     </form>
                 </div>

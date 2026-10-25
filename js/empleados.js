@@ -101,13 +101,25 @@ $(document).ready(function(){
 
         $("#btnEliminar").on("click", function(){
         var cedula = $("#cedulaEmpleado").val(); 
-        if(confirm("¿Seguro que desea eliminar a este Empleado?")){
+        
+        // Pasa la cédula al modal de confirmación
+        $("#id_eliminar_global").val(cedula);
+        
+        // Oculta el modal de edición y abre el de confirmación
+        $("#modalUsuario").modal("hide");
+        $("#modal_eliminar").modal("show");
+    });
+
+        // Evento del botón "SÍ, ELIMINAR" del modal genérico
+    $("#btnConfirmarEliminar").on("click", function(){
+        var cedula = $("#id_eliminar_global").val(); 
+        
         var datos = new FormData();
         datos.append('accion', 'eliminar');
         datos.append('cedulaEmpleado', cedula);
+        
         enviaAjax(datos);
-    }
-});
+    });
         
 
         $("#incluir").on("click", function(){
@@ -212,13 +224,11 @@ function eliminar(pos){
     var linea = $(pos).closest('tr');
     var cedula = $(linea).find("td:eq(0)").text();
 
-    if(confirm("¿Seguro que deseas eliminar al empleado con cédula " + cedula + "?")){
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('cedulaEmpleado', cedula);
-        
-        enviaAjax(datos);
-    }
+    // Guardamos la cédula en el input oculto del modal genérico
+    $("#id_eliminar_global").val(cedula);
+    
+    // Mostramos el modal de Bootstrap
+    $("#modal_eliminar").modal("show");
 }
 
 function enviaAjax(datos){

@@ -99,6 +99,16 @@ $(document).ready(function(){
      $("#modalUsuario").modal("show");
 });
 
+        $("#btnConfirmarEliminar").on("click", function(){
+        var cedula = $("#id_eliminar_global").val(); 
+        
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('cedulaCliente', cedula);
+        
+        enviaAjax(datos);
+    });
+
 });
 
 //validar antes de enviar
@@ -193,14 +203,11 @@ function eliminar(pos){
     var linea = $(pos).closest('tr');
     var cedula = $(linea).find("td:eq(0)").text();
 
-    if(confirm("¿Seguro que deseas eliminar al cliente con cédula " + cedula + "?")){
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('cedulaCliente', cedula);
-        
-        // Esto es lo que faltaba: ¡Enviar la petición al servidor!
-        enviaAjax(datos);
-    }
+    // Guardamos la cédula en el input oculto del modal genérico
+    $("#id_eliminar_global").val(cedula);
+    
+    // Mostramos el modal de Bootstrap
+    $("#modal_eliminar").modal("show");
 }
 
 function enviaAjax(datos){
@@ -239,7 +246,7 @@ function enviaAjax(datos){
                 else if(lee.resultado == 'eliminar'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Cliente Eliminado'){
-                        $("#modalUsuario").modal("hide");
+                        $("#modal_eliminar").modal("hide"); // <-- Cierra el modal de confirmación
                         consultar();
                     }
                 } 

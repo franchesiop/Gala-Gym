@@ -1,25 +1,15 @@
 $(document).ready(function(){
 
-    // Validación correo
-    $("#correo").on("keypress", function(e){
-        validarkeypress(/^[a-zA-Z0-9._@-]*$/, e);
-    });
-    $("#correo").on("keyup", function() {
-        validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $(this), $("#scorreo"), "Correo inválido");
+    // Validar correo mientras se escribe
+    $("#correo").on("keyup",function() {
+        validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $(this), $("#scorreo"), "Formato de correo inválido");
     });
 
-    // Validación contraseña (evitar caracteres que no correspondan a tu regla)
-    $("#contrasena").on("keypress", function(e) {
-        validarkeypress(/^[a-zA-Z0-9!@#$%^&*]*$/, e);
-    });
-    // No ponemos validación estricta de longitud en el keyup para no molestar al usuario mientras escribe su clave actual.
+    // Interceptar el envío del formulario
+    $("#formLogin").on("submit", function(e){
+        e.preventDefault(); // Evita que la página se recargue
 
-    // Capturar el envío del formulario
-    $("form").on("submit", function(e) {
-        console.log("Se presionó el botón de submit");
-        e.preventDefault(); // Evita que la página se recargue por defecto
-
-        if (validarEnvio()) {
+        if(validarEnvio()){
             var datos = new FormData();
             datos.append('accion', 'ingresar');
             datos.append('correo', $("#correo").val());
@@ -30,60 +20,19 @@ $(document).ready(function(){
     });
 });
 
-// Validar antes de enviar a AJAX
+// Validar antes de enviar
 function validarEnvio() {
-    // Validar correo
-    if (validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $("#correo"), $("#scorreo"), "Correo Invalido") == 0) {
-        mostrarMensaje("Correo Inválido <br/>(Formato incorrecto)");
+    if(validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $("#correo"), $("#scorreo"), "Formato de correo inválido") == 0){
+        mostrarMensaje("Por favor, ingresa un correo válido.");
         return false;
     }
     
-    // Validar contraseña vacía
-    if ($("#contrasena").val().trim() === "") {
-        mostrarMensaje("La contraseña no puede estar vacía");
+    if($("#contrasena").val().trim() === "") {
+        mostrarMensaje("La contraseña no puede estar vacía.");
         return false;
     }
-    
-    return true;
-}
 
-// Función para enviar los datos al controlador
-function enviaAjax(datos){
-    $.ajax({
-        async: true,
-        url: "index.php?pagina=login", // Asegúrate de que apunte a tu enrutador principal
-        type: "POST",
-        contentType: false,
-        data: datos,
-        processData: false,
-        cache: false,
-        beforeSend: function () {},
-        timeout: 10000,
-        success: function (respuesta){
-            console.log(respuesta);
-            try {
-                var lee = JSON.parse(respuesta);
-                
-                if(lee.resultado == 'exito'){
-                    window.location.href = lee.ruta;
-                } 
-                else if(lee.resultado == "error"){
-                    mostrarMensaje(lee.mensaje);
-                }
-            } catch(e) {
-                mostrarMensaje("Error en la respuesta del servidor.");
-                console.error("Error en JSON:", e, "Respuesta:", respuesta);
-            }
-        },
-        error: function(request, status, err){
-            if(status == "timeout"){
-                mostrarMensaje("Servidor Ocupado, Intente de Nuevo");
-            } else {
-                mostrarMensaje("ERROR: <br/>" + request.status + " " + err);
-            }
-        },
-        complete: function () {},
-    });
+    return true;
 }
 
 function mostrarMensaje(mensaje){
@@ -92,22 +41,53 @@ function mostrarMensaje(mensaje){
     setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
 }
 
-function validarkeypress(er, e){
-    key = e.keyCode;
-    tecla = String.fromCharCode(key);
-    a = er.test(tecla);
-    if(!a){
-        e.preventDefault();
-    }
-}
-
 function validarkeyup(er, etiqueta, etiquetamensaje, mensaje){
     a = er.test(etiqueta.val());
     if(a){
-        if(etiquetamensaje.length) etiquetamensaje.text("");
+        etiquetamensaje.text("");
         return 1;
     } else{
-        if(etiquetamensaje.length) etiquetamensaje.text(mensaje);
+        etiquetamensaje.text(mensaje);
         return 0;
     }
+}
+
+function enviaAjax(datos){
+    $.ajax({
+        async: true,
+        url: "index.php?pagina=login",
+        type: "POST",
+        contentType: false,
+        data: datos,
+        processData: false,
+        cache: false,
+        beforeSend: function () {
+            $("#btnEntrar").prop("disabled", true).text("Verificando...");
+        },
+        timeout: 10000,
+        success: function (respuesta){
+            $("#btnEntrar").prop("disabled", false).text("ENTRAR");
+            try{
+                var lee = JSON.parse(respuesta);
+                if(lee.resultado == 'exito'){
+                    // Si el login es correcto, redirigimos al panel de clientes o rutinas
+                    window.location.href = "?pagina=admin";
+                } 
+                else if(lee.resultado == 'error'){
+                    mostrarMensaje(lee.mensaje);
+                }
+            } catch(e){
+                alert("Error en JSON: " + e.name);
+            }
+        },
+        error: function(request, status, err){
+            $("#btnEntrar").prop("disabled", false).text("ENTRAR");
+            if(status == "timeout"){
+                mostrarMensaje("Servidor Ocupado, Intente de Nuevo");
+            } else {
+                mostrarMensaje("ERROR: <br/>" + request + status + err);
+            }
+        },
+        complete: function () {},
+    });
 }

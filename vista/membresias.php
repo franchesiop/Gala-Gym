@@ -69,6 +69,7 @@ require_once("comunes/encabezado.php");
 
 <?php 
 require_once("comunes/pie.php"); 
+require_once("comunes/modal_eliminar.php");
 require_once("comunes/modal.php");
 ?>
 <script src="js/membresias.js"></script>

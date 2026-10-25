@@ -49,6 +49,6 @@
     </div>
 
     <div class="p-4 mt-5">
-        <a href="?pagina=principal" class="btn btn-outline-danger btn-sm w-100 rounded-0 fw-bold">CERRAR SESIÓN</a>
+        <a href="?pagina=logout" class="btn btn-outline-danger w-100 rounded-0">CERRAR SESIÓN</a>
     </div>
 </nav>
