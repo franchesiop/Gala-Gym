@@ -1,3 +1,6 @@
+var paginaActual = 1;
+var filasPorPagina = 10;
+
 function consultar(){
     var datos = new FormData();
     datos.append('accion', 'consultar');
@@ -89,7 +92,7 @@ $(document).ready(function(){
             datos.append('id_metodo', $("#id_metodo").val());
             datos.append('banco', $("#banco").val());
             
-            // empaquetamos segun los nombres que espera el Controlador
+            // empaqueta segun los nombres que espera el controlador
             if($("#banco").val() === "Pago Móvil") {
                 datos.append('nombre_banco', $("#input_dato_1").val());
                 datos.append('cedula', $("#input_dato_2").val());
@@ -108,6 +111,29 @@ $(document).ready(function(){
         limpia();
         $("#btnGuardar").text("incluir"); 
         $("#modalPago").modal("show");
+    });
+
+    $("#buscar_pago").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        var filasFiltradas = 0;
+        
+        $("#cuerpoTablaPagos tr").filter(function() {
+            // busca en las columnas de Banco/Tipo y los datos extra
+            var banco = $(this).find("td:eq(1)").text().toLowerCase();
+            var dato1 = $(this).find("td:eq(2)").text().toLowerCase();
+            var dato2 = $(this).find("td:eq(3)").text().toLowerCase();
+
+            var coincide = banco.indexOf(valor) > -1 || dato1.indexOf(valor) > -1 || dato2.indexOf(valor) > -1;
+            $(this).toggle(coincide);
+            if(coincide) filasFiltradas++;
+        });
+
+        if(valor === ""){
+            paginarTabla(1);
+        } else {
+            $("#infoPaginacion").text("Mostrando resultados (" + filasFiltradas + ")");
+            $("#contenedorPaginacion").empty(); 
+        }
     });
 
 });
@@ -233,6 +259,7 @@ function enviaAjax(datos){
                 var lee = JSON.parse(respuesta);
                 if(lee.resultado == 'consultar'){
                     $("#cuerpoTablaPagos").html(lee.mensaje);
+                    paginarTabla(1);
                 } 
                 else if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
@@ -271,6 +298,40 @@ function enviaAjax(datos){
         },
         complete: function () {},
     });
+}
+    function paginarTabla(pagina) {
+    paginaActual = pagina;
+    var filas = $("#cuerpoTablaPagos tr");
+    var totalFilas = filas.length;
+    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
+    
+    var inicio = (paginaActual - 1) * filasPorPagina;
+    var fin = inicio + filasPorPagina;
+
+    filas.hide().slice(inicio, fin).show();
+    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " métodos de pago");
+
+    var htmlBotones = "";
+
+    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
+
+    var l = null;
+    for (var i = 1; i <= totalPaginas; i++) {
+        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
+            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
+            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
+            l = i;
+        } else if (l != null && i != l + 1 && l != '...') {
+            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
+            l = '...';
+        }
+    }
+
+    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
+
+    $("#contenedorPaginacion").html(htmlBotones);
 }
 
 function limpia(){

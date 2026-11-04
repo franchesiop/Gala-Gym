@@ -1,3 +1,6 @@
+var paginaActual = 1;
+var filasPorPagina = 10;
+
 function consultar(){
     var datos = new FormData();
     datos.append('accion', 'consultar');
@@ -52,11 +55,10 @@ $(document).ready(function(){
     $("#btnNuevoPlan").on("click", function(){
         limpia();
         $("#btnGuardar").text("incluir"); 
-        $("#modalMembresia").modal("show"); // El ID de tu modal en la vista
+        $("#modalMembresia").modal("show"); 
     });
 
     // Botón Eliminar del Modal
-   // Reemplaza el botón Eliminar viejo por este:
     $("#btnEliminar").on("click", function(){
         var id_membresia = $("#idMembresia").val(); 
         
@@ -68,7 +70,7 @@ $(document).ready(function(){
         $("#modal_eliminar").modal("show");
     });
 
-    // Evento del botón "SÍ, ELIMINAR" del modal genérico
+    // Evento del botón "SÍ, ELIMINAR" 
     $("#btnConfirmarEliminar").on("click", function(){
         var id_membresia = $("#id_eliminar_global").val(); 
         
@@ -84,6 +86,28 @@ $(document).ready(function(){
         limpia();
         $("#btnGuardar").text("incluir");
         $("#modalUsuario").modal("show");
+    });
+
+    // Buscador en tiempo real
+    $("#buscar_membresia").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        var filasFiltradas = 0;
+        
+        $("#cuerpoTablaMembresias tr").filter(function() {
+            var plan = $(this).find("td:eq(1)").text().toLowerCase();
+            var costo = $(this).find("td:eq(2)").text().toLowerCase();
+
+            var coincide = plan.indexOf(valor) > -1 || costo.indexOf(valor) > -1;
+            $(this).toggle(coincide);
+            if(coincide) filasFiltradas++;
+        });
+
+        if(valor === ""){
+            paginarTabla(1);
+        } else {
+            $("#infoPaginacion").text("Mostrando resultados (" + filasFiltradas + ")");
+            $("#contenedorPaginacion").empty(); 
+        }
     });
 }); // Fin del $(document).ready
 
@@ -135,7 +159,7 @@ function pone(pos){
     
     $("#idMembresia").val(linea.find("td:eq(0)").text());
     $("#nombrePlan").val(linea.find("td:eq(1)").text()); 
-    $("#costoPlan").val(linea.find("td:eq(2)").text()); // Agregamos el costo
+    $("#costoPlan").val(linea.find("td:eq(2)").text());
 
     $("#btnGuardar").text('modificar');
     $("#modalMembresia").modal("show");
@@ -147,10 +171,9 @@ function eliminar(pos){
     var linea = $(pos).closest('tr');
     var id_membresia = $(linea).find("td:eq(0)").text();
 
-    // Guardamos el ID en el input oculto del modal genérico
+    // Guardamos el ID en el input oculto del modal 
     $("#id_eliminar_global").val(id_membresia);
     
-    // Mostramos el modal de Bootstrap
     $("#modal_eliminar").modal("show");
 }
 
@@ -165,20 +188,21 @@ function enviaAjax(datos){
         processData: false,
         cache: false,
         success: function (respuesta){
-            console.log("Respuesta del servidor:", respuesta); //
+            console.log("Respuesta del servidor:", respuesta); 
             try {
                 var lee = JSON.parse(respuesta);
                 
                 // Si la acción fue consultar, dibuja las filas en la tabla
                 if(lee.resultado == 'consultar'){
                     $("#cuerpoTablaMembresias").html(lee.mensaje);
+                    paginarTabla(1);
                 } 
                 // Si se incluyó con éxito, limpia, cierra el modal y recarga la tabla
                 else if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Membresía Registrada'){
                         $("#modalMembresia").modal("hide");
-                        consultar(); // <-- Vuelve a llamar a la base de datos para actualizar la vista
+                        consultar(); // <-- vuelve a llamar a la base de datos para actualizar la vista
                     }
                 }
                else if(lee.resultado == 'modificar'){
@@ -204,6 +228,41 @@ function enviaAjax(datos){
             mostrarMensaje("ERROR DE RED o SERVIDOR: <br/>" + err);
         }
     });
+}
+
+function paginarTabla(pagina) {
+    paginaActual = pagina;
+    var filas = $("#cuerpoTablaMembresias tr");
+    var totalFilas = filas.length;
+    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
+    
+    var inicio = (paginaActual - 1) * filasPorPagina;
+    var fin = inicio + filasPorPagina;
+
+    filas.hide().slice(inicio, fin).show();
+    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " membresías");
+
+    var htmlBotones = "";
+
+    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
+
+    var l = null;
+    for (var i = 1; i <= totalPaginas; i++) {
+        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
+            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
+            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
+            l = i;
+        } else if (l != null && i != l + 1 && l != '...') {
+            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
+            l = '...';
+        }
+    }
+
+    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
+
+    $("#contenedorPaginacion").html(htmlBotones);
 }
 // Limpiar formulario
 function limpia(){

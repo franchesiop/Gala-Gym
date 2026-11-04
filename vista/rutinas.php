@@ -5,19 +5,28 @@ require_once("comunes/encabezado.php");
 <div class="container-fluid">
     <div class="row">
         
-        <!-- Sidebar centralizado -->
+        <!-- sidebar centralizado -->
         <?php require_once("comunes/menu.php"); ?>
 
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light">
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light min-vh-100">
             <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom bg-white px-3 mt-3 shadow-sm">
                 <h5 class="fw-bold text-uppercase m-0 small">Panel / Rutinas</h5>
             </div>
 
             <div class="bg-white p-4 shadow-sm border">
-                <div class="d-flex justify-content-between mb-4">
+                
+                <!-- Buscador en tiempo real y botón de registro -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
                     <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-clipboard2-pulse"></i> Rutinas</h6>
-                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevaRutina">REGISTRAR</button>
+                    
+                    <div class="d-flex gap-2 align-items-center" style="max-width: 450px; width: 100%;">
+                        <input type="text" class="form-control form-control-sm rounded-0" id="buscar_rutina" placeholder="Buscar...">
+                        <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap" id="btnNuevaRutina">
+                            REGISTRAR
+                        </button>
+                    </div>
                 </div>
+
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaRutinas">
                         <thead class="table-light">
@@ -32,13 +41,24 @@ require_once("comunes/encabezado.php");
                         <tbody class="fw-bold" id="cuerpoTablaRutinas"></tbody>
                     </table>
                 </div>
+
+                <!-- Paginación dinámica (Estándar Bootstrap) -->
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
+                    <span class="text-muted small" id="infoPaginacion">Mostrando 0 rutinas</span>
+                    <nav>
+                        <ul class="pagination pagination-sm m-0" id="contenedorPaginacion">
+                            <!-- Los botones se generan dinámicamente por JS -->
+                        </ul>
+                    </nav>
+                </div>
+
             </div>
         </main>
     </div>
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="modalUsuario" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalUsuario" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
    <div class="modal-dialog modal-lg modal-dialog-centered"> 
      <div class="modal-content rounded-0 border-0 shadow">
        <div class="modal-header bg-dark text-white rounded-0">
@@ -50,26 +70,26 @@ require_once("comunes/encabezado.php");
                 <input type="hidden" id="idRutina" name="idRutina">
                 
                 <div class="row mb-4">
-                    <!-- Nombre de la rutina -->
+                    <!-- nombre de la rutina -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">NOMBRE DE LA RUTINA</label>
                         <input type="text" class="form-control rounded-0" id="nombreRutina" name="nombreRutina" placeholder="Ej: HIPERMAXHULKGOLku" required>
                         <span id="snombreRutina" class="text-danger small"></span>
                     </div>
 
-                    <!-- Buscador de Cliente con AJAX -->
+                    <!-- buscador de cliente -->
                     <div class="col-md-6 position-relative">
                         <label class="form-label small fw-bold">ASIGNAR A CLIENTE</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light rounded-0 border-end-0"><i class="bi bi-search"></i></span>
                             <input type="text" class="form-control rounded-0 border-start-0" id="buscarCliente" placeholder="Buscar cédula o nombre..." autocomplete="off">
-                            <!-- Este input oculto es el que guarda el ID real para la base de datos -->
+                            
                             <input type="hidden" id="idCliente" name="idCliente">
                         </div>
                         
-                        <!-- Contenedor flotante para los resultados de la búsqueda -->
+                        
                         <div class="list-group position-absolute w-100 shadow mt-1 d-none" id="listaClientes" style="z-index: 1050; max-height: 200px; overflow-y: auto;">
-                            <!-- JS inyectará aquí los <button> o <a> con los clientes encontrados -->
+                           
                         </div>
                         <span id="sCliente" class="text-danger small"></span>
                     </div>
@@ -84,7 +104,7 @@ require_once("comunes/encabezado.php");
                     </button>
                 </div>
 
-                <!-- Encabezados fijos para las columnas -->
+                
                 <div class="row mb-1 text-muted border-bottom pb-1">
                     <div class="col-5">
                         <label class="form-label small fw-bold m-0">EJERCICIO</label>
@@ -96,13 +116,13 @@ require_once("comunes/encabezado.php");
                         <label class="form-label small fw-bold m-0">REPS</label>
                     </div>
                     <div class="col-1">
-                        <!-- Espacio vacío para la columna del botón de eliminar -->
+                        
                     </div>
                 </div>
 
-                <!-- Contenedor donde JS inyectará solo los inputs limpios -->
+               
                 <div id="contenedorEjercicios" class="mt-2">
-                    <!-- Aquí caerán los selects y los inputs de series/repeticiones -->
+                    
                 </div>
                 <span id="sEjercicios" class="text-danger small"></span>
                 

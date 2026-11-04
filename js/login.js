@@ -1,17 +1,28 @@
 $(document).ready(function(){
 
-    // Validar correo mientras se escribe
-    $("#correo").on("keyup",function() {
-        validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $(this), $("#scorreo"), "Formato de correo inválido");
+    // Validación de correo
+    $("#correo").on("keypress", function(e){
+        validarkeypress(/^[a-zA-Z0-9._@-]*$/, e);
+    });
+    $("#correo").on("keyup", function(){
+        validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $(this), $("#scorreo"), "Formato inválido");
     });
 
-    // Interceptar el envío del formulario
-    $("#formLogin").on("submit", function(e){
-        e.preventDefault(); // Evita que la página se recargue
+    // Validación de contraseña
+    $("#contrasena").on("keypress", function(e){
+        validarkeypress(/^[a-zA-Z0-9!@#$%^&*]*$/, e);
+    });
+    $("#contrasena").on("keyup", function(){
+        validarkeyup(/^[a-zA-Z0-9!@#$%^&*]{8,20}$/, $(this), $("#scontrasena"), "Entre 8 y 20 caracteres");
+    });
 
+    // Capturar el submit del formulario
+    $("#formLogin").on("submit", function(e){
+        e.preventDefault(); // Evitamos que recargue la página
+        
         if(validarEnvio()){
             var datos = new FormData();
-            datos.append('accion', 'ingresar');
+            datos.append('accion', 'entrar');
             datos.append('correo', $("#correo").val());
             datos.append('contrasena', $("#contrasena").val());
             
@@ -20,28 +31,63 @@ $(document).ready(function(){
     });
 });
 
-// Validar antes de enviar
 function validarEnvio() {
-    if(validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $("#correo"), $("#scorreo"), "Formato de correo inválido") == 0){
-        mostrarMensaje("Por favor, ingresa un correo válido.");
+    if(validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $("#correo"), $("#scorreo"), "Formato inválido") == 0){
+        mostrarMensaje("El correo ingresado no es válido.");    
+        return false;                   
+    }
+    else if(validarkeyup(/^[a-zA-Z0-9!@#$%^&*]{8,20}$/, $("#contrasena"), $("#scontrasena"), "Mínimo 8 caracteres") == 0){
+        mostrarMensaje("La contraseña no cumple con el formato.");
         return false;
     }
-    
-    if($("#contrasena").val().trim() === "") {
-        mostrarMensaje("La contraseña no puede estar vacía.");
-        return false;
-    }
-
     return true;
 }
 
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje);
-    $("#mostrarModal").modal("show");
-    setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
+function enviaAjax(datos){
+    $.ajax({
+        async: true,
+        url: "index.php?pagina=login", 
+        type: "POST",
+        contentType: false,
+        data: datos,
+        processData: false,
+        cache: false,
+        success: function(respuesta){
+            try{
+                var lee = JSON.parse(respuesta);
+                if(lee.resultado == 'existe'){
+                    // si el login es exitoso, redirigimos al index para que el front controller nos asigne la vista
+                    window.location.href = "."; 
+                } 
+                else if(lee.resultado == 'noexiste' || lee.resultado == 'error'){
+                    mostrarMensaje(lee.mensaje);
+                }
+            } catch(e){
+                mostrarMensaje("Error en JSON: " + e.name);
+            }
+        },
+        error: function(request, status, err){
+            mostrarMensaje("ERROR: " + request + status + err);
+        }
+    });
 }
 
-function validarkeyup(er, etiqueta, etiquetamensaje, mensaje){
+function mostrarMensaje(mensaje){
+    $("#contenidoModal").html(mensaje); 
+    $("#mostrarModal").modal("show");
+    setTimeout(function() { $("#mostrarModal").modal("hide"); }, 5000);
+}
+
+function validarkeypress(er,e){
+    key = e.keyCode;
+    tecla = String.fromCharCode(key);
+    a = er.test(tecla);
+    if(!a){
+        e.preventDefault();
+    }
+}
+
+function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
     a = er.test(etiqueta.val());
     if(a){
         etiquetamensaje.text("");
@@ -50,44 +96,4 @@ function validarkeyup(er, etiqueta, etiquetamensaje, mensaje){
         etiquetamensaje.text(mensaje);
         return 0;
     }
-}
-
-function enviaAjax(datos){
-    $.ajax({
-        async: true,
-        url: "index.php?pagina=login",
-        type: "POST",
-        contentType: false,
-        data: datos,
-        processData: false,
-        cache: false,
-        beforeSend: function () {
-            $("#btnEntrar").prop("disabled", true).text("Verificando...");
-        },
-        timeout: 10000,
-        success: function (respuesta){
-            $("#btnEntrar").prop("disabled", false).text("ENTRAR");
-            try{
-                var lee = JSON.parse(respuesta);
-                if(lee.resultado == 'exito'){
-                    // Si el login es correcto, redirigimos al panel de clientes o rutinas
-                    window.location.href = "?pagina=admin";
-                } 
-                else if(lee.resultado == 'error'){
-                    mostrarMensaje(lee.mensaje);
-                }
-            } catch(e){
-                alert("Error en JSON: " + e.name);
-            }
-        },
-        error: function(request, status, err){
-            $("#btnEntrar").prop("disabled", false).text("ENTRAR");
-            if(status == "timeout"){
-                mostrarMensaje("Servidor Ocupado, Intente de Nuevo");
-            } else {
-                mostrarMensaje("ERROR: <br/>" + request + status + err);
-            }
-        },
-        complete: function () {},
-    });
 }

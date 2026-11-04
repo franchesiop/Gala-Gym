@@ -1,3 +1,6 @@
+var paginaActual = 1;
+var filasPorPagina = 10;
+
 function consultar(){
     var datos = new FormData();
     datos.append('accion', 'consultar');
@@ -128,6 +131,28 @@ $(document).ready(function(){
         $("#modalUsuario").modal("show");
         });
 
+        $("#buscar_empleado").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        var filasFiltradas = 0;
+        
+        $("#cuerpoTablaEmpleados tr").filter(function() {
+            var cedula = $(this).find("td:eq(0)").text().toLowerCase();
+            var nombre = $(this).find("td:eq(1)").text().toLowerCase();
+            var apellido = $(this).find("td:eq(2)").text().toLowerCase();
+
+            var coincide = cedula.indexOf(valor) > -1 || nombre.indexOf(valor) > -1 || apellido.indexOf(valor) > -1;
+            $(this).toggle(coincide);
+            if(coincide) filasFiltradas++;
+        });
+
+        if(valor === ""){
+            paginarTabla(1);
+        } else {
+            $("#infoPaginacion").text("Mostrando resultados de búsqueda (" + filasFiltradas + ")");
+            $("#contenedorPaginacion").empty(); 
+        }
+    });
+
 });
 
 //validar antes de enviar
@@ -249,6 +274,7 @@ function enviaAjax(datos){
                 var lee = JSON.parse(respuesta);
                 if(lee.resultado == 'consultar'){
                     $("#cuerpoTablaEmpleados").html(lee.mensaje);
+                    paginarTabla(1);
                 } 
                 else if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
@@ -310,6 +336,40 @@ function cargarRoles(valorSeleccionado = "") {
             }
         }
     });
+}
+function paginarTabla(pagina) {
+    paginaActual = pagina;
+    var filas = $("#cuerpoTablaEmpleados tr");
+    var totalFilas = filas.length;
+    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
+    
+    var inicio = (paginaActual - 1) * filasPorPagina;
+    var fin = inicio + filasPorPagina;
+
+    filas.hide().slice(inicio, fin).show();
+    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " empleados");
+
+    var htmlBotones = "";
+
+    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
+
+    var l = null;
+    for (var i = 1; i <= totalPaginas; i++) {
+        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
+            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
+            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
+            l = i;
+        } else if (l != null && i != l + 1 && l != '...') {
+            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
+            l = '...';
+        }
+    }
+
+    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
+
+    $("#contenedorPaginacion").html(htmlBotones);
 }
 
 function limpia(){

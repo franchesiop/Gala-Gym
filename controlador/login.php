@@ -1,34 +1,35 @@
 <?php
-// si el usuario ya está logueado y trata de entrar al login lo pateamos pal panel
-session_start();
-if(isset($_SESSION['id_empleado']) && empty($_POST)){
-    header("Location: ?pagina=admin"); 
-    exit();
-}
-
-if (!is_file("modelo/".$pagina.".php")){
+if(!is_file("modelo/".$pagina.".php")){
     echo "Falta definir la clase ".$pagina;
     exit;
 }
 require_once("modelo/".$pagina.".php");
 
 if(is_file("vista/".$pagina.".php")){
-    $o = new login();
+    $o = new entrada(); 
     
     if(!empty($_POST)){
-        $accion = $_POST['accion'];
-
-        if($accion == 'ingresar'){
+        if(isset($_POST['accion']) && $_POST['accion'] == 'entrar'){
             $o->set_correo($_POST['correo']);
             $o->set_contrasena($_POST['contrasena']);
             
-            echo json_encode($o->ingresar());
-            exit();
+            $m = $o->existe();
+            
+            if($m['resultado'] == 'existe'){
+                session_start(); 
+                
+            
+                $_SESSION['rol'] = $m['id_rol'];
+                $_SESSION['id_usuario'] = $m['id_usuario']; 
+            }
+            
+           
+            echo json_encode($m);
+            exit(); 
         }
     }
-    
     require_once("vista/".$pagina.".php"); 
 } else {
-    echo "pagina en construccion";
+    echo "Página en construcción";
 }
 ?>

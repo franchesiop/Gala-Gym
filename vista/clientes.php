@@ -14,18 +14,27 @@ require_once("comunes/encabezado.php");
             </div>
 
             <div class="bg-white p-4 shadow-sm border">
-                <div class="d-flex justify-content-between mb-4">
+                
+                <!-- Buscador en tiempo real y botón de registro -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
                     <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-person"></i> Clientes</h6>
-                    <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold" id="btnNuevoCliente">REGISTRAR</button>
+                    
+                    <div class="d-flex gap-2 align-items-center" style="max-width: 450px; width: 100%;">
+                        <input type="text" class="form-control form-control-sm rounded-0" id="buscar_cliente" placeholder="Buscar...">
+                        <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap" id="btnNuevoCliente">
+                            REGISTRAR
+                        </button>
+                    </div>
                 </div>
+
                 <div class="table-responsive">
                     <table class="table table-hover align-middle small" id="tablaClientes">
                         <thead class="table-light">
                             <tr class="text-muted">
-                                <th><i class="bi bi-person-badge"> CÉDULA</i></th>
+                                <th><i class="bi bi-person-badge"></i> CÉDULA</th>
                                 <th><i class="bi bi-person-circle"></i> NOMBRE</th>
                                 <th><i class="bi bi-person-circle"></i> APELLIDO</th>
-                                <th> <i class="bi bi-telephone"></i>TELÉFONO</th>
+                                <th><i class="bi bi-telephone"></i> TELÉFONO</th>
                                 <th style="display:none">CORREO</th>
                                 <th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th>
                             </tr>
@@ -33,13 +42,24 @@ require_once("comunes/encabezado.php");
                         <tbody class="fw-bold" id="cuerpoTablaClientes"></tbody>
                     </table>
                 </div>
+
+                <!-- Paginación dinámica (Estándar Bootstrap) -->
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
+                    <span class="text-muted small" id="infoPaginacion">Mostrando 0 clientes</span>
+                    <nav>
+                        <ul class="pagination pagination-sm m-0" id="contenedorPaginacion">
+                            <!-- Los botones se generan dinámicamente por JS -->
+                        </ul>
+                    </nav>
+                </div>
+
             </div>
         </main>
     </div>
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="modalUsuario" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalUsuario" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
    <div class="modal-dialog modal-dialog-centered">
      <div class="modal-content rounded-0 border-0 shadow">
        <div class="modal-header bg-dark text-white rounded-0">
@@ -77,6 +97,7 @@ require_once("comunes/encabezado.php");
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold">MEMBRESÍA</label>
+                    <!-- Select nativo intacto -->
                     <select id="membresiaCliente" name="membresiaCliente" class="form-select rounded-0">
                         <option value="" disabled selected>Seleccione una membresía...</option>
                     </select>
@@ -90,8 +111,8 @@ require_once("comunes/encabezado.php");
             </form>
        </div>
        <div class="modal-footer d-flex justify-content-between">
-          <div>
-            <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold">CANCELAR</button>
+          <div class="ms-auto">
+            <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold me-2">CANCELAR</button>
             <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4" id="btnGuardar">INCLUIR</button>
           </div>
        </div>
@@ -104,4 +125,4 @@ require_once("comunes/modal.php");
 require_once("comunes/modal_eliminar.php");
 require_once("comunes/pie.php"); 
 ?>
-<script src="js/clientes.js"></script>
+<script src="js/clientes.js?v=<?php echo time(); ?>"></script>

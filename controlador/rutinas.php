@@ -28,8 +28,8 @@ if(is_file("vista/".$pagina.".php")){
 
             case 'incluir':
                 $o->set_nombre($_POST['nombreRutina']);
-                $o->set_id_empleado($_SESSION['id_empleado']); 
-                $o->set_id_cliente($_POST['idCliente']); // Captura del ID del cliente
+                $o->set_id_empleado($_SESSION['id_usuario']); 
+                $o->set_id_cliente($_POST['idCliente']); 
                 
                 $ejercicios = isset($_POST['ejercicios']) ? $_POST['ejercicios'] : [];
                 $series = isset($_POST['series']) ? $_POST['series'] : [];
@@ -41,8 +41,8 @@ if(is_file("vista/".$pagina.".php")){
             case 'modificar':
                 $o->set_id_rutina($_POST['idRutina']);
                 $o->set_nombre($_POST['nombreRutina']);
-                $o->set_id_empleado($_SESSION['id_empleado']); 
-                $o->set_id_cliente($_POST['idCliente']); // Captura del ID del cliente
+                $o->set_id_empleado($_SESSION['id_usuario']); 
+                $o->set_id_cliente($_POST['idCliente']); 
                 
                 $ejercicios = isset($_POST['ejercicios']) ? $_POST['ejercicios'] : [];
                 $series = isset($_POST['series']) ? $_POST['series'] : [];
@@ -66,7 +66,7 @@ if(is_file("vista/".$pagina.".php")){
                 echo json_encode(['results' => $resultados]);
                 break;    
                 
-            case 'buscar_cliente': // Nuevo caso para el buscador AJAX
+            case 'buscar_cliente': 
                 $busqueda = isset($_POST['busqueda']) ? $_POST['busqueda'] : '';
                 echo json_encode($o->buscar_cliente_ajax($busqueda));
                 break;

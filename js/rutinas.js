@@ -1,3 +1,6 @@
+var paginaActual = 1;
+var filasPorPagina = 10;
+
 function consultar(){
     var datos = new FormData();
     datos.append('accion', 'consultar');
@@ -12,7 +15,7 @@ $(document).ready(function(){
     $("#nombreRutina").on("keypress",function(e){ validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e); });
     $("#nombreRutina").on("keyup",function(){ validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this),$("#snombreRutina"),"Nombre inválido"); });
 
-    // ==== LÓGICA DE BÚSQUEDA DE CLIENTES CON AJAX ====
+    // busca de clientes con ajax
     $("#buscarCliente").on("keyup", function(){
         var busqueda = $(this).val();
         
@@ -27,8 +30,8 @@ $(document).ready(function(){
                         var html = "";
                         if (data.length > 0) {
                             $.each(data, function(index, cliente) {
-                                html += `<button type="button" class="list-group-item list-group-item-action opcion-cliente" data-id="${cliente.id_cliente}" data-nombre="${cliente.cedula} - ${cliente.nombre} ${cliente.apellido}">
-                                            <i class="bi bi-person"></i> ${cliente.cedula} - ${cliente.nombre} ${cliente.apellido}
+                                 html += `<button type="button" class="list-group-item list-group-item-action opcion-cliente" data-id="${cliente.id_cliente}" data-nombre="${cliente.cedula} ${cliente.nombre} ${cliente.apellido}">
+                                             <i class="bi bi-person"></i> ${cliente.cedula} ${cliente.nombre} ${cliente.apellido}
                                          </button>`;
                             });
                         } else {
@@ -42,28 +45,27 @@ $(document).ready(function(){
             });
         } else {
             $("#listaClientes").addClass("d-none").empty();
-            $("#idCliente").val(""); // Si borra todo, limpiamos el ID oculto
+            $("#idCliente").val(""); 
         }
     });
 
-    // Evento al hacer clic en un cliente de la lista de resultados
+    // evento al hacer click en un cliente de la lista de resultados
     $("#listaClientes").on("click", ".opcion-cliente", function(){
         var idCliente = $(this).data("id");
         var textoCliente = $(this).data("nombre");
 
-        $("#idCliente").val(idCliente); // Guardamos el ID real en el input hidden
-        $("#buscarCliente").val(textoCliente); // Mostramos el texto en el input visible
-        $("#listaClientes").addClass("d-none").empty(); // Escondemos la lista
-        $("#sCliente").text(""); // Limpiamos mensaje de error si lo hubiera
+        $("#idCliente").val(idCliente); // guarda el id real en el input oculto
+        $("#buscarCliente").val(textoCliente); // muestra el texto en el input visible
+        $("#listaClientes").addClass("d-none").empty(); // esconde la lista
+        $("#sCliente").text(""); // limpia mensaje de error si lo hubiera
     });
 
-    // Ocultar lista de clientes si hace clic afuera
+    // ocultar lista de clientes si hace click afuera
     $(document).on("click", function(event) {
         if (!$(event.target).closest("#buscarCliente, #listaClientes").length) {
             $("#listaClientes").addClass("d-none");
         }
     });
-    // =================================================
 
     $("#btnAgregarEjercicio").on("click", function(){ agregarFilaEjercicio(); });
 
@@ -93,7 +95,31 @@ $(document).ready(function(){
         datos.append('id_rutina', $("#id_eliminar_global").val());
         enviaAjax(datos);
     });
-});
+
+    // Buscador en tiempo real
+    $("#buscar_rutina").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        var filasFiltradas = 0;
+        
+        $("#cuerpoTablaRutinas tr").filter(function() {
+            var nombreRutina = $(this).find("td:eq(1)").text().toLowerCase();
+            var entrenador = $(this).find("td:eq(2)").text().toLowerCase();
+            var cliente = $(this).find("td:eq(3)").text().toLowerCase();
+
+            var coincide = nombreRutina.indexOf(valor) > -1 || entrenador.indexOf(valor) > -1 || cliente.indexOf(valor) > -1;
+            $(this).toggle(coincide);
+            if(coincide) filasFiltradas++;
+        });
+
+        if(valor === ""){
+            paginarTabla(1);
+        } else {
+            $("#infoPaginacion").text("Mostrando resultados (" + filasFiltradas + ")");
+            $("#contenedorPaginacion").empty(); 
+        }
+    });
+
+}); // Fin del $(document).ready
 
 function agregarFilaEjercicio(id_ejercicio = "", nombre_ejercicio = "", series = "", repeticiones = "") {
     var fila = `
@@ -157,7 +183,7 @@ function empaquetarDatos(accion) {
     var datos = new FormData();
     datos.append('accion', accion);
     datos.append('nombreRutina', $("#nombreRutina").val());
-    datos.append('idCliente', $("#idCliente").val()); // Añadimos el ID del cliente al paquete de datos
+    datos.append('idCliente', $("#idCliente").val()); // añade el id del cliente al paquete de datos
     
     if (accion === 'modificar') { datos.append('idRutina', $("#idRutina").val()); }
 
@@ -174,7 +200,7 @@ function validarEnvio() {
         return false;
     }
     
-    // Nueva validación: Asegurar que se haya seleccionado un cliente
+    // validación asegura que se haya seleccionado un cliente
     if($("#idCliente").val() === "" || $("#buscarCliente").val().trim() === ""){
         $("#sCliente").text("Debe seleccionar un cliente del listado");
         mostrarMensaje("Por favor, asigne esta rutina a un cliente.");
@@ -225,14 +251,14 @@ function pone(pos){
     var idRutina = linea.find("td:eq(0)").text();
     var nombreRutina = linea.find("td:eq(1)").text();
     
-    // Ocultos los datos del cliente que enviaremos desde el backend en la tabla (lo ajustaremos en PHP)
-    var idCliente = linea.find("td:eq(4)").text(); // ID Cliente Oculto
-    var textoCliente = linea.find("td:eq(3)").text(); // Texto Cliente Visible
+    // ocultos los datos del cliente que envia desde el backend en la tabla
+    var idCliente = linea.find("td:eq(4)").text(); // id cliente Oculto
+    var textoCliente = linea.find("td:eq(3)").text(); // texto cliente Visible
     
     $("#idRutina").val(idRutina);
     $("#nombreRutina").val(nombreRutina);   
     
-    // Llenamos los inputs del cliente al modificar
+    // llena los inputs del cliente al modificar
     $("#idCliente").val(idCliente);
     $("#buscarCliente").val(textoCliente);
 
@@ -274,7 +300,7 @@ function enviaAjax(datos){
         success: function (respuesta){
             try{
                 var lee = JSON.parse(respuesta);
-                if(lee.resultado == 'consultar'){ $("#cuerpoTablaRutinas").html(lee.mensaje); } 
+                if(lee.resultado == 'consultar'){ $("#cuerpoTablaRutinas").html(lee.mensaje); paginarTabla(1); } 
                 else if(lee.resultado == 'incluir' || lee.resultado == 'modificar' || lee.resultado == 'eliminar'){
                     mostrarMensaje(lee.mensaje);
                     $("#modalUsuario").modal("hide");
@@ -295,11 +321,47 @@ function limpia(){
     $("#nombreRutina").val("");
     $("#snombreRutina").text("");
     
-    // Limpiamos los campos del cliente
+    // limpia los campos del cliente
     $("#idCliente").val("");
     $("#buscarCliente").val("");
     $("#sCliente").text("");
     $("#listaClientes").addClass("d-none").empty();
     
     $("#contenedorEjercicios").empty();
+}
+
+// Función de Paginación
+function paginarTabla(pagina) {
+    paginaActual = pagina;
+    var filas = $("#cuerpoTablaRutinas tr");
+    var totalFilas = filas.length;
+    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
+    
+    var inicio = (paginaActual - 1) * filasPorPagina;
+    var fin = inicio + filasPorPagina;
+
+    filas.hide().slice(inicio, fin).show();
+    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " rutinas");
+
+    var htmlBotones = "";
+
+    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
+
+    var l = null;
+    for (var i = 1; i <= totalPaginas; i++) {
+        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
+            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
+            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
+            l = i;
+        } else if (l != null && i != l + 1 && l != '...') {
+            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
+            l = '...';
+        }
+    }
+
+    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
+
+    $("#contenedorPaginacion").html(htmlBotones);
 }

@@ -72,4 +72,5 @@
 </div>
 
 <?php require_once("comunes/pie.php"); ?>
+<?php require_once("comunes/modal.php") ?>
 <script src="js/pago.js"></script>

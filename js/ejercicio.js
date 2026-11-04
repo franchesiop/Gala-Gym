@@ -1,3 +1,6 @@
+var paginaActual = 1;
+var filasPorPagina = 10;
+
 function consultar(){
     var datos = new FormData();
     datos.append('accion', 'consultar');
@@ -7,114 +10,136 @@ function consultar(){
 $(document).ready(function(){
 
     consultar();
+
     $("#formEjercicios").on("submit", function(e){
         e.preventDefault();
+    });
+
+    // validacion de imagen (Preview, formato y peso)
+    $("#imagen_ejercicio").on("change", function(){
+        var archivo = this.files[0];
+        if(archivo){
+            if(archivo.size > 2097152){ // 2MB
+                mostrarMensaje("Imagen Invalida <br/> (La imagen es muy pesada. Máximo 2MB)");
+                $(this).val(""); 
+                $("#vista_previa").attr("src", "img/default.jpg");
+                return;
+            }
+            
+            var tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if(!tiposPermitidos.includes(archivo.type)){
+                mostrarMensaje("Formato Invalido <br/> (Solo JPG, PNG o WEBP)");
+                $(this).val("");
+                $("#vista_previa").attr("src", "img/default.jpg");
+                return;
+            }
+            
+            var reader = new FileReader();
+            reader.onload = function(e){
+                $("#vista_previa").attr("src", e.target.result);
+            }
+            reader.readAsDataURL(archivo);
+        } else {
+            $("#vista_previa").attr("src", "img/default.jpg");
+        }
+    });
+
+    // Buscador en tiempo real
+    $("#buscar_ejercicio").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        var filasFiltradas = 0;
+        
+        $("#tablaEjercicios tr").filter(function() {
+            var coincide = $(this).find("td:eq(2)").text().toLowerCase().indexOf(valor) > -1;
+            $(this).toggle(coincide);
+            if(coincide) filasFiltradas++;
         });
 
-    
-    
-    // Validacion de datos
+        if(valor === ""){
+            paginarTabla(1);
+        } else {
+            $("#infoPaginacion").text("Mostrando resultados de búsqueda (" + filasFiltradas + ")");
+            $("#contenedorPaginacion").empty(); 
+        }
+    });
+
     // Validacion nombre
     $("#nombre_ejercicio").on("keypress",function(e){
-        validarkeypress(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
+        validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
     });
-    
     $("#nombre_ejercicio").on("keyup",function(){
-        validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this),$("#snombre_ejercicio"),"Nombre inválido - entre 3 y 100 caracteres");
+        validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this), $("#snombre_ejercicio"), "Nombre invalido - entre 3 y 100 caracteres");
     });
 
-    // Botón Guardar / Modificar
+    // Botones
     $("#btnGuardar").on("click", function() {
-        // Guardar (Incluir)
-        if($(this).text().toLowerCase() == 'incluir'){
+        // guardar
+        if($(this).text().toUpperCase() == 'INCLUIR' || $(this).text() == 'incluir'){
             if(validarEnvio()){
-                var datos = new FormData();
+                // Usamos el formulario completo para que capture la imagen automáticamente
+                var datos = new FormData($("#formEjercicios")[0]);
                 datos.append('accion', 'incluir');
-                datos.append('nombre_ejercicio', $("#nombre_ejercicio").val());
                 enviaAjax(datos);
             }
         }
-        // Modificar
-        else if($(this).text().toLowerCase() == 'modificar'){
+        // modificar
+        else if($(this).text().toUpperCase() == 'MODIFICAR' || $(this).text() == 'modificar'){
             if(validarEnvio()){
-                var datos = new FormData();
+                var datos = new FormData($("#formEjercicios")[0]);
                 datos.append('accion', 'modificar');
-                datos.append('id_ejercicio', $("#id_ejercicio").val());
-                datos.append('nombre_ejercicio', $("#nombre_ejercicio").val());
                 enviaAjax(datos);
             }
         }
-    }); // 
+    });
 
-    // Botón Nuevo Ejercicio
     $("#btnNuevoEjercicio").on("click", function(){
         limpia();
-        $("#btnGuardar").text("incluir"); 
-        $("#btnEliminar").hide(); 
+        $("#btnGuardar").text("INCLUIR"); 
         $("#modalUsuario").modal("show");
     });
 
-    // Botón Eliminar del Modal
-   // Reemplaza el Botón Eliminar del Modal de edición por este:
-    $("#btnEliminar").on("click", function(){
-        var id_ejercicio = $("#id_ejercicio").val(); 
-        
-        // Pasa el ID al modal de confirmación
-        $("#id_eliminar_global").val(id_ejercicio);
-        
-        // Oculta el modal de edición y abre el de confirmación
-        $("#modalUsuario").modal("hide");
-        $("#modal_eliminar").modal("show");
-    });
-
-    // Añade el evento del botón "SÍ, ELIMINAR" del nuevo modal
     $("#btnConfirmarEliminar").on("click", function(){
-        var id_ejercicio = $("#id_eliminar_global").val(); 
+        var id = $("#id_eliminar_global").val(); 
         
         var datos = new FormData();
         datos.append('accion', 'eliminar');
-        datos.append('id_ejercicio', id_ejercicio);
+        datos.append('id_ejercicio', id);
         
         enviaAjax(datos);
     });
 
-    // Botón Incluir alternativo 
-    $("#incluir").on("click", function(){
-        limpia();
-        $("#btnGuardar").text("incluir");
-        $("#modalUsuario").modal("show");
-    });
-}); // Fin del $(document).ready
+});
 
 // Validar antes de enviar
 function validarEnvio() {
-    if(validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $("#nombre_ejercicio"),$("#snombre_ejercicio"),"Nombre Invalido - (Solo letras entre 3 y 100 caracteres)")==0){
-        mostrarMensaje("Nombre de Ejercicio Invalido <br>" + "(Solo letras entre 3 y 100 caracteres)");
+    // validar nombre
+    if(validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $("#nombre_ejercicio"), $("#snombre_ejercicio"), "Nombre Invalido - (Entre 3 y 100 caracteres)") == 0){
+        mostrarMensaje("Nombre Invalido <br>" + "(Entre 3 y 100 caracteres)");
         return false;
     }
     return true;
 }
 
-// Función para mostrar el mensaje modal
+// Funcion para mostrar el mensaje modal
 function mostrarMensaje(mensaje){
     $("#contenidoModal").html(mensaje);
     $("#mostrarModal").modal("show");
     setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
 }
 
-// Función para validar por keypress
+// Funcion para validar por keypress
 function validarkeypress(er,e){
-    var key = e.keyCode || e.which;
-    var tecla = String.fromCharCode(key);
-    var a = er.test(tecla);
+    key = e.keyCode;
+    tecla = String.fromCharCode(key);
+    a = er.test(tecla);
     if(!a){
         e.preventDefault();
     }
 }
 
-// Función para validar por keyup
+// Funcion para validar por keyup
 function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
-    var a = er.test(etiqueta.val());
+    a = er.test(etiqueta.val());
     if(a){
         etiquetamensaje.text("");
         return 1;
@@ -124,32 +149,41 @@ function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
     }
 }
 
-// Función para llenar el formulario al editar
+// Funcion para llenar el formulario
 function pone(pos){
-    var linea = $(pos).closest('tr');
+    linea = $(pos).closest('tr');
     
-    $("#id_ejercicio").val(linea.find("td:eq(0)").text());
-    $("#nombre_ejercicio").val(linea.find("td:eq(1)").text()); 
+    var id = linea.find("td:eq(0)").text();
+    var srcImagen = linea.find("td:eq(1) img").attr("src"); 
+    var nombre = linea.find("td:eq(2)").text();
+    var descripcion = linea.find("td:eq(4)").text(); // El td 4 es el texto oculto limpio (sin HTML)
 
-    $("#btnGuardar").text('modificar');
-    $("#btnEliminar").show();
+    $("#id_ejercicio").val(id);
+    $("#nombre_ejercicio").val(nombre);
+    $("#descripcion_ejercicio").val(descripcion !== "Sin descripción" ? descripcion : "");
+    
+    if(srcImagen) { 
+        $("#vista_previa").attr("src", srcImagen); 
+    } else { 
+        $("#vista_previa").attr("src", "img/default.jpg"); 
+    }
+
+    $("#btnGuardar").text('MODIFICAR');
     $("#modalUsuario").modal("show");
 }
 
-// Función eliminar directa desde la tabla
-// Función eliminar directa desde la tabla
 function eliminar(pos){
     var linea = $(pos).closest('tr');
-    var id_ejercicio = $(linea).find("td:eq(0)").text();
+    var id = $(linea).find("td:eq(0)").text();
 
-    // Guardamos el ID en el input oculto del nuevo modal
-    $("#id_eliminar_global").val(id_ejercicio);
+    // Guardamos el ID en el input oculto del modal generico
+    $("#id_eliminar_global").val(id);
     
     // Mostramos el modal de Bootstrap
     $("#modal_eliminar").modal("show");
 }
 
-// Función AJAX
+// Funcion Ajax estandarizada a la estructura de clientes
 function enviaAjax(datos){
     $.ajax({
         async: true,
@@ -159,24 +193,24 @@ function enviaAjax(datos){
         data: datos,
         processData: false,
         cache: false,
+        beforeSend: function () {},
+        timeout: 10000,
         success: function (respuesta){
-            console.log("Respuesta del servidor:", respuesta); //
-            try {
+            console.log(respuesta);
+            try{
                 var lee = JSON.parse(respuesta);
-                
-                // Si la acción fue consultar, dibuja las filas en la tabla
                 if(lee.resultado == 'consultar'){
                     $("#tablaEjercicios").html(lee.mensaje);
+                    paginarTabla(1);
                 } 
-                // Si se incluyó con éxito, limpia, cierra el modal y recarga la tabla
                 else if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Ejercicio Registrado'){
                         $("#modalUsuario").modal("hide");
-                        consultar(); // <-- Vuelve a llamar a la base de datos para actualizar la vista
+                        consultar();
                     }
                 }
-               else if(lee.resultado == 'modificar'){
+                else if(lee.resultado == 'modificar'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Ejercicio Modificado'){
                         $("#modalUsuario").modal("hide");
@@ -186,23 +220,70 @@ function enviaAjax(datos){
                 else if(lee.resultado == 'eliminar'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Ejercicio Eliminado'){
-                        $("#modalUsuario").modal("hide");
                         $("#modal_eliminar").modal("hide");
                         consultar();
                     }
                 } 
-            } catch(e) {
-                alert("Error procesando los datos del servidor (JSON): " + e.message);
+                else if(lee.resultado == "error"){
+                    mostrarMensaje("ERROR: <br/>" + lee.mensaje);
+                }
+            } catch(e){
+                alert("Error en JSON " + e.name);
             }
         },
         error: function(request, status, err){
-            mostrarMensaje("ERROR DE RED o SERVIDOR: <br/>" + err);
-        }
+            if(status == "timeout"){
+                mostrarMensaje("Servidor Ocupado, Intente de Nuevo");
+            } else {
+                mostrarMensaje("ERROR: <br/>" + request + status + err);
+            }
+        },
+        complete: function () {},
     });
 }
-// Limpiar formulario
+
+// logica de paginacion matematica exacta (< 1 2 3 ... >)
+function paginarTabla(pagina) {
+    paginaActual = pagina;
+    var filas = $("#tablaEjercicios tr");
+    var totalFilas = filas.length;
+    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
+    
+    var inicio = (paginaActual - 1) * filasPorPagina;
+    var fin = inicio + filasPorPagina;
+
+    filas.hide().slice(inicio, fin).show();
+    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " ejercicios");
+
+    var htmlBotones = "";
+
+    // Boton <
+    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
+
+    // Numeros y puntos suspensivos (...)
+    var l = null;
+    for (var i = 1; i <= totalPaginas; i++) {
+        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
+            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
+            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
+            l = i;
+        } else if (l != null && i != l + 1 && l != '...') {
+            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
+            l = '...';
+        }
+    }
+
+    // Boton >
+    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
+    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
+
+    $("#contenedorPaginacion").html(htmlBotones);
+}
+
 function limpia(){
     $("#id_ejercicio").val("");
-    $("#nombre_ejercicio").val("");
+    $("#formEjercicios")[0].reset();
     $("#snombre_ejercicio").text("");
+    $("#vista_previa").attr("src", "img/default.jpg");
 }

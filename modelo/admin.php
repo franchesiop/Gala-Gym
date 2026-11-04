@@ -1,235 +1,242 @@
 <?php
+require_once('dompdf/vendor/autoload.php'); 
+use Dompdf\Dompdf; 
 require_once('modelo/datos.php');
 
 class admin extends datos {
-    private $cedula, $nombre, $apellido, $telefono, $correo, $contrasena, $cargo, $id_membresia, $monto, $id_pago, $banco, $cedula_pago, $telefono_pago;
-
-    public function set_cedula($v){ $this->cedula = $v; }
-    public function set_nombres($v){ $this->nombre = $v; }
-    public function set_apellidos($v){ $this->apellido = $v; }
-    public function set_telefono($v){ $this->telefono = $v; }
-    public function set_correo($v){ $this->correo = $v; }
-    public function set_contrasena($v){ $this->contrasena = $v; }
-    public function set_cargo($v){ $this->cargo = $v; }
-    public function set_id_membresia($v){ $this->id_membresia = $v; }
-    public function set_monto($v){ $this->monto = $v; }
-    public function set_id_pago($v){ $this->id_pago = $v; }
-  
-    public function set_banco($v){ $this->banco = $v; }
-    public function set_cedula_pago($v){ $this->cedula_pago = $v; }
-    public function set_telefono_pago($v){ $this->telefono_pago = $v; }
-
-    public function consultar() {
-        $co = $this->conecta();
-        $resultado = $co->query("SELECT cedula, nombre, apellido, telefono FROM cliente");
-        $respuesta = '';
-        foreach($resultado as $r) {
-            $respuesta .= "<tr>
-                <td>{$r['cedula']}</td>
-                <td>{$r['nombre']}</td>
-                <td>{$r['apellido']}</td>
-                <td>{$r['telefono']}</td>
-                <td class='text-center'>
-                    <button class='btn btn-dark btn-sm text-white rounded-0 fw-bold px-3 btn-consultar-cliente' data-cedula='{$r['cedula']}'>CONSULTAR</button>
-                </td>
-            </tr>";
-        }
-        return $respuesta;
-    }
-
-    public function obtener_cliente() {
-        $co = $this->conecta();
-        $stmt = $co->prepare("SELECT * FROM cliente WHERE cedula = ?");
-        $stmt->execute([$this->cedula]);
-        return json_encode($stmt->fetch(PDO::FETCH_ASSOC));
-    }
-
-    public function incluir() {
-        $co = $this->conecta();
-        try {
-            $stmt = $co->prepare("INSERT INTO cliente (cedula, nombre, apellido, telefono, correo, contrasena, id_membresia) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$this->cedula, $this->nombre, $this->apellido, $this->telefono, $this->correo, $this->contrasena, $this->id_membresia]);
-            return "Socio registrado con éxito";
-        } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-    }
-
-    public function modificar() {
-        $co = $this->conecta();
-        try {
-            $stmt = $co->prepare("UPDATE cliente SET nombre=?, apellido=?, telefono=?, correo=?, contrasena=?, id_membresia=? WHERE cedula=?");
-            $stmt->execute([$this->nombre, $this->apellido, $this->telefono, $this->correo, $this->contrasena, $this->id_membresia, $this->cedula]);
-            return "Datos del socio actualizados";
-        } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-    }
-
-    public function eliminar() {
-        $co = $this->conecta();
-        try {
-            $stmt = $co->prepare("DELETE FROM cliente WHERE cedula = ?");
-            $stmt->execute([$this->cedula]);
-            return "Socio eliminado correctamente";
-        } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-    }
-
-    // empleados
-
-    public function consultar_emp() {
-        $co = $this->conecta();
-        $resultado = $co->query("SELECT cedula, nombre, apellido, cargo, telefono FROM empleado");
-        $respuesta = '';
-        foreach($resultado as $r) {
-            $respuesta .= "<tr>
-                <td>{$r['cedula']}</td>
-                <td>{$r['nombre']}</td>
-                <td>{$r['apellido']}</td>
-                <td>{$r['cargo']}</td>
-                <td>{$r['telefono']}</td>
-                <td class='text-center'>
-                    <button class='btn btn-dark btn-sm text-white rounded-0 fw-bold px-3 btn-consultar-empleado' data-cedula='{$r['cedula']}'>CONSULTAR</button>
-                </td>
-            </tr>";
-        }
-        return $respuesta;
-    }
-
-    public function obtener_empleado() {
-        $co = $this->conecta();
-        $stmt = $co->prepare("SELECT * FROM empleado WHERE cedula = ?");
-        $stmt->execute([$this->cedula]);
-        return json_encode($stmt->fetch(PDO::FETCH_ASSOC));
-    }
-
-    public function incluir_emp() {
-        $co = $this->conecta();
-        try {
-            $stmt = $co->prepare("INSERT INTO empleado (cedula, nombre, apellido, cargo, telefono, correo, contrasena) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$this->cedula, $this->nombre, $this->apellido, $this->cargo, $this->telefono, $this->correo, $this->contrasena]);
-            return "Empleado registrado con éxito";
-        } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-    }
-
-    public function modificar_emp() {
-        $co = $this->conecta();
-        try {
-            $stmt = $co->prepare("UPDATE empleado SET nombre=?, apellido=?, cargo=?, telefono=?, correo=?, contrasena=? WHERE cedula=?");
-            $stmt->execute([$this->nombre, $this->apellido, $this->cargo, $this->telefono, $this->correo, $this->contrasena, $this->cedula]);
-            return "Datos del empleado actualizados";
-        } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-    }
-
-    public function eliminar_emp() {
-        $co = $this->conecta();
-        try {
-            $stmt = $co->prepare("DELETE FROM empleado WHERE cedula = ?");
-            $stmt->execute([$this->cedula]);
-            return "Empleado eliminado correctamente";
-        } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-    }
-
-    public function consultar_membresias() {
-        $co = $this->conecta();
-        $resultado = $co->query("SELECT id_membresia, tipo, monto FROM membresia");
-        $respuesta = '';
-        foreach($resultado as $r) {
-            $respuesta .= "<tr>
-                
-                <td>{$r['id_membresia']}</td>
-                <td>{$r['tipo']}</td>
-                <td>{$r['monto']}$</td>
-                <td class='text-center'>
-                    <button class='btn btn-dark btn-sm text-white rounded-0 fw-bold px-3 btn-consultar-membresia' data-id='{$r['id_membresia']}'>CONSULTAR</button>
-                </td>
-            </tr>";
-        }
-        return $respuesta;
-    }
-
-
-    public function incluir_membresia() {
-        $co = $this->conecta();
-        try {
-            $stmt = $co->prepare("INSERT INTO membresia (tipo, monto) VALUES (?, ?)");
-            $stmt->execute([$this->nombre, $this->monto]); 
-            return "Membresía registrada con éxito";
-        } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-    }
-
-    public function modificar_membresia() {
-        $co = $this->conecta();
-        try {
-            $stmt = $co->prepare("UPDATE membresia SET tipo=?, monto=? WHERE id_membresia=?");
-            $stmt->execute([$this->nombre, $this->monto, $this->id_membresia]);
-            return "Membresía actualizada con éxito";
-        } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-    }
-
-    public function obtener_membresia() {
-    $co = $this->conecta();
-    $stmt = $co->prepare("SELECT * FROM membresia WHERE id_membresia = ?");
-    $stmt->execute([$this->id_membresia]);
-    return json_encode($stmt->fetch(PDO::FETCH_ASSOC));
-}
-
-    public function eliminar_membresia() {
-    $co = $this->conecta();
-    try {
-        $stmt = $co->prepare("DELETE FROM membresia WHERE id_membresia = ?");
-        $stmt->execute([$this->id_membresia]);
-        return "Membresía eliminada correctamente";
-    } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-}
-
-public function incluir_pago() {
-    $co = $this->conecta();
-    try {
-        $stmt = $co->prepare("INSERT INTO metodos_pago (banco, cedula, telefono) VALUES (?, ?, ?)");
-        $stmt->execute([post('banco'), post('cedula'), post('telefono')]);
-        return "Método de pago registrado con éxito";
-    } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-}
-
-public function modificar_pago() {
-    $co = $this->conecta();
-    try {
-        $stmt = $co->prepare("UPDATE metodos_pago SET banco=?, cedula=?, telefono=? WHERE id_metodo=?");
-        $stmt->execute([$this->banco, $this->cedula_pago, $this->telefono_pago, $this->id_pago]);
-        return "Método de pago actualizado";
-    } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-}
-
-public function obtener_pago() {
-    $co = $this->conecta();
-    $stmt = $co->prepare("SELECT * FROM metodos_pago WHERE id_metodo = ?");
-    $stmt->execute([$this->id_pago]); 
-    return json_encode($stmt->fetch(PDO::FETCH_ASSOC));
-}
-
-public function consultar_pagos() {
-    $co = $this->conecta();
-    $resultado = $co->query("SELECT * FROM metodos_pago");
-    $respuesta = '';
-    foreach($resultado as $r) {
-        $respuesta .= "<tr>
-            <td>{$r['id_metodo']}</td>
-            <td>{$r['banco']}</td>
-            <td>{$r['cedula']}</td>
-            <td>{$r['telefono']}</td>
-            <td class='text-center'>
-                <button class='btn btn-dark btn-sm rounded-0 fw-bold px-3 btn-consultar-pago' data-id='{$r['id_metodo']}'>CONSULTAR</button>
-            </td>
-        </tr>";
-    }
-    return $respuesta;
-}
-
-    public function eliminar_pago() {
-    $co = $this->conecta();
-    try {
-        $stmt = $co->prepare("DELETE FROM metodos_pago WHERE id_metodo = ?");
-        $stmt->execute([$this->id_pago]);
-        return "Método de pago eliminado correctamente";
-    } catch(Exception $e) { return "Error: " . $e->getMessage(); }
-}
     
+    private $filtro_membresia;
+    private $fecha_inicio;
+    private $fecha_fin;
+    private $filtro_rol;
+    
+    function set_filtro_membresia($v) { $this->filtro_membresia = $v; }
+    function set_fecha_inicio($v) { $this->fecha_inicio = $v; }
+    function set_fecha_fin($v) { $this->fecha_fin = $v; }
+    function set_filtro_rol($v) { $this->filtro_rol = $v; }
+
+    function contarClientes(){
+        try {
+            $co = $this->conecta();
+            $sql = $co->query("SELECT COUNT(*) as total FROM cliente WHERE estado = 1");
+            $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+            return $resultado['total'];
+        } catch(Exception $e) {
+            return 0;
+        }
+    }
+
+    function contarEmpleados(){
+        try {
+            $co = $this->conecta();
+            $sql = $co->query("SELECT COUNT(*) as total FROM empleado WHERE estado = 1");
+            $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+            return $resultado['total'];
+        } catch(Exception $e) {
+            return 0;
+        }
+    }
+
+    private function getEstilosPDF() {
+        return '<style>
+                    body { font-family: "Helvetica", "Arial", sans-serif; font-size: 12px; color: #333; margin: 0; padding: 0; }
+                    .header { text-align: left; border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 20px; }
+                    .header h2 { margin: 0; font-size: 18px; text-transform: uppercase; color: #111; }
+                    .header p { margin: 5px 0 0 0; color: #555; font-size: 12px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                    th { background-color: #f4f4f4; color: #333; font-weight: bold; border: 1px solid #ccc; text-align: left; padding: 8px; font-size: 12px; }
+                    td { border: 1px solid #ccc; padding: 8px; color: #444; font-size: 12px; }
+                    .total-row td { font-weight: bold; background-color: #f9f9f9; text-align: right; }
+                    .footer { text-align: left; font-size: 10px; color: #999; position: fixed; bottom: -20px; width: 100%; border-top: 1px solid #eee; padding-top: 5px; }
+                </style>';
+    }
+
+    function generarPDF_Clientes(){
+        $co = $this->conecta();
+        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        try{
+            $sql = "SELECT c.cedula, c.nombre, c.apellido, c.telefono, m.tipo 
+                    FROM cliente c 
+                    LEFT JOIN membresia m ON c.id_membresia = m.id_membresia 
+                    WHERE c.estado = 1";
+            
+            if(!empty($this->filtro_membresia)){
+                $sql .= " AND c.id_membresia = :id_mem";
+                $resultado = $co->prepare($sql);
+                $resultado->bindParam(':id_mem', $this->filtro_membresia);
+            } else {
+                $resultado = $co->prepare($sql);
+            }
+            
+            $resultado->execute();
+            $fila = $resultado->fetchAll(PDO::FETCH_BOTH);
+            $fecha = date("d/m/Y H:i");
+
+            $html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'.$this->getEstilosPDF().'</head><body>';
+            $html .= '<div class="header">
+                        <h2>Reporte de Clientes Activos</h2>
+                        <p>Gala Gym - Generado el: '.$fecha.'</p>
+                      </div>';
+            $html .= "<table><thead><tr>
+                        <th>Cédula</th>
+                        <th>Nombre y Apellido</th>
+                        <th>Teléfono</th>
+                        <th>Membresía</th>
+                      </tr></thead><tbody>";
+                      
+            if($fila){
+                foreach($fila as $f){
+                    $html .= "<tr>";
+                    $html .= "<td>".$f['cedula']."</td>";
+                    $html .= "<td>".$f['nombre']." ".$f['apellido']."</td>";
+                    $html .= "<td>".$f['telefono']."</td>";
+                    $html .= "<td>".($f['tipo'] ? $f['tipo'] : 'Sin Membresía')."</td>";
+                    $html .= "</tr>";
+                }
+            } else {
+                $html .= "<tr><td colspan='4'>No hay clientes registrados o activos.</td></tr>";
+            }
+            
+            $html .= "</tbody></table><div class='footer'>Documento generado por el Sistema Gala Gym</div></body></html>";
+            
+        } catch(Exception $e){
+            $html = "Error: " . $e->getMessage();
+        }
+ 
+        $pdf = new DOMPDF();
+        $pdf->set_paper("A4", "portrait");
+        $pdf->load_html($html); 
+        $pdf->render();
+        $pdf->stream('Clientes_GalaGym.pdf', array("Attachment" => false));
+    }
+
+
+    function generarPDF_Empleados(){
+        $co = $this->conecta();
+        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        try{
+            $sql = "SELECT e.cedula, e.nombre, e.apellido, e.telefono, r.nombre as rol 
+                    FROM empleado e 
+                    LEFT JOIN rol r ON e.id_rol = r.id_rol 
+                    WHERE e.estado = 1";
+            
+            if(!empty($this->filtro_rol)){
+                $sql .= " AND e.id_rol = :id_rol";
+                $resultado = $co->prepare($sql);
+                $resultado->bindParam(':id_rol', $this->filtro_rol);
+            } else {
+                $resultado = $co->prepare($sql);
+            }
+            
+            $resultado->execute();
+            $fila = $resultado->fetchAll(PDO::FETCH_BOTH);
+            $fecha = date("d/m/Y H:i");
+            
+            $html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'.$this->getEstilosPDF().'</head><body>';
+            $html .= '<div class="header">
+                        <h2>Reporte de Personal (Staff)</h2>
+                        <p>Gala Gym - Generado el: '.$fecha.'</p>
+                      </div>';
+            $html .= "<table><thead><tr>
+                        <th>Cédula</th>
+                        <th>Nombre y Apellido</th>
+                        <th>Teléfono</th>
+                        <th>Rol / Cargo</th>
+                      </tr></thead><tbody>";
+                      
+            if($fila){
+                foreach($fila as $f){
+                    $html .= "<tr>";
+                    $html .= "<td>".$f['cedula']."</td>";
+                    $html .= "<td>".$f['nombre']." ".$f['apellido']."</td>";
+                    $html .= "<td>".$f['telefono']."</td>";
+                    $html .= "<td>".($f['rol'] ? $f['rol'] : 'Sin Rol')."</td>";
+                    $html .= "</tr>";
+                }
+            } else {
+                $html .= "<tr><td colspan='4'>No hay personal registrado o activo en este filtro.</td></tr>";
+            }
+            
+            $html .= "</tbody></table><div class='footer'>Documento generado por el Sistema Gala Gym</div></body></html>";
+            
+        } catch(Exception $e){
+            $html = "Error: " . $e->getMessage();
+        }
+ 
+        $pdf = new DOMPDF();
+        $pdf->set_paper("A4", "portrait");
+        $pdf->load_html($html); 
+        $pdf->render();
+        $pdf->stream('Staff_GalaGym.pdf', array("Attachment" => false));
+    }
+
+
+    function generarPDF_Pagos(){
+        $co = $this->conecta();
+        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        try{
+            $sql = "SELECT p.fecha, p.monto, p.referencia, c.nombre, c.apellido, m.banco 
+                    FROM pago p 
+                    INNER JOIN cliente c ON p.id_cliente = c.id_cliente 
+                    INNER JOIN metodos_pago m ON p.id_metodo = m.id_metodo 
+                    WHERE p.fecha BETWEEN :f_inicio AND :f_fin 
+                    ORDER BY p.fecha DESC";
+                    
+            $resultado = $co->prepare($sql);
+            $resultado->bindParam(':f_inicio', $this->fecha_inicio);
+            $resultado->bindParam(':f_fin', $this->fecha_fin);
+            $resultado->execute();
+            
+            $fila = $resultado->fetchAll(PDO::FETCH_BOTH);
+            $total_ingresos = 0;
+            $fecha_gen = date("d/m/Y H:i");
+
+            $html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'.$this->getEstilosPDF().'</head><body>';
+            $html .= '<div class="header">
+                        <h2>Reporte de Pagos e Ingresos</h2>
+                        <p>Gala Gym - Rango: '.$this->fecha_inicio.' al '.$this->fecha_fin.' | Generado el: '.$fecha_gen.'</p>
+                      </div>';
+            $html .= "<table><thead><tr>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Banco</th>
+                        <th>Referencia</th>
+                        <th>Monto ($)</th>
+                      </tr></thead><tbody>";
+                      
+            if($fila){
+                foreach($fila as $f){
+                    $html .= "<tr>";
+                    $html .= "<td>".$f['fecha']."</td>";
+                    $html .= "<td>".$f['nombre']." ".$f['apellido']."</td>";
+                    $html .= "<td>".$f['banco']."</td>";
+                    $html .= "<td>".$f['referencia']."</td>";
+                    $html .= "<td>$".number_format($f['monto'], 2)."</td>";
+                    $html .= "</tr>";
+                    $total_ingresos += $f['monto'];
+                }
+                $html .= "<tr class='total-row'>
+                            <td colspan='4'>TOTAL INGRESADO:</td>
+                            <td>$".number_format($total_ingresos, 2)."</td>
+                          </tr>";
+            } else {
+                $html .= "<tr><td colspan='5'>No hay pagos en este rango de fechas.</td></tr>";
+            }
+            
+            $html .= "</tbody></table><div class='footer'>Documento generado por el Sistema Gala Gym</div></body></html>";
+            
+        } catch(Exception $e){
+            $html = "Error: " . $e->getMessage();
+        }
+ 
+        $pdf = new DOMPDF();
+        $pdf->set_paper("A4", "portrait");
+        $pdf->load_html($html); /
+        $pdf->render();
+        $pdf->stream('Pagos_GalaGym.pdf', array("Attachment" => false));
+    }
 }
 ?>

@@ -1,34 +1,48 @@
 <?php
+if(session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
+if (!is_file("modelo/".$pagina.".php")){
+    echo "Falta definir la clase ".$pagina;
+    exit;
+}
 require_once("modelo/".$pagina.".php");
-$obj = new Pago();
 
-// 2. Si es una petición AJAX (POST)
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if(is_file("vista/".$pagina.".php")){
+    $o = new pago();
     
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
+    if(!empty($_POST)){
+        $accion = $_POST['accion'];
 
-    if ($accion == 'consultar_membresias') {
-        $resultado = $obj->obtenerMembresias();
-        echo json_encode($resultado);
-    } 
-    elseif ($accion == 'consultar_metodos') {
-        $resultado = $obj->obtenerMetodosPago();
-        echo json_encode($resultado);
+        switch($accion){
+            case 'listar_membresias':
+                echo json_encode($o->listar_membresias());
+                break;
+
+            case 'listar_metodos':
+                echo json_encode($o->listar_metodos());
+                break;
+
+            case 'incluir':
+                
+                $id_cliente = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : 0;
+                
+                $o->set_idCliente($id_cliente);
+                $o->set_idMembresia($_POST['id_membresia']);
+                $o->set_cantidadPeriodos($_POST['cantidad']);
+                $o->set_idMetodo($_POST['id_metodo']);
+                $o->set_monto($_POST['monto']);
+                $o->set_referencia($_POST['referencia']);
+                
+                echo json_encode($o->incluir());
+                break;
+        }
+        exit(); 
     }
-    elseif ($accion == 'registrar_pago') {
-        session_start();
-        $id_cliente = $_SESSION['id_cliente'] ?? 3;
-        $obj->set_id_cliente($id_cliente);
-        $obj->set_id_membresia($_POST['id_membresia']);
-        $obj->set_monto($_POST['monto']);
-        $obj->set_referencia($_POST['referencia']);
-        $obj->set_id_metodo($_POST['id_metodo']);
-        $respuesta = $obj->registrarPago();
-        echo json_encode($respuesta);
-    }
-} 
-else {
-    require_once("vista/".$pagina.".php");
+    
+    require_once("vista/".$pagina.".php"); 
+} else {
+    echo "Página en construcción";
 }
 ?>

@@ -1,51 +1,46 @@
 <?php
-
-require_once("modelo/admin.php");
-$admin = new admin();
-
-function post($key) {
-    return isset($_POST[$key]) ? $_POST[$key] : "";
+// verifica que exista el modelo
+if (!is_file("modelo/".$pagina.".php")){
+    echo "Falta definir la clase ".$pagina;
+    exit;
 }
+require_once("modelo/".$pagina.".php");
 
-// peticiones ajax
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['accion'])) {
-    $accion = $_POST['accion'];
-
-    // asignacion de datos al modelo
+if(is_file("vista/".$pagina.".php")){
+    $o = new admin();
     
-    if ($accion == 'incluir_membresia' || $accion == 'modificar_membresia') {
-        $admin->set_nombres(post('tipo')); 
-    } else {
-        $admin->set_nombres(post('nombres') ?: post('nombre_emp'));
-    }
+    // di se envía el formulario
+    if(!empty($_POST) && isset($_POST['accion'])){
+        $accion = $_POST['accion'];
 
-    // datos comunes que pueden venir de distintos formularios
-    $admin->set_cedula(post('cedula') ?: post('cedula_emp'));
-    $admin->set_apellidos(post('apellidos') ?: post('apellido_emp'));
-    $admin->set_telefono(post('telefono') ?: post('telefono_emp'));
-    $admin->set_correo(post('correo') ?: post('correo_emp'));
-    $admin->set_contrasena(post('contrasena') ?: post('contrasena_emp'));
-    
-    $admin->set_id_membresia(post('id_membresia') ?: post('id_membresia_cliente'));
-    $admin->set_cargo(post('cargo_emp'));
-    $admin->set_monto(post('monto')); 
+        switch($accion){
+            case 'pdf_clientes':
+                $membresia = isset($_POST['filtro_membresia']) ? $_POST['filtro_membresia'] : '';
+                $o->set_filtro_membresia($membresia);
+                $o->generarPDF_Clientes();
+                exit; 
 
-    $admin->set_banco(post('banco'));
-    $admin->set_cedula_pago(post('cedula'));
-    $admin->set_telefono_pago(post('telefono'));
+            case 'pdf_pagos':
+                $o->set_fecha_inicio($_POST['fecha_inicio']);
+                $o->set_fecha_fin($_POST['fecha_fin']);
+                $o->generarPDF_Pagos();
+                exit; 
 
-    if (isset($_POST['id_pago'])) {
-    $admin->set_id_pago(post('id_pago'));
-}
-
-    if (method_exists($admin, $accion)) {
-        echo $admin->$accion();
-    } else {
-        echo "Error: Acción '$accion' no definida en el modelo.";
+            case 'pdf_empleados':
+                $rol = isset($_POST['filtro_rol']) ? $_POST['filtro_rol'] : '';
+                $o->set_filtro_rol($rol);
+                $o->generarPDF_Empleados();
+                exit; 
+        }
     }
     
-    exit; 
-}
+    // si no es un post, calcula los contadores para el dashboard
+    $total_clientes = $o->contarClientes();
+    $total_empleados = $o->contarEmpleados();
 
-require_once("vista/admin.php"); 
+    // carga de la vista inyectando las variables de arriba
+    require_once("vista/".$pagina.".php"); 
+} else {
+    echo "pagina en construccion";
+}
 ?>

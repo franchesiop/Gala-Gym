@@ -20,7 +20,7 @@ class membresias extends datos {
         $r = array();
         
         try {
-            // Se usa $this->nombre_ejercicio de manera consistente
+            // se usa $this->nombre_ejercicio de manera consistente
             $busqueda = $co->prepare("SELECT * FROM membresia WHERE tipo = :tipo");
             $busqueda->bindParam(':tipo', $this->tipo);
             $busqueda->execute();

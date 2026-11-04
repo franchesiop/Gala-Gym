@@ -8,13 +8,13 @@ class rutinas extends datos {
     function set_id_rutina($v) { $this->id_rutina = $v; }
     function set_nombre($v) { $this->nombre = $v; }
     function set_id_empleado($v) { $this->id_empleado = $v; }
-    function set_id_cliente($v) { $this->id_cliente = $v; } // Nuevo setter
+    function set_id_cliente($v) { $this->id_cliente = $v; } 
     
     // getters
     function get_id_rutina(){ return $this->id_rutina; }
     function get_nombre(){ return $this->nombre; }
     function get_id_empleado(){ return $this->id_empleado; }
-    function get_id_cliente(){ return $this->id_cliente; } // Nuevo getter
+    function get_id_cliente(){ return $this->id_cliente; } 
 
     function incluir($ejercicios, $series, $repeticiones){
         $co = $this->conecta();
@@ -24,7 +24,7 @@ class rutinas extends datos {
         try {
             $co->beginTransaction();
 
-            // 1. Insertar la cabecera (Rutina) - Ahora incluye id_cliente
+            //  insertar la cabecera
             $inc = $co->prepare("INSERT INTO rutina (nombre, id_empleado, id_cliente) VALUES (:nombre, :id_empleado, :id_cliente)");
             $inc->bindParam(':nombre', $this->nombre);
             $inc->bindParam(':id_empleado', $this->id_empleado);
@@ -33,7 +33,7 @@ class rutinas extends datos {
 
             $id_rutina_nueva = $co->lastInsertId();
 
-            // 2. Insertar los detalles (Ejercicios)
+            // insertar los detalles
             $inc_detalle = $co->prepare("INSERT INTO detalleRutina (id_rutina, id_ejercicio, series, repeticiones) VALUES (:id_rutina, :id_ejercicio, :series, :repeticiones)");
             
             for ($i = 0; $i < count($ejercicios); $i++) {
@@ -66,19 +66,19 @@ class rutinas extends datos {
             try{
                 $co->beginTransaction();
 
-                // 1. Actualizamos el nombre de la rutina y el cliente asignado
+                // actualiza el nombre de la rutina y cliente asignado
                 $mod = $co->prepare("UPDATE rutina SET nombre = :nombre, id_cliente = :id_cliente WHERE id_rutina = :id_rutina");
                 $mod->bindParam(':id_rutina', $this->id_rutina);
                 $mod->bindParam(':nombre', $this->nombre);
                 $mod->bindParam(':id_cliente', $this->id_cliente);
                 $mod->execute();
                 
-                // 2. Eliminamos los ejercicios viejos
+                // elimina los ejercicios viejos
                 $eli_detalles = $co->prepare("DELETE FROM detalleRutina WHERE id_rutina = :id_rutina");
                 $eli_detalles->bindParam(':id_rutina', $this->id_rutina);
                 $eli_detalles->execute();
 
-                // 3. Insertamos la nueva lista de ejercicios
+                // inserta la nueva lista de ejercicios
                 $inc_detalle = $co->prepare("INSERT INTO detalleRutina (id_rutina, id_ejercicio, series, repeticiones) VALUES (:id_rutina, :id_ejercicio, :series, :repeticiones)");
                 
                 for ($i = 0; $i < count($ejercicios); $i++) {
@@ -133,7 +133,7 @@ class rutinas extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
         try{
-            // JOIN actualizado para traer también los datos del cliente
+            
             $sql = "SELECT r.id_rutina, r.nombre AS rutina, r.id_cliente, 
                            e.nombre AS empleado_nombre, e.apellido AS empleado_apellido,
                            c.cedula, c.nombre AS cliente_nombre, c.apellido AS cliente_apellido
@@ -147,7 +147,7 @@ class rutinas extends datos {
                 foreach($resultado as $fila){
                     $creador = $fila['empleado_nombre'] ? $fila['empleado_nombre'] . " " . $fila['empleado_apellido'] : "Desconocido";
                     
-                    // Formateamos el nombre del cliente
+                    // formatea el nombre del cliente
                     $cliente = $fila['cliente_nombre'] ? $fila['cedula'] . " - " . $fila['cliente_nombre'] . " " . $fila['cliente_apellido'] : "Sin asignar";
                     $idClienteAsignado = $fila['id_cliente'] ? $fila['id_cliente'] : "";
 
@@ -155,8 +155,8 @@ class rutinas extends datos {
                     $respuesta .= "<td style='display:none'>" . $fila['id_rutina'] . "</td>";
                     $respuesta .= "<td>" . $fila['rutina'] . "</td>";
                     $respuesta .= "<td>" . $creador . "</td>";
-                    $respuesta .= "<td>" . $cliente . "</td>"; // Columna visible del cliente
-                    $respuesta .= "<td style='display:none'>" . $idClienteAsignado . "</td>"; // Columna oculta con el ID para el JS
+                    $respuesta .= "<td>" . $cliente . "</td>"; 
+                    $respuesta .= "<td style='display:none'>" . $idClienteAsignado . "</td>"; 
                     
                     $respuesta .= "<td>";
                     $respuesta .= "<div class='d-flex justify-content-center'>";
@@ -189,13 +189,13 @@ class rutinas extends datos {
         return $r;
     }
 
-    // Nueve método para buscar clientes desde el AJAX
+    
     function buscar_cliente_ajax($busqueda){
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            // Busca coincidencias tanto por cédula como por nombre o apellido
+            // busca coincidencias por cedula y nombre o apellido
             $sql = "SELECT id_cliente, cedula, nombre, apellido 
                     FROM cliente 
                     WHERE cedula LIKE :busqueda OR nombre LIKE :busqueda OR apellido LIKE :busqueda 
