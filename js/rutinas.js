@@ -1,5 +1,6 @@
 var paginaActual = 1;
 var filasPorPagina = 10;
+var filaEjercicioGlobal = null; 
 
 function consultar(){
     var datos = new FormData();
@@ -15,62 +16,114 @@ $(document).ready(function(){
     $("#nombreRutina").on("keypress",function(e){ validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e); });
     $("#nombreRutina").on("keyup",function(){ validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this),$("#snombreRutina"),"Nombre inválido"); });
 
-    // busca de clientes con ajax
-    $("#buscarCliente").on("keyup", function(){
-        var busqueda = $(this).val();
-        
-        if (busqueda.length > 0) {
-            $.ajax({
-                url: 'index.php?pagina=rutinas',
-                type: 'POST',
-                data: { accion: 'buscar_cliente', busqueda: busqueda },
-                success: function(respuesta){
-                    try {
-                        var data = JSON.parse(respuesta);
-                        var html = "";
-                        if (data.length > 0) {
-                            $.each(data, function(index, cliente) {
-                                 html += `<button type="button" class="list-group-item list-group-item-action opcion-cliente" data-id="${cliente.id_cliente}" data-nombre="${cliente.cedula} ${cliente.nombre} ${cliente.apellido}">
-                                             <i class="bi bi-person"></i> ${cliente.cedula} ${cliente.nombre} ${cliente.apellido}
-                                         </button>`;
-                            });
-                        } else {
-                            html = `<button type="button" class="list-group-item list-group-item-action disabled">No se encontraron resultados</button>`;
-                        }
-                        $("#listaClientes").html(html).removeClass("d-none");
-                    } catch(e) {
-                        console.error("Error al analizar la respuesta JSON de clientes:", e);
+    $("#contenedorEjercicios").on("keypress", ".input-series", function(e){
+        validarkeypress(/^[0-9]$/, e);
+    });
+    
+    $("#contenedorEjercicios").on("keyup", ".input-series", function(){
+        validarkeyup(/^[0-9]{1,3}$/, $(this), $(this).siblings('.s-error-series'), "Solo números");
+    });
+
+    $("#contenedorEjercicios").on("keypress", ".input-reps", function(e){
+        validarkeypress(/^[0-9-]$/, e);
+    });
+    
+    $("#contenedorEjercicios").on("keyup", ".input-reps", function(){
+        validarkeyup(/^[0-9]{1,3}(-[0-9]{1,3})?$/, $(this), $(this).siblings('.s-error-reps'), "Formato: 12 o 10-12");
+    });
+
+    // ==========================================
+    // LÓGICA DEL MODAL DE CLIENTES
+    // ==========================================
+    $("#listarClienteBtn").on("click", function(){
+        $.ajax({
+            url: 'index.php?pagina=rutinas',
+            type: 'POST',
+            data: { accion: 'listar_clientes' }, 
+            success: function(respuesta){
+                try {
+                    var data = JSON.parse(respuesta);
+                    var html = "";
+                    if (data.length > 0) {
+                        $.each(data, function(index, cliente) {
+                             html += `<tr style="cursor:pointer" onclick="colocacliente(this);">
+                                         <td style="display:none">${cliente.id_cliente}</td>
+                                         <td>${cliente.cedula}</td>
+                                         <td>${cliente.nombre} ${cliente.apellido}</td>
+                                         <td>${cliente.telefono || 'N/A'}</td>
+                                     </tr>`;
+                        });
+                    } else {
+                        html = `<tr><td colspan="4" class="text-center text-muted py-3">No hay clientes registrados</td></tr>`;
                     }
+                    $("#listaClientesModal").html(html);
+                    $("#modal_clientes").modal("show");
+                } catch(e) {
+                    console.error("Error al cargar clientes:", e);
                 }
-            });
-        } else {
-            $("#listaClientes").addClass("d-none").empty();
-            $("#idCliente").val(""); 
-        }
+            }
+        });
     });
 
-    // evento al hacer click en un cliente de la lista de resultados
-    $("#listaClientes").on("click", ".opcion-cliente", function(){
-        var idCliente = $(this).data("id");
-        var textoCliente = $(this).data("nombre");
-
-        $("#idCliente").val(idCliente); // guarda el id real en el input oculto
-        $("#buscarCliente").val(textoCliente); // muestra el texto en el input visible
-        $("#listaClientes").addClass("d-none").empty(); // esconde la lista
-        $("#sCliente").text(""); // limpia mensaje de error si lo hubiera
+    $("#filtrarClientesModal").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        $("#listaClientesModal tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
     });
 
-    // ocultar lista de clientes si hace click afuera
-    $(document).on("click", function(event) {
-        if (!$(event.target).closest("#buscarCliente, #listaClientes").length) {
-            $("#listaClientes").addClass("d-none");
-        }
+    // ==========================================
+    // LÓGICA DEL MODAL DE EJERCICIOS
+    // ==========================================
+    $("#contenedorEjercicios").on("click", ".btnBuscarEjercicio", function(){
+        filaEjercicioGlobal = $(this).closest('.fila-ejercicio').attr('id');
+        
+        $.ajax({
+            url: 'index.php?pagina=rutinas',
+            type: 'POST',
+            data: { accion: 'listar_ejercicios' }, 
+            success: function(respuesta){
+                try {
+                    var data = JSON.parse(respuesta);
+                    var html = "";
+                    if (data.length > 0) {
+                        $.each(data, function(index, ejercicio) {
+                             // Si no hay imagen en BD, le ponemos una por defecto
+                             var rutaImg = (ejercicio.imagen && ejercicio.imagen !== "") ? "img/ejercicios/" + ejercicio.imagen : "img/default.jpg";
+                             
+                             html += `<tr style="cursor:pointer" onclick="colocaejercicio(this);">
+                                         <td style="display:none">${ejercicio.id_ejercicio}</td>
+                                         <td class="text-center">
+                                            <img src="${rutaImg}" alt="img" class="rounded object-fit-cover shadow-sm" style="width: 50px; height: 50px;">
+                                         </td>
+                                         <td class="text-start fw-bold">${ejercicio.nombre}</td>
+                                     </tr>`;
+                        });
+                    } else {
+                        html = `<tr><td colspan="2" class="text-center text-muted py-3">No hay ejercicios registrados</td></tr>`;
+                    }
+                    $("#listaEjerciciosModal").html(html);
+                    $("#modal_ejercicios").modal("show");
+                } catch(e) {
+                    console.error("Error al cargar ejercicios:", e);
+                }
+            }
+        });
     });
 
+    $("#filtrarEjerciciosModal").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        $("#listaEjerciciosModal tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
+
+    // ==========================================
+    // BOTONES GENERALES
+    // ==========================================
     $("#btnAgregarEjercicio").on("click", function(){ agregarFilaEjercicio(); });
 
     $("#contenedorEjercicios").on("click", ".btnEliminarFila", function(){
-        $(this).closest('.fila-ejercicio').find('.select-ejercicio').select2('destroy');
         $(this).closest('.fila-ejercicio').remove();
     });
 
@@ -96,7 +149,7 @@ $(document).ready(function(){
         enviaAjax(datos);
     });
 
-    // Buscador en tiempo real
+    // Buscador en tiempo real tabla principal
     $("#buscar_rutina").on("keyup", function() {
         var valor = $(this).val().toLowerCase();
         var filasFiltradas = 0;
@@ -119,19 +172,58 @@ $(document).ready(function(){
         }
     });
 
-}); // Fin del $(document).ready
+}); 
 
+// ==========================================
+// SELECCIÓN DE MODALES
+// ==========================================
+function colocacliente(tr) {
+    var id = $(tr).find("td:eq(0)").text();
+    var cedula = $(tr).find("td:eq(1)").text();
+    var nombre = $(tr).find("td:eq(2)").text();
+
+    $("#idCliente").val(id); 
+    $("#clienteInfo").val(cedula + " - " + nombre); 
+    $("#modal_clientes").modal("hide"); 
+    $("#sCliente").text(""); 
+}
+
+function colocaejercicio(tr) {
+    var id = $(tr).find("td:eq(0)").text();
+    var nombre = $(tr).find("td:eq(2)").text(); // El nombre ahora está en la columna 2, no en la 1
+
+    var filaDestino = $("#" + filaEjercicioGlobal);
+    
+    filaDestino.find(".input-id-ejercicio").val(id); 
+    filaDestino.find(".input-info-ejercicio").val(nombre); 
+    
+    $("#modal_ejercicios").modal("hide"); 
+}
+
+// ==========================================
+// GESTIÓN DE FILAS DINÁMICAS
+// ==========================================
 function agregarFilaEjercicio(id_ejercicio = "", nombre_ejercicio = "", series = "", repeticiones = "") {
+    var idFilaUnico = 'fila_ej_' + new Date().getTime() + Math.floor(Math.random() * 1000); 
+    
     var fila = `
-        <div class="row fila-ejercicio align-items-center mb-2">
+        <div class="row fila-ejercicio align-items-center mb-2" id="${idFilaUnico}">
             <div class="col-5">
-                <select class="form-select rounded-0 select-ejercicio" name="ejercicios[]" required></select>
+                <div class="input-group">
+                    <input type="hidden" class="input-id-ejercicio" name="ejercicios[]" value="${id_ejercicio}">
+                    <input type="text" class="form-control rounded-0 border-end-0 bg-white input-info-ejercicio" placeholder="Seleccione..." value="${nombre_ejercicio}" readonly required>
+                    <button class="btn btn-dark rounded-0 px-2 btnBuscarEjercicio" type="button">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
             </div>
             <div class="col-3">
-                <input type="number" class="form-control rounded-0 input-series" name="series[]" value="${series}" min="1" placeholder="Ej: 4" required>
+                <input type="text" class="form-control rounded-0 input-series" name="series[]" value="${series}" placeholder="Ej: 4" required>
+                <span class="text-danger small s-error-series"></span>
             </div>
             <div class="col-3">
                 <input type="text" class="form-control rounded-0 input-reps" name="repeticiones[]" value="${repeticiones}" placeholder="Ej: 10-12" required>
+                <span class="text-danger small s-error-reps"></span>
             </div>
             <div class="col-1 text-end">
                 <button type="button" class="btn btn-danger btn-sm rounded-0 btnEliminarFila"><i class="bi bi-trash"></i></button>
@@ -140,54 +232,17 @@ function agregarFilaEjercicio(id_ejercicio = "", nombre_ejercicio = "", series =
     `;
     
     $("#contenedorEjercicios").append(fila);
-    var nuevoSelect = $("#contenedorEjercicios .fila-ejercicio:last-child .select-ejercicio");
-
-    if(id_ejercicio !== "" && nombre_ejercicio !== "") {
-        var opcion = new Option(nombre_ejercicio, id_ejercicio, true, true);
-        nuevoSelect.append(opcion).trigger('change');
-    }
-
-    nuevoSelect.select2({
-        dropdownParent: $('#modalUsuario'), 
-        width: '100%',
-        placeholder: "Buscar...",
-        minimumInputLength: 1,
-        language: {
-            inputTooShort: function () {
-                return "Por favor, ingresa 1 o más caracteres";
-            },
-            noResults: function () {
-                return "No se encontraron resultados";
-            },
-            searching: function () {
-                return "Buscando...";
-            }
-        },
-        ajax: {
-            url: "index.php?pagina=rutinas",
-            type: "POST",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return { accion: 'buscar_ejercicios_ajax', q: params.term };
-            },
-            processResults: function (data) {
-                return { results: data.results };
-            },
-            cache: true
-        }
-    });
 }
 
 function empaquetarDatos(accion) {
     var datos = new FormData();
     datos.append('accion', accion);
     datos.append('nombreRutina', $("#nombreRutina").val());
-    datos.append('idCliente', $("#idCliente").val()); // añade el id del cliente al paquete de datos
+    datos.append('idCliente', $("#idCliente").val()); 
     
     if (accion === 'modificar') { datos.append('idRutina', $("#idRutina").val()); }
 
-    $(".select-ejercicio").each(function(){ datos.append('ejercicios[]', $(this).val()); });
+    $(".input-id-ejercicio").each(function(){ datos.append('ejercicios[]', $(this).val()); });
     $(".input-series").each(function(){ datos.append('series[]', $(this).val()); });
     $(".input-reps").each(function(){ datos.append('repeticiones[]', $(this).val()); });
 
@@ -200,8 +255,7 @@ function validarEnvio() {
         return false;
     }
     
-    // validación asegura que se haya seleccionado un cliente
-    if($("#idCliente").val() === "" || $("#buscarCliente").val().trim() === ""){
+    if($("#idCliente").val() === "" || $("#clienteInfo").val().trim() === ""){
         $("#sCliente").text("Debe seleccionar un cliente del listado");
         mostrarMensaje("Por favor, asigne esta rutina a un cliente.");
         return false;
@@ -214,14 +268,20 @@ function validarEnvio() {
 
     var validacionDetalles = true;
     $(".fila-ejercicio").each(function() {
-        var ej = $(this).find(".select-ejercicio").val();
+        var ej = $(this).find(".input-id-ejercicio").val();
         var ser = $(this).find(".input-series").val();
         var rep = $(this).find(".input-reps").val();
-        if (ej === null || ej === "" || ser.trim() === "" || rep.trim() === "") { validacionDetalles = false; }
+        
+        var regexSer = /^[0-9]{1,3}$/;
+        var regexRep = /^[0-9]{1,3}(-[0-9]{1,3})?$/;
+
+        if (ej === null || ej === "" || !regexSer.test(ser) || !regexRep.test(rep)) { 
+            validacionDetalles = false; 
+        }
     });
 
     if (!validacionDetalles) {
-        mostrarMensaje("Completa todos los campos (Ejercicio, Series y Repeticiones).");
+        mostrarMensaje("Revisa los ejercicios. Asegúrate de haber seleccionado un ejercicio y colocado series/reps válidas.");
         return false;
     }
     return true;
@@ -250,17 +310,13 @@ function pone(pos){
     var linea = $(pos).closest('tr');
     var idRutina = linea.find("td:eq(0)").text();
     var nombreRutina = linea.find("td:eq(1)").text();
-    
-    // ocultos los datos del cliente que envia desde el backend en la tabla
-    var idCliente = linea.find("td:eq(4)").text(); // id cliente Oculto
-    var textoCliente = linea.find("td:eq(3)").text(); // texto cliente Visible
+    var idCliente = linea.find("td:eq(4)").text(); 
+    var textoCliente = linea.find("td:eq(3)").text(); 
     
     $("#idRutina").val(idRutina);
     $("#nombreRutina").val(nombreRutina);   
-    
-    // llena los inputs del cliente al modificar
     $("#idCliente").val(idCliente);
-    $("#buscarCliente").val(textoCliente);
+    $("#clienteInfo").val(textoCliente);
 
     $("#btnGuardar").text('modificar');
     $("#contenedorEjercicios").empty(); 
@@ -321,16 +377,13 @@ function limpia(){
     $("#nombreRutina").val("");
     $("#snombreRutina").text("");
     
-    // limpia los campos del cliente
     $("#idCliente").val("");
-    $("#buscarCliente").val("");
+    $("#clienteInfo").val("");
     $("#sCliente").text("");
-    $("#listaClientes").addClass("d-none").empty();
     
     $("#contenedorEjercicios").empty();
 }
 
-// Función de Paginación
 function paginarTabla(pagina) {
     paginaActual = pagina;
     var filas = $("#cuerpoTablaRutinas tr");

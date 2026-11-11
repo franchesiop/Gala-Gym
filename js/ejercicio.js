@@ -64,11 +64,15 @@ $(document).ready(function(){
     });
 
     // Validacion nombre
-    $("#nombre_ejercicio").on("keypress",function(e){
-        validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
+   // Validacion nombre
+    $("#nombre_ejercicio").on("keypress", function(e){
+        // Regex para un solo carácter: Letras, acentos, ñ y espacios (sin 0-9)
+        validarkeypress(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]$/, e);
     });
-    $("#nombre_ejercicio").on("keyup",function(){
-        validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this), $("#snombre_ejercicio"), "Nombre invalido - entre 3 y 100 caracteres");
+    
+    $("#nombre_ejercicio").on("keyup", function(){
+        // Regex para la cadena completa: Solo letras, de 3 a 100 caracteres
+        validarkeyup(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,100}$/, $(this), $("#snombre_ejercicio"), "Solo se aceptan letras (entre 3 y 100 caracteres)");
     });
 
     // Botones
@@ -111,10 +115,11 @@ $(document).ready(function(){
 });
 
 // Validar antes de enviar
+// Validar antes de enviar
 function validarEnvio() {
-    // validar nombre
-    if(validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $("#nombre_ejercicio"), $("#snombre_ejercicio"), "Nombre Invalido - (Entre 3 y 100 caracteres)") == 0){
-        mostrarMensaje("Nombre Invalido <br>" + "(Entre 3 y 100 caracteres)");
+    // validar nombre (Actualizado sin el 0-9)
+    if(validarkeyup(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,100}$/, $("#nombre_ejercicio"), $("#snombre_ejercicio"), "Solo letras (Entre 3 y 100 caracteres)") == 0){
+        mostrarMensaje("Nombre Inválido <br>" + "(Solo se permiten letras, entre 3 y 100 caracteres)");
         return false;
     }
     return true;

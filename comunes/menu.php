@@ -34,6 +34,11 @@
 
             <?php if($nivel == 1 || $nivel == 4): ?>
             <li class="nav-item">
+                <a href="?pagina=clientes_pagos" class="nav-link text-white py-3 px-4 small fw-bold d-flex align-items-center gap-3">
+                    <i class="bi bi-cash-coin fs-5 text-white-50"></i> <span>PAGOS</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="?pagina=pagos" class="nav-link text-white py-3 px-4 small fw-bold d-flex align-items-center gap-3">
                     <i class="bi bi-wallet2 fs-5 text-white-50"></i> <span>MÉTODOS DE PAGO</span>
                 </a>

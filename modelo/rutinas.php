@@ -24,7 +24,6 @@ class rutinas extends datos {
         try {
             $co->beginTransaction();
 
-            //  insertar la cabecera
             $inc = $co->prepare("INSERT INTO rutina (nombre, id_empleado, id_cliente) VALUES (:nombre, :id_empleado, :id_cliente)");
             $inc->bindParam(':nombre', $this->nombre);
             $inc->bindParam(':id_empleado', $this->id_empleado);
@@ -33,7 +32,6 @@ class rutinas extends datos {
 
             $id_rutina_nueva = $co->lastInsertId();
 
-            // insertar los detalles
             $inc_detalle = $co->prepare("INSERT INTO detalleRutina (id_rutina, id_ejercicio, series, repeticiones) VALUES (:id_rutina, :id_ejercicio, :series, :repeticiones)");
             
             for ($i = 0; $i < count($ejercicios); $i++) {
@@ -45,7 +43,6 @@ class rutinas extends datos {
             }
 
             $co->commit();
-
             $r['resultado'] = 'incluir';
             $r['mensaje'] = 'Rutina Registrada'; 
             
@@ -66,19 +63,16 @@ class rutinas extends datos {
             try{
                 $co->beginTransaction();
 
-                // actualiza el nombre de la rutina y cliente asignado
                 $mod = $co->prepare("UPDATE rutina SET nombre = :nombre, id_cliente = :id_cliente WHERE id_rutina = :id_rutina");
                 $mod->bindParam(':id_rutina', $this->id_rutina);
                 $mod->bindParam(':nombre', $this->nombre);
                 $mod->bindParam(':id_cliente', $this->id_cliente);
                 $mod->execute();
                 
-                // elimina los ejercicios viejos
                 $eli_detalles = $co->prepare("DELETE FROM detalleRutina WHERE id_rutina = :id_rutina");
                 $eli_detalles->bindParam(':id_rutina', $this->id_rutina);
                 $eli_detalles->execute();
 
-                // inserta la nueva lista de ejercicios
                 $inc_detalle = $co->prepare("INSERT INTO detalleRutina (id_rutina, id_ejercicio, series, repeticiones) VALUES (:id_rutina, :id_ejercicio, :series, :repeticiones)");
                 
                 for ($i = 0; $i < count($ejercicios); $i++) {
@@ -133,7 +127,6 @@ class rutinas extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
         try{
-            
             $sql = "SELECT r.id_rutina, r.nombre AS rutina, r.id_cliente, 
                            e.nombre AS empleado_nombre, e.apellido AS empleado_apellido,
                            c.cedula, c.nombre AS cliente_nombre, c.apellido AS cliente_apellido
@@ -146,8 +139,6 @@ class rutinas extends datos {
                 $respuesta = '';
                 foreach($resultado as $fila){
                     $creador = $fila['empleado_nombre'] ? $fila['empleado_nombre'] . " " . $fila['empleado_apellido'] : "Desconocido";
-                    
-                    // formatea el nombre del cliente
                     $cliente = $fila['cliente_nombre'] ? $fila['cedula'] . " - " . $fila['cliente_nombre'] . " " . $fila['cliente_apellido'] : "Sin asignar";
                     $idClienteAsignado = $fila['id_cliente'] ? $fila['id_cliente'] : "";
 
@@ -189,22 +180,14 @@ class rutinas extends datos {
         return $r;
     }
 
-    
-    function buscar_cliente_ajax($busqueda){
+    // NUEVA FUNCION: Para traer todos los clientes y llenar la tabla del modal
+    function listar_todos_clientes(){
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            // busca coincidencias por cedula y nombre o apellido
-            $sql = "SELECT id_cliente, cedula, nombre, apellido 
-                    FROM cliente 
-                    WHERE cedula LIKE :busqueda OR nombre LIKE :busqueda OR apellido LIKE :busqueda 
-                    LIMIT 10";
-            $consulta = $co->prepare($sql);
-            $parametro = "%" . $busqueda . "%";
-            $consulta->bindParam(':busqueda', $parametro);
-            $consulta->execute();
-            
+            $sql = "SELECT id_cliente, cedula, nombre, apellido, telefono FROM cliente ORDER BY nombre ASC";
+            $consulta = $co->query($sql);
             $datos = $consulta->fetchAll(PDO::FETCH_ASSOC);
         } catch(Exception $e) {
             $datos = [];
@@ -217,7 +200,9 @@ class rutinas extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            $resultado = $co->query("SELECT id_ejercicio, nombre FROM ejercicio ORDER BY nombre ASC");
+            // Asegúrate de que el campo de la imagen se llame así en tu BD (ej. foto, imagen, url_imagen)
+            // Aquí asumo que se llama 'imagen'. Si se llama distinto, cámbialo abajo.
+            $resultado = $co->query("SELECT id_ejercicio, nombre, imagen FROM ejercicio ORDER BY nombre ASC");
             $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
         } catch(Exception $e) {
             $datos = [];
@@ -261,23 +246,6 @@ class rutinas extends datos {
         } catch(Exception $e){
             return false;
         }
-    }
-
-    function buscar_ejercicios_ajax($busqueda){
-        $co = $this->conecta();
-        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $datos = [];
-        try {
-            $sql = "SELECT id_ejercicio AS id, nombre AS text FROM ejercicio WHERE nombre LIKE :busqueda LIMIT 20";
-            $consulta = $co->prepare($sql);
-            $parametro = "%" . $busqueda . "%";
-            $consulta->bindParam(':busqueda', $parametro);
-            $consulta->execute();
-            $datos = $consulta->fetchAll(PDO::FETCH_ASSOC);
-        } catch(Exception $e) {
-            $datos = [];
-        }
-        return $datos;
     }
 }
 ?>

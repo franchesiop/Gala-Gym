@@ -109,7 +109,7 @@ $(document).ready(function(){
     
     $("#btnNuevoPago").on("click", function(){
         limpia();
-        $("#btnGuardar").text("incluir"); 
+        $("#btnGuardar").text("INCLUIR"); 
         $("#modalPago").modal("show");
     });
 
@@ -224,7 +224,7 @@ function pone(pos){
         $("#input_dato_3").val(dato_2); // teleono
     }
     
-    $("#btnGuardar").text('modificar');
+    $("#btnGuardar").text("MODIFICAR");
     $("#modalPago").modal("show");
 }
 

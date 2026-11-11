@@ -7,7 +7,7 @@
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light" style="min-height: 100vh;">
             <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom bg-white px-3 mt-3 shadow-sm">
-                <h5 class="fw-bold text-uppercase m-0 small">Panel / Reportes Generales</h5>
+                <h5 class="fw-bold text-uppercase m-0 small">Panel / Reportes</h5>
             </div>
 
             <!-- CONTADORES DEL DASHBOARD -->

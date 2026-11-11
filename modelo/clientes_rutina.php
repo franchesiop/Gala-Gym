@@ -4,12 +4,10 @@ require_once('modelo/datos.php');
 class clientes_rutina extends datos {
     private $id_rutina, $nombre_rutina, $id_cliente;
 
-    // setters
     function set_id_rutina($v) { $this->id_rutina = $v; }
     function set_nombre_rutina($v) { $this->nombre_rutina = $v; }
     function set_id_cliente($v) { $this->id_cliente = $v; }
 
-    // getters
     function get_id_rutina() { return $this->id_rutina; }
     function get_nombre_rutina() { return $this->nombre_rutina; }
     function get_id_cliente() { return $this->id_cliente; }
@@ -19,7 +17,8 @@ class clientes_rutina extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            $resultado = $co->query("SELECT id_ejercicio, nombre FROM ejercicio");
+            // Traemos también la imagen para el modal de ejercicios
+            $resultado = $co->query("SELECT id_ejercicio, nombre, imagen FROM ejercicio ORDER BY nombre ASC");
             $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
         } catch(Exception $e) {
             $datos = [];
@@ -32,17 +31,29 @@ class clientes_rutina extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
         try {
-            // extrae los datos de racha del cliente primero
+            // Extraemos los datos de racha y calculamos los días de diferencia directo en SQL
             $stmtCliente = $co->prepare("SELECT racha_actual, fecha_ultimo_entrenamiento, CURDATE() as hoy, DATEDIFF(CURDATE(), fecha_ultimo_entrenamiento) as dias_diferencia FROM cliente WHERE id_cliente = :id_cliente");
             $stmtCliente->bindParam(':id_cliente', $this->id_cliente);
             $stmtCliente->execute();
             $datosCliente = $stmtCliente->fetch(PDO::FETCH_ASSOC);
             
-            $r['racha_actual'] = $datosCliente['racha_actual'] ? $datosCliente['racha_actual'] : 0;
-            $r['fecha_ultimo_entrenamiento'] = $datosCliente['fecha_ultimo_entrenamiento'];
-            $r['dias_diferencia'] = $datosCliente['dias_diferencia'] === null ? 99 : (int)$datosCliente['dias_diferencia'];
+            $racha = $datosCliente['racha_actual'] ? (int)$datosCliente['racha_actual'] : 0;
+            // Si es null (como el usuario Luis Alvarado[cite: 9]), ponemos 99 días por defecto para que baje a 0
+            $dias_diff = $datosCliente['dias_diferencia'] === null ? 99 : (int)$datosCliente['dias_diferencia'];
+
+            // LÓGICA DE CORRECCIÓN: Si pasaron 2 o más días, la racha murió. La bajamos a 0 y actualizamos la BD.
+            if ($dias_diff >= 2) {
+                $racha = 0;
+                $upd = $co->prepare("UPDATE cliente SET racha_actual = 0 WHERE id_cliente = :id_cliente");
+                $upd->bindParam(':id_cliente', $this->id_cliente);
+                $upd->execute();
+            }
             
-            // extrae las rutinas 
+            $r['racha_actual'] = $racha;
+            $r['fecha_ultimo_entrenamiento'] = $datosCliente['fecha_ultimo_entrenamiento'];
+            $r['dias_diferencia'] = $dias_diff;
+            
+            // Extraemos las rutinas 
             $sql = "SELECT id_rutina, nombre FROM rutina WHERE id_cliente = :id_cliente";
             $stmt = $co->prepare($sql);
             $stmt->bindParam(':id_cliente', $this->id_cliente);
@@ -53,14 +64,14 @@ class clientes_rutina extends datos {
             if($resultado){
                 foreach($resultado as $fila){
                     $respuesta .= '<div class="col-md-6 col-lg-4">';
-                    $respuesta .= '<div class="card h-100 border-0 shadow-sm rounded-4 bg-white">';
+                    $respuesta .= '<div class="card h-100 border-0 shadow rounded-4 bg-white">';
                     $respuesta .= '<div class="card-body p-4 d-flex flex-column">';
                     $respuesta .= '<h5 class="fw-bold text-uppercase text-dark mb-1">'.$fila['nombre'].'</h5>';
                     $respuesta .= '<p class="text-muted small mb-4">Rutina personalizada</p>';
                     $respuesta .= '<div class="mt-auto d-flex justify-content-between align-items-center gap-2">';
-                    $respuesta .= '<button class="btn btn-dark rounded-3 fw-bold small flex-grow-1" onclick="abrirEntrenamiento('.$fila['id_rutina'].', \''.$fila['nombre'].'\')"><i class="bi bi-play-fill me-1"></i> ENTRENAR</button>';
-                    $respuesta .= '<button class="btn btn-light border rounded-3 p-2 text-dark" onclick="editarRutina('.$fila['id_rutina'].')" title="Editar"><i class="bi bi-pencil-square"></i></button>';
-                    $respuesta .= '<button class="btn btn-light border rounded-3 p-2 text-danger" onclick="modalEliminarRutina('.$fila['id_rutina'].')" title="Eliminar"><i class="bi bi-trash3"></i></button>';
+                    $respuesta .= '<button class="btn btn-dark rounded-3 fw-bold small flex-grow-1 shadow" onclick="abrirEntrenamiento('.$fila['id_rutina'].', \''.$fila['nombre'].'\')"><i class="bi bi-play-fill me-1"></i> ENTRENAR</button>';
+                    $respuesta .= '<button class="btn btn-light border-0 shadow-sm rounded-3 p-2 text-dark" onclick="editarRutina('.$fila['id_rutina'].')" title="Editar"><i class="bi bi-pencil-square"></i></button>';
+                    $respuesta .= '<button class="btn btn-light border-0 shadow-sm rounded-3 p-2 text-danger" onclick="modalEliminarRutina('.$fila['id_rutina'].')" title="Eliminar"><i class="bi bi-trash3"></i></button>';
                     $respuesta .= '</div>';
                     $respuesta .= '</div>';
                     $respuesta .= '</div>';
@@ -87,10 +98,8 @@ class clientes_rutina extends datos {
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
-        
         try {
             $co->beginTransaction(); 
-
             $incRutina = $co->prepare("INSERT INTO rutina(nombre, id_cliente) VALUES (:nombre, :id_cliente)");
             $incRutina->bindParam(':nombre', $this->nombre_rutina);
             $incRutina->bindParam(':id_cliente', $this->id_cliente);
@@ -99,7 +108,6 @@ class clientes_rutina extends datos {
             $idRutinaGenerado = $co->lastInsertId();
 
             $incDetalle = $co->prepare("INSERT INTO detalleRutina(id_rutina, id_ejercicio, series, repeticiones) VALUES (:id_rutina, :id_ejercicio, :series, :reps)");
-            
             for ($i = 0; $i < count($arrEjercicios); $i++) {
                 $incDetalle->bindParam(':id_rutina', $idRutinaGenerado);
                 $incDetalle->bindParam(':id_ejercicio', $arrEjercicios[$i]);
@@ -109,7 +117,6 @@ class clientes_rutina extends datos {
             }
 
             $co->commit(); 
-
             $r['resultado'] = 'incluir';
             $r['mensaje'] = 'Rutina Registrada';
         } catch(Exception $e) {
@@ -124,7 +131,6 @@ class clientes_rutina extends datos {
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
-        
         try {
             $co->beginTransaction();
 
@@ -139,7 +145,6 @@ class clientes_rutina extends datos {
             $delDetalle->execute();
 
             $incDetalle = $co->prepare("INSERT INTO detalleRutina(id_rutina, id_ejercicio, series, repeticiones) VALUES (:id_rutina, :id_ejercicio, :series, :reps)");
-            
             for ($i = 0; $i < count($arrEjercicios); $i++) {
                 $incDetalle->bindParam(':id_rutina', $this->id_rutina);
                 $incDetalle->bindParam(':id_ejercicio', $arrEjercicios[$i]);
@@ -149,7 +154,6 @@ class clientes_rutina extends datos {
             }
 
             $co->commit();
-
             $r['resultado'] = 'modificar';
             $r['mensaje'] = 'Rutina Modificada';
         } catch(Exception $e) {
@@ -183,7 +187,6 @@ class clientes_rutina extends datos {
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $data = [];
-        
         try {
             $stmtRutina = $co->prepare("SELECT id_rutina, nombre FROM rutina WHERE id_rutina = :id_rutina AND id_cliente = :id_cliente");
             $stmtRutina->bindParam(':id_rutina', $this->id_rutina);
@@ -208,12 +211,10 @@ class clientes_rutina extends datos {
                 
                 $data['ejercicios'] = $stmtDetalle->fetchAll(PDO::FETCH_ASSOC);
             }
-        } catch(Exception $e) {
-        }
+        } catch(Exception $e) {}
         return $data;
     }
 
-    // calculay u actualizar racha
     function calcularRacha() {
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -222,7 +223,6 @@ class clientes_rutina extends datos {
         try {
             $co->beginTransaction();
             
-            // obtiene el id del cliente dueño de esta rutina
             $stmtRutina = $co->prepare("SELECT id_cliente FROM rutina WHERE id_rutina = :id_rutina");
             $stmtRutina->bindParam(':id_rutina', $this->id_rutina);
             $stmtRutina->execute();
@@ -233,7 +233,6 @@ class clientes_rutina extends datos {
             }
             $idCliente = $rutina['id_cliente'];
 
-            // busca la racha y fecha actual del cliente
             $stmt = $co->prepare("SELECT racha_actual, fecha_ultimo_entrenamiento FROM cliente WHERE id_cliente = :id_cliente");
             $stmt->bindParam(':id_cliente', $idCliente);
             $stmt->execute();
@@ -243,7 +242,6 @@ class clientes_rutina extends datos {
                 throw new Exception("Cliente no encontrado.");
             }
 
-            // evalua la diferencia de dias
             $stmtDiff = $co->query("SELECT CURDATE() as hoy, DATEDIFF(CURDATE(), '".$cliente['fecha_ultimo_entrenamiento']."') as dias_diferencia");
             $fechas = $stmtDiff->fetch(PDO::FETCH_ASSOC);
             
@@ -252,15 +250,11 @@ class clientes_rutina extends datos {
             $nueva_racha = $cliente['racha_actual'] ? (int)$cliente['racha_actual'] : 0;
 
             if ($cliente['fecha_ultimo_entrenamiento'] == null || $dias_diff >= 2) {
-                // falto 2 dias o mas o es su primer entrenamiento reiniciar a 1
                 $nueva_racha = 1;
             } else if ($dias_diff == 1) {
-                // entrenó ayer sumar 1 dia a la racha
                 $nueva_racha += 1;
             } 
-            // si dias_diff == 0 (Ya le dio clic hoy) la racha se queda igual
 
-            // Actualiza el registro del cliente
             $upd = $co->prepare("UPDATE cliente SET racha_actual = :racha, fecha_ultimo_entrenamiento = :hoy WHERE id_cliente = :id_cliente");
             $upd->bindParam(':racha', $nueva_racha);
             $upd->bindParam(':hoy', $hoy);

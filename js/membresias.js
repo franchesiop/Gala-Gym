@@ -18,12 +18,24 @@ $(document).ready(function(){
     
     // Validacion de datos
     // Validacion nombre
-    $("#nombre_membresia").on("keypress",function(e){
-        validarkeypress(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
+    $("#nombrePlan").on("keypress", function(e){
+        // Regex para un solo carácter: Solo letras, acentos, ñ y espacios. Nada de = _ o números.
+        validarkeypress(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]$/, e);
     });
     
-    $("#nombre_membresia").on("keyup",function(){
-        validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this),$("#snombre_membresia"),"Nombre inválido - entre 3 y 100 caracteres");
+    $("#nombrePlan").on("keyup", function(){
+        // Regex para la cadena completa: entre 3 y 100 caracteres.
+        validarkeyup(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,100}$/, $(this), $("#snombrePlan"), "Solo letras (entre 3 y 100 caracteres)");
+    });
+
+    $("#costoPlan").on("keypress", function(e){
+        // Regex para un solo carácter: Exclusivamente números del 0 al 9.
+        validarkeypress(/^[0-9]$/, e);
+    });
+    
+    $("#costoPlan").on("keyup", function(){
+        // Regex para la cadena completa: 1 o más números.
+        validarkeyup(/^[0-9]+$/, $(this), $("#scostoPlan"), "Solo se aceptan números");
     });
 
     // Botón Guardar / Modificar
@@ -54,7 +66,7 @@ $(document).ready(function(){
     // Botón Nuevo Ejercicio
     $("#btnNuevoPlan").on("click", function(){
         limpia();
-        $("#btnGuardar").text("incluir"); 
+        $("#btnGuardar").text("INCLUIR"); 
         $("#modalMembresia").modal("show"); 
     });
 
@@ -161,7 +173,7 @@ function pone(pos){
     $("#nombrePlan").val(linea.find("td:eq(1)").text()); 
     $("#costoPlan").val(linea.find("td:eq(2)").text());
 
-    $("#btnGuardar").text('modificar');
+    $("#btnGuardar").text('MODIFICAR');
     $("#modalMembresia").modal("show");
 }
 

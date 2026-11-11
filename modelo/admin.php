@@ -179,11 +179,12 @@ class admin extends datos {
         
         try{
             $sql = "SELECT p.fecha, p.monto, p.referencia, c.nombre, c.apellido, m.banco 
-                    FROM pago p 
-                    INNER JOIN cliente c ON p.id_cliente = c.id_cliente 
-                    INNER JOIN metodos_pago m ON p.id_metodo = m.id_metodo 
-                    WHERE p.fecha BETWEEN :f_inicio AND :f_fin 
-                    ORDER BY p.fecha DESC";
+        FROM pago p 
+        INNER JOIN cliente c ON p.id_cliente = c.id_cliente 
+        INNER JOIN metodos_pago m ON p.id_metodo = m.id_metodo 
+        WHERE p.fecha BETWEEN :f_inicio AND :f_fin 
+        AND p.estado_pago = 1 
+        ORDER BY p.fecha DESC";
                     
             $resultado = $co->prepare($sql);
             $resultado->bindParam(':f_inicio', $this->fecha_inicio);
@@ -234,7 +235,7 @@ class admin extends datos {
  
         $pdf = new DOMPDF();
         $pdf->set_paper("A4", "portrait");
-        $pdf->load_html($html); /
+        $pdf->load_html($html); 
         $pdf->render();
         $pdf->stream('Pagos_GalaGym.pdf', array("Attachment" => false));
     }

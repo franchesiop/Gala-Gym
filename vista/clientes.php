@@ -113,7 +113,7 @@ require_once("comunes/encabezado.php");
        <div class="modal-footer d-flex justify-content-between">
           <div class="ms-auto">
             <button type="button" data-bs-dismiss="modal" class="btn btn-outline-secondary rounded-0 small fw-bold me-2">CANCELAR</button>
-            <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4" id="btnGuardar">INCLUIR</button>
+            <button type="button" class="btn btn-dark rounded-0 small fw-bold px-4 text-uppercase" id="btnGuardar">INCLUIR</button>
           </div>
        </div>
     </div>

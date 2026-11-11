@@ -1,20 +1,18 @@
 <?php require_once("comunes/encabezado.php"); ?>
 
 <!-- Menú Superior Blanco (Fijo) -->
-<nav class="bg-white border-bottom py-4 sticky-top">
+<nav class="bg-white border-bottom py-4 sticky-top shadow-sm">
     <div class="container d-flex justify-content-between align-items-center">
         <h4 class="fw-bold m-0 text-dark text-uppercase" style="letter-spacing: 3px;">GALA GYM</h4>
         
         <div class="d-flex align-items-center gap-4">
-            <!-- Enlace inactivo: texto gris -->
             <a href="?pagina=clientes_rutina" class="text-secondary text-decoration-none text-uppercase fw-bold small pb-1">Rutinas</a>
             
-            <!-- Indicador visual de página activa: borde inferior oscuro -->
             <a href="?pagina=pago" class="text-dark text-decoration-none text-uppercase fw-bold small pb-1 border-bottom border-2 border-dark">Pagos</a>
             
             <div class="vr text-dark opacity-25"></div>
             
-            
+            <a href="?pagina=logout" class="text-danger text-decoration-none text-uppercase fw-bold small pb-1">Salir</a>
         </div>
     </div>
 </nav>

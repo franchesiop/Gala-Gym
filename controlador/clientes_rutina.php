@@ -1,5 +1,4 @@
 <?php
-// valida si la sesion ya esta iniciada antes de llamarla
 if(session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }

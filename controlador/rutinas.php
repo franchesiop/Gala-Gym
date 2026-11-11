@@ -1,5 +1,4 @@
 <?php
-// valida si la sesion ya esta iniciada antes de llamarla
 if(session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
@@ -51,24 +50,17 @@ if(is_file("vista/".$pagina.".php")){
                 echo json_encode($o->modificar($ejercicios, $series, $repeticiones));
                 break;
 
-            case 'listar_ejercicios':
-                echo json_encode($o->listar_ejercicios());
-                break;
-                
             case 'consultar_detalles':
                 $o->set_id_rutina($_POST['id_rutina']);
                 echo json_encode($o->consultar_detalles());
                 break;
-
-            case 'buscar_ejercicios_ajax':
-                $busqueda = isset($_POST['q']) ? $_POST['q'] : '';
-                $resultados = $o->buscar_ejercicios_ajax($busqueda);
-                echo json_encode(['results' => $resultados]);
-                break;    
                 
-            case 'buscar_cliente': 
-                $busqueda = isset($_POST['busqueda']) ? $_POST['busqueda'] : '';
-                echo json_encode($o->buscar_cliente_ajax($busqueda));
+            case 'listar_clientes': 
+                echo json_encode($o->listar_todos_clientes()); 
+                break;
+
+            case 'listar_ejercicios':
+                echo json_encode($o->listar_ejercicios());
                 break;
         }
         exit();

@@ -18,7 +18,7 @@ $(document).ready(function(){
 
     // Capturar el submit del formulario
     $("#formLogin").on("submit", function(e){
-        e.preventDefault(); // Evitamos que recargue la página
+        e.preventDefault(); // evita que recargue la página
         
         if(validarEnvio()){
             var datos = new FormData();
@@ -56,7 +56,7 @@ function enviaAjax(datos){
             try{
                 var lee = JSON.parse(respuesta);
                 if(lee.resultado == 'existe'){
-                    // si el login es exitoso, redirigimos al index para que el front controller nos asigne la vista
+                    // si el login es exitoso, redirige al index para que el front controller asigne la vista
                     window.location.href = "."; 
                 } 
                 else if(lee.resultado == 'noexiste' || lee.resultado == 'error'){

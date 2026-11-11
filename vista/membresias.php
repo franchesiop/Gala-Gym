@@ -67,13 +67,20 @@ require_once("comunes/encabezado.php");
        <div class="modal-body p-4">
             <form id="formMembresia">
                 <input type="hidden" id="idMembresia"> 
+                
                 <div class="mb-3">
                     <label class="form-label small fw-bold">TIPO DE PLAN</label>
                     <input type="text" class="form-control rounded-0" id="nombrePlan" required>
+                    <!-- SPAN PARA EL ERROR DEL NOMBRE -->
+                    <span id="snombrePlan" class="text-danger small"></span>
                 </div>
+                
                 <div class="mb-3">
                     <label class="form-label small fw-bold">COSTO ($)</label>
-                    <input type="number" step="0.01" class="form-control rounded-0" id="costoPlan" required>
+                    <!-- Cambié type="number" a type="text" para que tu validación JS funcione perfecto -->
+                    <input type="text" class="form-control rounded-0" id="costoPlan" required>
+                    <!-- SPAN PARA EL ERROR DEL COSTO -->
+                    <span id="scostoPlan" class="text-danger small"></span>
                 </div>
             </form>
        </div>

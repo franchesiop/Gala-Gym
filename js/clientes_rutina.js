@@ -1,19 +1,28 @@
-// Variable global para almacenar el catalogo de ejercicios
 var catalogoEjercicios = []; 
+var filaEjercicioGlobal = null;
 
 $(document).ready(function(){
 
-    // cargar rutinas y catalogo de ejercicios al iniciar
     consultar();
     cargarCatalogoEjercicios();
 
-    // EVENTOS DEL MODAL DE RUTINAS
+    $("#nombre_rutina").on("keypress", function(e){
+        validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]*$/, e);
+    });
+
+    $("#contenedorEjercicios").on("keypress", ".form-serie-validar", function(e){
+        validarkeypress(/^[0-9]$/, e);
+    });
+
+    $("#contenedorEjercicios").on("keypress", ".form-rep-validar", function(e){
+        validarkeypress(/^[0-9-]$/, e);
+    });
 
     $("#btnNuevaRutina").on("click", function(){
         limpiarFormulario();
-        $("#tituloModalRutina").text("NUEVA RUTINA");
+        $("#tituloModalRutina").text("REGISTRAR");
         $("#accionRutina").val("incluir");
-        $("#btnGuardarRutina").text("GUARDAR RUTINA");
+        $("#btnGuardarRutina").text("GUARDAR");
         
         agregarFilaEjercicio(); 
         $("#modalRutina").modal("show");
@@ -42,10 +51,44 @@ $(document).ready(function(){
         datos.append('id_rutina', id);
         enviaAjax(datos);
     });
+    
+    // ==========================================
+    // LÓGICA DEL MODAL DE EJERCICIOS
+    // ==========================================
+    $("#contenedorEjercicios").on("click", ".btnBuscarEjercicio", function(){
+        filaEjercicioGlobal = $(this).closest('.fila-ejercicio').attr('id');
+        
+        var html = "";
+        if (catalogoEjercicios.length > 0) {
+            $.each(catalogoEjercicios, function(index, ejercicio) {
+                 var rutaImg = (ejercicio.imagen && ejercicio.imagen !== "") ? "img/ejercicios/" + ejercicio.imagen : "img/default.jpg";
+                 
+                 html += `<tr style="cursor:pointer" onclick="colocaejercicio(this);">
+                             <td style="display:none">${ejercicio.id_ejercicio}</td>
+                             <td class="text-center">
+                                <img src="${rutaImg}" alt="img" class="rounded object-fit-cover shadow-sm" style="width: 50px; height: 50px;">
+                             </td>
+                             <td class="text-start fw-bold">${ejercicio.nombre}</td>
+                         </tr>`;
+            });
+        } else {
+            html = `<tr><td colspan="2" class="text-center text-muted py-3">No hay ejercicios registrados</td></tr>`;
+        }
+        $("#listaEjerciciosModal").html(html);
+        $("#modal_ejercicios").modal("show");
+    });
 
-    // INTERACTIVIDAD DEL MODO ENTRENAMIENTO
+    $("#filtrarEjerciciosModal").on("keyup", function() {
+        var valor = $(this).val().toLowerCase();
+        $("#listaEjerciciosModal tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
 
-    // clic directo en un item de la playlist
+
+    // ==========================================
+    // LÓGICA DE ENTRENAMIENTO
+    // ==========================================
     $(document).on("click", ".playlist-item", function(){
         $(".playlist-item").removeClass("bg-white border-dark shadow-sm").addClass("bg-light border-transparent opacity-75");
         $(this).removeClass("bg-light border-transparent opacity-75").addClass("bg-white border-dark shadow-sm");
@@ -97,8 +140,6 @@ $(document).ready(function(){
         }
     });
 
-    // LÓGICA DE RACHAS (BOTÓN RUTINA COMPLETADA)
-
     $("#btnMarcarHecha").on("click", function(e) {
         e.preventDefault();
         
@@ -125,8 +166,7 @@ $(document).ready(function(){
                         $("#mensaje-racha").html('<span class="text-success fs-6">🔥 ¡Racha actual: ' + resp.racha + ' días!</span>');
                         btn.removeClass('btn-success').addClass('btn-secondary').html('<i class="bi bi-check2-all me-2"></i> Registrado');
                         
-                        // ACTUALIZAR EL WIDGET PRINCIPAL SIN RECARGAR LA PÁGINA
-                        actualizarWidgetRacha(resp.racha, 0); // 0 porque si fue éxito, significa que entrenó hoy
+                        actualizarWidgetRacha(resp.racha, 0); 
                         
                     } else {
                         $("#mensaje-racha").html('<span class="text-danger">' + resp.mensaje + '</span>');
@@ -146,8 +186,6 @@ $(document).ready(function(){
     });
 
 });
-
-// FUNCIONES PRINCIPALES
 
 function consultar(){
     var datos = new FormData();
@@ -194,7 +232,6 @@ function enviaAjax(datos){
                 if(lee.resultado == 'consultar'){
                     $("#contenedor_rutinas").html(lee.mensaje);
                     
-                    // inicializar el widget de racha con los datos que trajo la consulta
                     if(lee.racha_actual !== undefined) {
                         actualizarWidgetRacha(lee.racha_actual, lee.dias_diferencia);
                     }
@@ -226,12 +263,9 @@ function enviaAjax(datos){
     });
 }
 
-// NUEVA FUNCIÓN: DIBUJAR CALENDARIO RACHA
-
 function actualizarWidgetRacha(rachaTotal, diasDiferencia) {
     $("#contenedor_racha").removeClass('d-none');
     
-    // actualizar el número global
     $("#badgeRachaGlobal").html("🔥 " + rachaTotal + (rachaTotal == 1 ? " día" : " días") + " seguidos");
     if(rachaTotal > 0) {
         $("#badgeRachaGlobal").removeClass('bg-secondary').addClass('bg-danger');
@@ -242,35 +276,24 @@ function actualizarWidgetRacha(rachaTotal, diasDiferencia) {
     var contenedorCalendario = $("#calendarioRacha");
     contenedorCalendario.empty();
 
-    // nombres de los días de la semana
     var nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
     var fechaActual = new Date();
 
-    // calcula que dias de los ultimos 7 estuvieron activos
-    // diasDiferencia = 0 (entrenó hoy), 1 (entrenó ayer)
     for (var i = 6; i >= 0; i--) {
-        // obtiene la fecha de hace 'i' días
         var d = new Date(fechaActual);
         d.setDate(fechaActual.getDate() - i);
         var nombreDiaStr = nombresDias[d.getDay()];
         
-        // logica para determinar si ese dia debe estar coloreado
-        // i representa cuántos días hacia atras esta evaluando (0 = hoy, 6 = hace 6 días)
-        // si la racha es mayor que 'i' (los días hacia atras) Y no hay un hueco que rompa la racha en ese día...
         var diaEntrenado = false;
         
         if (diasDiferencia === 0) {
-            // entrenó hoy, colorear todos los días que abarque su racha
             if (i < rachaTotal) diaEntrenado = true;
         } else if (diasDiferencia === 1) {
-            // entrenó ayer, hoy (i=0) es gris, los anteriores dependen de la racha
             if (i > 0 && i <= rachaTotal) diaEntrenado = true;
         } else {
-            // faltó 2 o más días. La racha actual es 0 (o 1 si ya entrenó hoy, pero eso cae en diasDiferencia=0). Todo gris.
             diaEntrenado = false;
         }
 
-        // diseño de la bolita del día
         var colorCirculo = diaEntrenado ? "bg-success text-white shadow-sm" : "bg-light text-muted border";
         var etiquetaHover = i === 0 ? "Hoy" : (i === 1 ? "Ayer" : nombreDiaStr);
         var resalteHoy = i === 0 ? "fw-bold" : "";
@@ -288,50 +311,58 @@ function actualizarWidgetRacha(rachaTotal, diasDiferencia) {
     }
 }
 
-// FUNCIONES DE INTERFAZ Y DOM
+// ==========================================
+// SELECCIÓN DE EJERCICIO DESDE MODAL
+// ==========================================
+function colocaejercicio(tr) {
+    var id = $(tr).find("td:eq(0)").text();
+    var nombre = $(tr).find("td:eq(2)").text();
 
-function agregarFilaEjercicio(id_ejercicio, series, reps) {
-    if(id_ejercicio === undefined) id_ejercicio = "";
-    if(series === undefined) series = "";
-    if(reps === undefined) reps = "";
+    var filaDestino = $("#" + filaEjercicioGlobal);
     
-    var idUnicoSelect = "select_ejercicio_" + new Date().getTime() + Math.floor(Math.random() * 1000);
+    filaDestino.find(".input-id-ejercicio").val(id); 
+    filaDestino.find(".input-info-ejercicio").val(nombre); 
+    
+    $("#modal_ejercicios").modal("hide"); 
+}
 
-    var opcionesSelect = '<option value="" disabled selected>Elegir...</option>';
-    $.each(catalogoEjercicios, function(index, ej){
-        var seleccionado = (ej.id_ejercicio == id_ejercicio) ? "selected" : "";
-        opcionesSelect += '<option value="' + ej.id_ejercicio + '" ' + seleccionado + '>' + ej.nombre + '</option>';
-    });
+function agregarFilaEjercicio(id_ejercicio = "", nombre_ejercicio = "", series = "", reps = "") {
+    var idFilaUnico = 'fila_ej_' + new Date().getTime() + Math.floor(Math.random() * 1000); 
+
+    // Buscar el nombre del ejercicio si no viene de parámetro pero sí tenemos el ID
+    if(id_ejercicio !== "" && nombre_ejercicio === "") {
+        $.each(catalogoEjercicios, function(index, ej){
+            if(ej.id_ejercicio == id_ejercicio) {
+                nombre_ejercicio = ej.nombre;
+            }
+        });
+    }
 
     var htmlFila = '' +
-    '<div class="row g-2 align-items-center mb-2 fila-ejercicio">' +
+    '<div class="row g-2 align-items-center mb-2 fila-ejercicio" id="' + idFilaUnico + '">' +
         '<div class="col-md-5">' +
-            '<select id="' + idUnicoSelect + '" class="form-select bg-light border-0 rounded-3 py-2 px-3 shadow-none form-ejercicio-validar" name="id_ejercicio[]" required>' +
-                opcionesSelect +
-            '</select>' +
+            '<div class="input-group shadow-sm">' +
+                '<input type="hidden" class="input-id-ejercicio form-ejercicio-validar" name="id_ejercicio[]" value="' + id_ejercicio + '">' +
+                '<input type="text" class="form-control bg-light border-0 rounded-start-3 py-2 px-3 input-info-ejercicio" placeholder="Seleccione..." value="' + nombre_ejercicio + '" readonly required>' +
+                '<button class="btn btn-dark rounded-end-3 px-3 btnBuscarEjercicio" type="button">' +
+                    '<i class="bi bi-search"></i>' +
+                '</button>' +
+            '</div>' +
         '</div>' +
         '<div class="col-md-3">' +
-            '<input type="number" class="form-control bg-light border-0 rounded-3 py-2 px-3 shadow-none text-center form-serie-validar" name="series[]" placeholder="Ej: 4" value="' + series + '" min="1" required>' +
+            '<input type="text" class="form-control bg-light border-0 rounded-3 py-2 px-3 shadow-sm text-center form-serie-validar" name="series[]" placeholder="Ej: 4" value="' + series + '" required>' +
         '</div>' +
         '<div class="col-md-3">' +
-            '<input type="number" class="form-control bg-light border-0 rounded-3 py-2 px-3 shadow-none text-center form-rep-validar" name="reps[]" placeholder="Ej: 12" value="' + reps + '" min="1" required>' +
+            '<input type="text" class="form-control bg-light border-0 rounded-3 py-2 px-3 shadow-sm text-center form-rep-validar" name="reps[]" placeholder="Ej: 10-12" value="' + reps + '" required>' +
         '</div>' +
         '<div class="col-md-1 text-center">' +
-            '<button type="button" class="btn btn-light text-danger border-0 rounded-circle btn-eliminar-fila p-2" title="Eliminar fila">' +
+            '<button type="button" class="btn btn-light text-danger border-0 rounded-circle shadow-sm btn-eliminar-fila p-2" title="Eliminar fila">' +
                 '<i class="bi bi-x-lg fw-bold"></i>' +
             '</button>' +
         '</div>' +
     '</div>';
     
     $("#contenedorEjercicios").append(htmlFila);
-
-    $("#" + idUnicoSelect).select2({
-        theme: 'bootstrap-5',
-        dropdownParent: $('#modalRutina'),
-        width: '100%',
-        placeholder: 'Escribe para buscar...',
-        minimumInputLength: 1 
-    });
 }
 
 function limpiarFormulario(){
@@ -346,10 +377,19 @@ function mostrarMensaje(mensaje){
     setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
 }
 
+function validarkeypress(er, e) {
+    var key = e.keyCode || e.which;
+    var tecla = String.fromCharCode(key);
+    var a = er.test(tecla);
+    if (!a) { e.preventDefault(); }
+}
+
 function validarEnvioRutina() {
     var nombre = $("#nombre_rutina").val().trim();
-    if (nombre.length < 3) {
-        mostrarMensaje("El nombre de la rutina debe tener al menos 3 caracteres.");
+    var regexNombre = /^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/;
+    
+    if (!regexNombre.test(nombre)) {
+        mostrarMensaje("El nombre de la rutina es inválido (letras/números, entre 3 y 100 caracteres).");
         return false;
     }
 
@@ -360,21 +400,26 @@ function validarEnvioRutina() {
     }
 
     var camposValidos = true;
-    $(".form-ejercicio-validar, .form-serie-validar, .form-rep-validar").each(function() {
-        if ($(this).val() === "" || $(this).val() === null) {
+    var regexSeries = /^[0-9]{1,3}$/;
+    var regexReps = /^[0-9]{1,3}(-[0-9]{1,3})?$/;
+
+    $(".fila-ejercicio").each(function() {
+        var ej = $(this).find(".input-id-ejercicio").val();
+        var ser = $(this).find(".form-serie-validar").val();
+        var rep = $(this).find(".form-rep-validar").val();
+        
+        if (ej === null || ej === "" || !regexSeries.test(ser) || !regexReps.test(rep)) {
             camposValidos = false;
         }
     });
 
     if (!camposValidos) {
-        mostrarMensaje("Por favor, completa todos los campos de los ejercicios.");
+        mostrarMensaje("Revisa los ejercicios. Asegúrate de haber seleccionado un ejercicio y colocado series/reps válidas.");
         return false;
     }
 
     return true;
 }
-
-// FUNCIONES INVOCADAS DESDE LAS TARJETAS HTML
 
 function editarRutina(id_rutina) {
     var datos = new FormData();
@@ -393,13 +438,14 @@ function editarRutina(id_rutina) {
             limpiarFormulario();
             $("#tituloModalRutina").text("EDITAR RUTINA");
             $("#accionRutina").val("modificar");
-            $("#btnGuardarRutina").text("ACTUALIZAR RUTINA");
+            $("#btnGuardarRutina").text("MODIFICAR");
             
             $("#id_rutina").val(data.id_rutina);
             $("#nombre_rutina").val(data.nombre);
             
             $.each(data.ejercicios, function(index, ej){
-                agregarFilaEjercicio(ej.id_ejercicio, ej.series, ej.reps);
+                // Le pasamos el nombre_ejercicio para que se pinte en el input readonly de inmediato
+                agregarFilaEjercicio(ej.id_ejercicio, ej.nombre_ejercicio, ej.series, ej.reps);
             });
             
             $("#modalRutina").modal("show");
@@ -449,7 +495,7 @@ function abrirEntrenamiento(id_rutina, nombre_rutina) {
                          'data-series="' + ej.series + '" ' +
                          'data-reps="' + ej.reps + '">' +
                         '<div class="card-body p-3 d-flex align-items-center gap-3">' +
-                            '<div class="rounded bg-dark text-white d-flex justify-content-center align-items-center fw-bold" style="width: 45px; height: 45px; flex-shrink: 0;">' +
+                            '<div class="rounded bg-dark text-white d-flex justify-content-center align-items-center fw-bold shadow-sm" style="width: 45px; height: 45px; flex-shrink: 0;">' +
                                 (index + 1) +
                             '</div>' +
                             '<div>' +
