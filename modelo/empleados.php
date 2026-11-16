@@ -57,47 +57,45 @@ class empleados extends datos {
     }
 
      function modificar(){
-    $co = $this->conecta();
-    $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $r = array();
+        $co = $this->conecta();
+        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $r = array();
 
-    if($this->existe($this->cedulaEmpleado)){
-        try{
-            // verifica si se escribio una nueva contraseña
-            if (!empty($this->contraEmpleado)) {
-                // si hay contrasena se hashea y la incluye en el update
-                $passwordHasheado = password_hash($this->contraEmpleado, PASSWORD_DEFAULT);
-                $sql = "UPDATE empleado SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
-                        correo = :correo, id_rol = :id_rol, contrasena = :contrasena WHERE cedula = :cedula";
-                $mod = $co->prepare($sql);
-                $mod->bindParam(':contrasena', $passwordHasheado);
-            } else {
-                // si no hay contrasena hacemos update de todo menos la contr
-                $sql = "UPDATE empleado SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
-                        correo = :correo, id_rol = :id_rol WHERE cedula = :cedula";
-                $mod = $co->prepare($sql);
+        if($this->existe($this->cedulaEmpleado)){
+            try{
+                // verifica si se escribio una nueva contraseña
+                if (!empty($this->contraEmpleado)) {
+                    $passwordHasheado = password_hash($this->contraEmpleado, PASSWORD_DEFAULT);
+                    $sql = "UPDATE empleado SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
+                            correo = :correo, id_rol = :id_rol, contrasena = :contrasena WHERE cedula = :cedula";
+                    $mod = $co->prepare($sql);
+                    $mod->bindParam(':contrasena', $passwordHasheado);
+                } else {
+                    $sql = "UPDATE empleado SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
+                            correo = :correo, id_rol = :id_rol WHERE cedula = :cedula";
+                    $mod = $co->prepare($sql);
+                }
+
+                $mod->bindParam(':cedula', $this->cedulaEmpleado);
+                $mod->bindParam(':nombre', $this->nombreEmpleado);
+                $mod->bindParam(':apellido', $this->apellidoEmpleado);
+                $mod->bindParam(':telefono', $this->tlfEmpleado);
+                $mod->bindParam(':correo', $this->correoEmpleado);
+                $mod->bindParam(':id_rol', $this->rolEmpleado);
+                $mod->execute();
+                
+                $r['resultado'] = 'modificar';
+                $r['mensaje'] = 'Empleado Modificado';
+            } catch(Exception $e){
+                $r['resultado'] = 'error';
+                $r['mensaje'] = $e->getMessage();
             }
-
-            $mod->bindParam(':cedula', $this->cedulaEmpleado);
-            $mod->bindParam(':nombre', $this->nombreEmpleado);
-            $mod->bindParam(':apellido', $this->apellidoEmpleado);
-            $mod->bindParam(':telefono', $this->tlfEmpleado);
-            $mod->bindParam(':correo', $this->correoEmpleado);
-            $mod->bindParam(':id_rol', $this->rolEmpleado);
-            $mod->execute();
-            
+        } else {
             $r['resultado'] = 'modificar';
-            $r['mensaje'] = 'Empleado Modificado';
-        } catch(Exception $e){
-            $r['resultado'] = 'error';
-            $r['mensaje'] = $e->getMessage();
+            $r['mensaje'] = 'La Cedula No Existe';
         }
-    } else {
-        $r['resultado'] = 'modificar';
-        $r['mensaje'] = 'La Cedula No Existe';
+        return $r;
     }
-    return $r;
-}
 
      function eliminar(){
         $co = $this->conecta();
@@ -122,46 +120,22 @@ class empleados extends datos {
         }
         return $r;
     }
+
    function consultar(){
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $r = array();
         try{
+            // Traemos los datos puros incluyendo el nombre del rol mediante el JOIN
             $resultado = $co->query("SELECT e.*, r.nombre AS nombre_rol FROM empleado e LEFT JOIN rol r ON e.id_rol = r.id_rol WHERE e.estado = 1");
             if($resultado){
-                $respuesta = '';
-                foreach($resultado as $fila){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td>" . $fila['cedula'] . "</td>";
-                    $respuesta .= "<td>" . $fila['nombre'] . "</td>";
-                    $respuesta .= "<td>" . $fila['apellido'] . "</td>";
-                    $respuesta .= "<td>" . $fila['nombre_rol'] . "</td>";
-                    $respuesta .= "<td>" . $fila['telefono'] . "</td>";
-                    $respuesta .= "<td style='display:none'>" . $fila['correo'] . "</td>";
-                    $respuesta .= "<td style='display:none'>" . $fila['id_rol'] . "</td>";
-                   // $respuesta .= "<td>" . $fila['contrasena'] . "</td>";
-                    $respuesta .= "<td>";
-                        $respuesta .= "<div class='d-flex justify-content-center'>";
-                        $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>";
-                        $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
-                if($respuesta == ""){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td colspan = '5' class='text-center text-muted py-4>'";
-                    $respuesta .= "<span><i class='bi bi-person-fill fs-1' style='color: #17120b'></i></span>";
-                    $respuesta .= "<h5 class= 'text-dashboard'> No hay empleados registrados </h5>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
+                $datos = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = $respuesta;
+                $r['mensaje'] = $datos; 
             } else {
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = '';
+                $r['mensaje'] = [];
             }
         } catch(Exception $e){
             $r['resultado'] = 'error';
@@ -193,7 +167,7 @@ class empleados extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            $resultado = $co->query("SELECT id_rol, nombre FROM rol");
+            $resultado = $co->query("SELECT id_rol, nombre FROM rol WHERE id_rol != 2");
             $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
         } catch(Exception $e) {
             $datos = [];

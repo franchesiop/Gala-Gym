@@ -1,0 +1,55 @@
+.login-bg {
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), 
+        url("../img/imagengimnasio.webp");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Efecto hover en los enlaces del menú */
+#sidebarMenu .nav-link {
+    transition: background-color 0.2s ease;
+}
+
+#sidebarMenu .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Menú desplegable flotante en celulares */
+@media (max-width: 767.98px) {
+    #sidebarMenu {
+        position: fixed;
+        top: 52px;
+        left: 0;
+        width: 260px;
+        min-height: auto !important;
+        z-index: 1050;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Paginación de DataTables en negro */
+.dataTables_wrapper .page-item.active .page-link,
+.dt-container .page-item.active .page-link {
+    background-color: #212529 !important;
+    border-color: #212529 !important;
+    color: #ffffff !important;
+}
+
+.dataTables_wrapper .page-link,
+.dt-container .page-link {
+    color: #212529 !important;
+}
+
+.dataTables_wrapper .page-link:hover,
+.dt-container .page-link:hover {
+    background-color: #e9ecef !important;
+    color: #000000 !important;
+}
+
+.dataTables_wrapper .page-link:focus,
+.dt-container .page-link:focus {
+    box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.25) !important;
+}

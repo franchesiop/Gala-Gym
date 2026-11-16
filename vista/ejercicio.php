@@ -14,42 +14,27 @@ require_once("comunes/encabezado.php");
             </div>
             
             <div class="bg-white p-4 shadow-sm border">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-activity"></i> Ejercicios</h6>
-                    
-                    <!-- Buscador en tiempo real y botón de registro -->
-                    <div class="d-flex gap-2 align-items-center" style="max-width: 450px; width: 100%;">
-                        <input type="text" class="form-control form-control-sm rounded-0" id="buscar_ejercicio" placeholder="Buscar...">
-                        <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap" id="btnNuevoEjercicio">
-                            REGISTRAR
-                        </button>
-                    </div>
-                </div>
+                
+                <!-- Botón de registrar suelto (DataTables inyectará su buscador y selector arriba automáticamente) -->
+                <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap mb-3" id="btnNuevoEjercicio">
+                    REGISTRAR
+                </button>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle small">
+                    <table class="table table-hover align-middle small w-100" id="tablaEjercicios">
                         <thead class="table-light">
                             <tr class="text-muted">
-                                <th style="display:none">ID DEL EJERCICIO</th>
+                                <th class="d-none">ID DEL EJERCICIO</th>
                                 <th style="width: 80px;"><i class="bi bi-image"></i> FOTO</th>
                                 <th><i class="bi bi-card-text"></i> NOMBRE</th>
                                 <th><i class="bi bi-file-text"></i> DESCRIPCIÓN</th>
                                 <th class="text-center" style="width: 120px;"><i class="bi bi-gear"></i> OPCIONES</th>
                             </tr>
                         </thead>
-                        <tbody class="fw-bold" id="tablaEjercicios"></tbody>
+                        <tbody class="fw-bold"></tbody>
                     </table>
                 </div>
 
-                <!-- Paginación dinámica (Estándar Bootstrap) -->
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-                    <span class="text-muted small" id="infoPaginacion">Mostrando 0 ejercicios</span>
-                    <nav>
-                        <ul class="pagination pagination-sm m-0" id="contenedorPaginacion">
-                            <!-- Los botones se generan dinámicamente por JS -->
-                        </ul>
-                    </nav>
-                </div>
             </div>
         </main>
     </div>
@@ -107,8 +92,6 @@ require_once("comunes/encabezado.php");
 </div>
 
 <?php 
-require_once("comunes/modal.php");
-require_once("comunes/modal_eliminar.php");
 require_once("comunes/pie.php"); 
 ?>
-<script src="js/ejercicio.js?v=<?php echo time(); ?>"></script>
+<script src="js/ejercicio.js"></script>

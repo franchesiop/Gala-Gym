@@ -1,19 +1,17 @@
 <?php
-require_once('dompdf/vendor/autoload.php'); 
+require_once('dompdf/vendor/autoload.php'); // importamos la libreria para volver el html a pdf
 use Dompdf\Dompdf; 
 require_once('modelo/datos.php');
 
+// aqui se hereda la conexion PDO a la bd
 class admin extends datos {
-    
-    private $filtro_membresia;
+    // encapsulamiento
     private $fecha_inicio;
     private $fecha_fin;
-    private $filtro_rol;
-    
-    function set_filtro_membresia($v) { $this->filtro_membresia = $v; }
+     // métodos set_* públicos con los que controlador/admin.php le 
+     // transfiere las fechas recibidas del formulario
     function set_fecha_inicio($v) { $this->fecha_inicio = $v; }
     function set_fecha_fin($v) { $this->fecha_fin = $v; }
-    function set_filtro_rol($v) { $this->filtro_rol = $v; }
 
     function contarClientes(){
         try {
@@ -37,6 +35,32 @@ class admin extends datos {
         }
     }
 
+    function obtenerEstadisticasPagos(){
+        try {
+            $co = $this->conecta();
+            // Calcula los totales y cuenta los estados en una sola consulta
+            $sql = $co->query("SELECT 
+                SUM(CASE WHEN estado_pago = 1 THEN monto ELSE 0 END) as total_ingresos,
+                AVG(CASE WHEN estado_pago = 1 THEN monto ELSE 0 END) as promedio_ingresos,
+                SUM(CASE WHEN estado_pago = 1 THEN 1 ELSE 0 END) as aprobados,
+                SUM(CASE WHEN estado_pago = 0 THEN 1 ELSE 0 END) as pendientes,
+                SUM(CASE WHEN estado_pago = 2 THEN 1 ELSE 0 END) as rechazados
+                FROM pago");
+            $resultado = $sql->fetch(PDO::FETCH_ASSOC);
+            
+            // Validar nulos si la tabla está vacía
+            if(!$resultado['total_ingresos']) $resultado['total_ingresos'] = 0;
+            if(!$resultado['promedio_ingresos']) $resultado['promedio_ingresos'] = 0;
+            if(!$resultado['aprobados']) $resultado['aprobados'] = 0;
+            if(!$resultado['pendientes']) $resultado['pendientes'] = 0;
+            if(!$resultado['rechazados']) $resultado['rechazados'] = 0;
+            
+            return $resultado;
+        } catch(Exception $e) {
+            return array('total_ingresos'=>0, 'promedio_ingresos'=>0, 'aprobados'=>0, 'pendientes'=>0, 'rechazados'=>0);
+        }
+    }
+
     private function getEstilosPDF() {
         return '<style>
                     body { font-family: "Helvetica", "Arial", sans-serif; font-size: 12px; color: #333; margin: 0; padding: 0; }
@@ -51,140 +75,18 @@ class admin extends datos {
                 </style>';
     }
 
-    function generarPDF_Clientes(){
-        $co = $this->conecta();
-        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        try{
-            $sql = "SELECT c.cedula, c.nombre, c.apellido, c.telefono, m.tipo 
-                    FROM cliente c 
-                    LEFT JOIN membresia m ON c.id_membresia = m.id_membresia 
-                    WHERE c.estado = 1";
-            
-            if(!empty($this->filtro_membresia)){
-                $sql .= " AND c.id_membresia = :id_mem";
-                $resultado = $co->prepare($sql);
-                $resultado->bindParam(':id_mem', $this->filtro_membresia);
-            } else {
-                $resultado = $co->prepare($sql);
-            }
-            
-            $resultado->execute();
-            $fila = $resultado->fetchAll(PDO::FETCH_BOTH);
-            $fecha = date("d/m/Y H:i");
-
-            $html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'.$this->getEstilosPDF().'</head><body>';
-            $html .= '<div class="header">
-                        <h2>Reporte de Clientes Activos</h2>
-                        <p>Gala Gym - Generado el: '.$fecha.'</p>
-                      </div>';
-            $html .= "<table><thead><tr>
-                        <th>Cédula</th>
-                        <th>Nombre y Apellido</th>
-                        <th>Teléfono</th>
-                        <th>Membresía</th>
-                      </tr></thead><tbody>";
-                      
-            if($fila){
-                foreach($fila as $f){
-                    $html .= "<tr>";
-                    $html .= "<td>".$f['cedula']."</td>";
-                    $html .= "<td>".$f['nombre']." ".$f['apellido']."</td>";
-                    $html .= "<td>".$f['telefono']."</td>";
-                    $html .= "<td>".($f['tipo'] ? $f['tipo'] : 'Sin Membresía')."</td>";
-                    $html .= "</tr>";
-                }
-            } else {
-                $html .= "<tr><td colspan='4'>No hay clientes registrados o activos.</td></tr>";
-            }
-            
-            $html .= "</tbody></table><div class='footer'>Documento generado por el Sistema Gala Gym</div></body></html>";
-            
-        } catch(Exception $e){
-            $html = "Error: " . $e->getMessage();
-        }
- 
-        $pdf = new DOMPDF();
-        $pdf->set_paper("A4", "portrait");
-        $pdf->load_html($html); 
-        $pdf->render();
-        $pdf->stream('Clientes_GalaGym.pdf', array("Attachment" => false));
-    }
-
-
-    function generarPDF_Empleados(){
-        $co = $this->conecta();
-        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        try{
-            $sql = "SELECT e.cedula, e.nombre, e.apellido, e.telefono, r.nombre as rol 
-                    FROM empleado e 
-                    LEFT JOIN rol r ON e.id_rol = r.id_rol 
-                    WHERE e.estado = 1";
-            
-            if(!empty($this->filtro_rol)){
-                $sql .= " AND e.id_rol = :id_rol";
-                $resultado = $co->prepare($sql);
-                $resultado->bindParam(':id_rol', $this->filtro_rol);
-            } else {
-                $resultado = $co->prepare($sql);
-            }
-            
-            $resultado->execute();
-            $fila = $resultado->fetchAll(PDO::FETCH_BOTH);
-            $fecha = date("d/m/Y H:i");
-            
-            $html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'.$this->getEstilosPDF().'</head><body>';
-            $html .= '<div class="header">
-                        <h2>Reporte de Personal (Staff)</h2>
-                        <p>Gala Gym - Generado el: '.$fecha.'</p>
-                      </div>';
-            $html .= "<table><thead><tr>
-                        <th>Cédula</th>
-                        <th>Nombre y Apellido</th>
-                        <th>Teléfono</th>
-                        <th>Rol / Cargo</th>
-                      </tr></thead><tbody>";
-                      
-            if($fila){
-                foreach($fila as $f){
-                    $html .= "<tr>";
-                    $html .= "<td>".$f['cedula']."</td>";
-                    $html .= "<td>".$f['nombre']." ".$f['apellido']."</td>";
-                    $html .= "<td>".$f['telefono']."</td>";
-                    $html .= "<td>".($f['rol'] ? $f['rol'] : 'Sin Rol')."</td>";
-                    $html .= "</tr>";
-                }
-            } else {
-                $html .= "<tr><td colspan='4'>No hay personal registrado o activo en este filtro.</td></tr>";
-            }
-            
-            $html .= "</tbody></table><div class='footer'>Documento generado por el Sistema Gala Gym</div></body></html>";
-            
-        } catch(Exception $e){
-            $html = "Error: " . $e->getMessage();
-        }
- 
-        $pdf = new DOMPDF();
-        $pdf->set_paper("A4", "portrait");
-        $pdf->load_html($html); 
-        $pdf->render();
-        $pdf->stream('Staff_GalaGym.pdf', array("Attachment" => false));
-    }
-
-
     function generarPDF_Pagos(){
         $co = $this->conecta();
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         try{
             $sql = "SELECT p.fecha, p.monto, p.referencia, c.nombre, c.apellido, m.banco 
-        FROM pago p 
-        INNER JOIN cliente c ON p.id_cliente = c.id_cliente 
-        INNER JOIN metodos_pago m ON p.id_metodo = m.id_metodo 
-        WHERE p.fecha BETWEEN :f_inicio AND :f_fin 
-        AND p.estado_pago = 1 
-        ORDER BY p.fecha DESC";
+                    FROM pago p 
+                    INNER JOIN cliente c ON p.id_cliente = c.id_cliente 
+                    INNER JOIN metodos_pago m ON p.id_metodo = m.id_metodo 
+                    WHERE p.fecha BETWEEN :f_inicio AND :f_fin 
+                    AND p.estado_pago = 1 
+                    ORDER BY p.fecha DESC";
                     
             $resultado = $co->prepare($sql);
             $resultado->bindParam(':f_inicio', $this->fecha_inicio);
@@ -224,7 +126,7 @@ class admin extends datos {
                             <td>$".number_format($total_ingresos, 2)."</td>
                           </tr>";
             } else {
-                $html .= "<tr><td colspan='5'>No hay pagos en este rango de fechas.</td></tr>";
+                $html .= "<tr><td colspan='5'>No hay pagos aprobados en este rango de fechas.</td></tr>";
             }
             
             $html .= "</tbody></table><div class='footer'>Documento generado por el Sistema Gala Gym</div></body></html>";

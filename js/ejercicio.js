@@ -1,10 +1,66 @@
-var paginaActual = 1;
-var filasPorPagina = 10;
+// Variable global para controlar la instancia de DataTables
+var tablaEjercicios;
 
 function consultar(){
-    var datos = new FormData();
-    datos.append('accion', 'consultar');
-    enviaAjax(datos);
+    if ($.fn.DataTable.isDataTable('#tablaEjercicios')) {
+        tablaEjercicios.ajax.reload(null, false);
+        return;
+    }
+
+    tablaEjercicios = $('#tablaEjercicios').DataTable({
+        autoWidth: false,
+        order: [],                       // Sin orden inicial por defecto
+        lengthChange: false,             // Quita el selector de cantidad de registros por defecto
+        layout: {
+            topStart: { div: { html: '<h6 class="fw-bold text-uppercase m-0"><i class="bi bi-activity"></i> Ejercicios</h6>' } },
+            topEnd: [
+                { search: { placeholder: 'Buscar...', text: '' } },
+                document.getElementById('btnNuevoEjercicio')
+            ]
+        },
+        ajax: {
+            url: "index.php?pagina=ejercicio",
+            type: "POST",
+            data: function (d) { d.accion = 'consultar'; },
+            dataSrc: "mensaje" // Los datos puros en formato JSON vienen en 'mensaje'
+        },
+        columns: [
+            { data: "id_ejercicio", visible: false }, // 0: ID Oculto
+            { 
+                data: "imagen",                       // 1: Foto (Visible)
+                orderable: false,
+                className: "text-center",
+                render: function (data) {
+                    var img = (data && data !== "" && data !== null) ? data : 'img/default.jpg';
+                    return `<img src='${img}' alt='ejercicio' style='width:45px; height:45px; object-fit:cover; border-radius:6px;' class='shadow-sm border'>`;
+                }
+            },
+            { data: "nombre" },                       // 2: Nombre (Visible)
+            { 
+                data: "descripcion",                  // 3: Descripción (Visible)
+                render: function (data) {
+                    if (!data || data.trim() === "") {
+                        return '<span class="text-muted fst-italic">Sin descripción</span>';
+                    }
+                    return `<div style='max-height: 45px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>${data}</div>`;
+                }
+            },
+            {
+                data: null,                           // 4: Opciones (Visible)
+                orderable: false,
+                className: "text-center",
+                render: function () {
+                    return `<div class='d-flex justify-content-center'>
+                                <button type='button' class='btn btn-dark text-white small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>
+                                <button type='button' class='btn btn-danger small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>
+                            </div>`;
+                }
+            }
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+        }
+    });
 }
 
 $(document).ready(function(){
@@ -44,49 +100,24 @@ $(document).ready(function(){
         }
     });
 
-    // Buscador en tiempo real
-    $("#buscar_ejercicio").on("keyup", function() {
-        var valor = $(this).val().toLowerCase();
-        var filasFiltradas = 0;
-        
-        $("#tablaEjercicios tr").filter(function() {
-            var coincide = $(this).find("td:eq(2)").text().toLowerCase().indexOf(valor) > -1;
-            $(this).toggle(coincide);
-            if(coincide) filasFiltradas++;
-        });
-
-        if(valor === ""){
-            paginarTabla(1);
-        } else {
-            $("#infoPaginacion").text("Mostrando resultados de búsqueda (" + filasFiltradas + ")");
-            $("#contenedorPaginacion").empty(); 
-        }
-    });
-
     // Validacion nombre
-   // Validacion nombre
     $("#nombre_ejercicio").on("keypress", function(e){
-        // Regex para un solo carácter: Letras, acentos, ñ y espacios (sin 0-9)
         validarkeypress(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]$/, e);
     });
     
     $("#nombre_ejercicio").on("keyup", function(){
-        // Regex para la cadena completa: Solo letras, de 3 a 100 caracteres
         validarkeyup(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,100}$/, $(this), $("#snombre_ejercicio"), "Solo se aceptan letras (entre 3 y 100 caracteres)");
     });
 
     // Botones
     $("#btnGuardar").on("click", function() {
-        // guardar
         if($(this).text().toUpperCase() == 'INCLUIR' || $(this).text() == 'incluir'){
             if(validarEnvio()){
-                // Usamos el formulario completo para que capture la imagen automáticamente
                 var datos = new FormData($("#formEjercicios")[0]);
                 datos.append('accion', 'incluir');
                 enviaAjax(datos);
             }
         }
-        // modificar
         else if($(this).text().toUpperCase() == 'MODIFICAR' || $(this).text() == 'modificar'){
             if(validarEnvio()){
                 var datos = new FormData($("#formEjercicios")[0]);
@@ -102,22 +133,10 @@ $(document).ready(function(){
         $("#modalUsuario").modal("show");
     });
 
-    $("#btnConfirmarEliminar").on("click", function(){
-        var id = $("#id_eliminar_global").val(); 
-        
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('id_ejercicio', id);
-        
-        enviaAjax(datos);
-    });
-
 });
 
 // Validar antes de enviar
-// Validar antes de enviar
 function validarEnvio() {
-    // validar nombre (Actualizado sin el 0-9)
     if(validarkeyup(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,100}$/, $("#nombre_ejercicio"), $("#snombre_ejercicio"), "Solo letras (Entre 3 y 100 caracteres)") == 0){
         mostrarMensaje("Nombre Inválido <br>" + "(Solo se permiten letras, entre 3 y 100 caracteres)");
         return false;
@@ -125,12 +144,7 @@ function validarEnvio() {
     return true;
 }
 
-// Funcion para mostrar el mensaje modal
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje);
-    $("#mostrarModal").modal("show");
-    setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
-}
+
 
 // Funcion para validar por keypress
 function validarkeypress(er,e){
@@ -154,41 +168,33 @@ function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
     }
 }
 
-// Funcion para llenar el formulario
+// Funcion para llenar el formulario usando DataTables
 function pone(pos){
-    linea = $(pos).closest('tr');
-    
-    var id = linea.find("td:eq(0)").text();
-    var srcImagen = linea.find("td:eq(1) img").attr("src"); 
-    var nombre = linea.find("td:eq(2)").text();
-    var descripcion = linea.find("td:eq(4)").text(); // El td 4 es el texto oculto limpio (sin HTML)
+    var d = tablaEjercicios.row($(pos).closest('tr')).data();
 
-    $("#id_ejercicio").val(id);
-    $("#nombre_ejercicio").val(nombre);
-    $("#descripcion_ejercicio").val(descripcion !== "Sin descripción" ? descripcion : "");
+    $("#id_ejercicio").val(d.id_ejercicio);
+    $("#nombre_ejercicio").val(d.nombre);
+    $("#descripcion_ejercicio").val(d.descripcion ? d.descripcion : "");
     
-    if(srcImagen) { 
-        $("#vista_previa").attr("src", srcImagen); 
-    } else { 
-        $("#vista_previa").attr("src", "img/default.jpg"); 
-    }
+    var srcImagen = (d.imagen && d.imagen !== "") ? d.imagen : "img/default.jpg";
+    $("#vista_previa").attr("src", srcImagen);
 
     $("#btnGuardar").text('MODIFICAR');
     $("#modalUsuario").modal("show");
 }
 
 function eliminar(pos){
-    var linea = $(pos).closest('tr');
-    var id = $(linea).find("td:eq(0)").text();
+    var d = tablaEjercicios.row($(pos).closest('tr')).data();
 
-    // Guardamos el ID en el input oculto del modal generico
-    $("#id_eliminar_global").val(id);
-    
-    // Mostramos el modal de Bootstrap
-    $("#modal_eliminar").modal("show");
+    alertaEliminar(function() {
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('id_ejercicio', d.id_ejercicio);
+        enviaAjax(datos);
+    });
 }
 
-// Funcion Ajax estandarizada a la estructura de clientes
+// Funcion Ajax estandarizada
 function enviaAjax(datos){
     $.ajax({
         async: true,
@@ -205,8 +211,7 @@ function enviaAjax(datos){
             try{
                 var lee = JSON.parse(respuesta);
                 if(lee.resultado == 'consultar'){
-                    $("#tablaEjercicios").html(lee.mensaje);
-                    paginarTabla(1);
+                    // DataTables gestiona el refresco automático
                 } 
                 else if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
@@ -225,7 +230,6 @@ function enviaAjax(datos){
                 else if(lee.resultado == 'eliminar'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Ejercicio Eliminado'){
-                        $("#modal_eliminar").modal("hide");
                         consultar();
                     }
                 } 
@@ -245,45 +249,6 @@ function enviaAjax(datos){
         },
         complete: function () {},
     });
-}
-
-// logica de paginacion matematica exacta (< 1 2 3 ... >)
-function paginarTabla(pagina) {
-    paginaActual = pagina;
-    var filas = $("#tablaEjercicios tr");
-    var totalFilas = filas.length;
-    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
-    
-    var inicio = (paginaActual - 1) * filasPorPagina;
-    var fin = inicio + filasPorPagina;
-
-    filas.hide().slice(inicio, fin).show();
-    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " ejercicios");
-
-    var htmlBotones = "";
-
-    // Boton <
-    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
-
-    // Numeros y puntos suspensivos (...)
-    var l = null;
-    for (var i = 1; i <= totalPaginas; i++) {
-        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
-            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
-            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
-            l = i;
-        } else if (l != null && i != l + 1 && l != '...') {
-            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
-            l = '...';
-        }
-    }
-
-    // Boton >
-    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
-
-    $("#contenedorPaginacion").html(htmlBotones);
 }
 
 function limpia(){

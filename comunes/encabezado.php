@@ -1,3 +1,4 @@
+<!-- estructura del html y links a librerias-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,7 +8,8 @@
     
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="icons/bootstrap-icons.css">
-    <link href="css/select2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="DataTables/datatables.min.css" rel="stylesheet">
     
     </head>
-<body>
+<body> 

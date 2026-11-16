@@ -1,20 +1,94 @@
-var paginaActual = 1;
-var filasPorPagina = 10;
+// Variable global para controlar la instancia de DataTables
+var tablaPagos;
 
 function consultar(){
-    var datos = new FormData();
-    datos.append('accion', 'consultar');
-    enviaAjax(datos);
+    if ($.fn.DataTable.isDataTable('#tablaPagos')) {
+        tablaPagos.ajax.reload(null, false);
+        return;
+    }
+
+    tablaPagos = $('#tablaPagos').DataTable({
+        autoWidth: false,
+        order: [],                       // Sin orden inicial por defecto
+        lengthChange: false,             // Quita el selector "Mostrar X registros" por defecto (dejando el layout limpio)
+        layout: {
+            topStart: { div: { html: '<h6 class="fw-bold text-uppercase m-0"><i class="bi bi-cash-coin"></i> Gestión de Pagos</h6>' } },
+            topEnd: [
+                { search: { placeholder: 'Buscar...', text: '' } },
+                document.getElementById('btnNuevoPago')
+            ]
+        },
+        ajax: {
+            url: "index.php?pagina=clientes_pagos",
+            type: "POST",
+            data: function (d) { d.accion = 'consultar'; },
+            dataSrc: "mensaje" // Los datos puros vienen en el arreglo asociativo 'mensaje'
+        },
+        columns: [
+            { data: "id_pago",      visible: false }, // Columna oculta para referencias internas
+            { data: "cedula",       visible: false }, // Columna oculta para búsquedas por cédula
+            { data: "fecha",        type: "string" },
+            { 
+                data: null,
+                render: function (data, type, row) {
+                    return row.nombre + " " + row.apellido;
+                }
+            },
+            { data: "referencia",   type: "string" },
+            { 
+                data: "monto",
+                render: function (data) {
+                    return "$" + data;
+                }
+            },
+            { 
+                data: "estado_pago",
+                className: "text-center",
+                render: function (data) {
+                    if (data == 0) {
+                        return "<span class='badge bg-warning text-dark'>Pendiente</span>";
+                    } else if (data == 1) {
+                        return "<span class='badge bg-success'>Aprobado</span>";
+                    } else {
+                        return "<span class='badge bg-danger'>Rechazado</span>";
+                    }
+                }
+            },
+            {
+                data: null,
+                orderable: false,
+                className: "text-center",
+                render: function (data, type, row) {
+                    // Preparamos los atributos data-* para la función ver_detalles
+                    var datosModal = `data-fecha='${row.fecha}' data-cliente='${row.nombre} ${row.apellido}' data-cedula='${row.cedula}' data-referencia='${row.referencia}' data-monto='${row.monto}' data-metodo='${row.metodo}' data-mcedula='${row.metodo_cedula}' data-mtelefono='${row.metodo_telefono}'`;
+                    
+                    var btnDetalles = `<button type='button' class='btn btn-dark btn-sm rounded-0 fw-bold m-1' onclick='ver_detalles(this)' title='Ver Detalles' ${datosModal}><i class='bi bi-receipt me-1'></i> DETALLES</button>`;
+
+                    if (row.estado_pago == 0) {
+                        return `<div class='d-flex justify-content-center'>
+                                    ${btnDetalles}
+                                    <button type='button' class='btn btn-success text-white small-width m-1' onclick='aprobar_pago(this)' title='Aprobar'><i class='bi bi-check-circle'></i></button>
+                                    <button type='button' class='btn btn-danger small-width m-1' onclick='rechazar_pago(this)' title='Rechazar'><i class='bi bi-x-circle'></i></button>
+                                </div>`;
+                    } else {
+                        return `<div class='d-flex justify-content-center'>
+                                    ${btnDetalles}
+                                </div>`;
+                    }
+                }
+            }
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+        }
+    });
 }
 
 $(document).ready(function(){
 
     consultar();
 
-    // ==========================================
     // VALIDACIONES DE DATOS (Teclado)
-    // ==========================================
-
     $("#referencia").on("keypress", function(e){ validarkeypress(/^[0-9]*$/, e); });
     $("#referencia").on("keyup", function(){
         validarkeyup(/^[0-9]{4,20}$/, $(this), $("#sreferencia"), "Referencia inválida (solo números)");
@@ -30,9 +104,7 @@ $(document).ready(function(){
         validarkeyup(/^[1-9][0-9]*$/, $(this), $("#scantidadPeriodos"), "Mínimo 1 período");
     });
 
-    // ==========================================
     // LÓGICA DEL MODAL DE CLIENTES
-    // ==========================================
     $("#listarClienteBtn").on("click", function(){
         $.ajax({
             url: 'index.php?pagina=clientes_pagos',
@@ -63,7 +135,6 @@ $(document).ready(function(){
         });
     });
 
-    // Buscador en tiempo real dentro del modal
     $("#filtrarClientesModal").on("keyup", function() {
         var valor = $(this).val().toLowerCase();
         $("#listaClientesModal tr").filter(function() {
@@ -71,10 +142,7 @@ $(document).ready(function(){
         });
     });
 
-    // ==========================================
     // BOTONES Y EVENTOS
-    // ==========================================
-
     $("#btnGuardar").on("click", function() {
         if(validarEnvio()){
             var datos = new FormData();
@@ -97,35 +165,9 @@ $(document).ready(function(){
         $("#modalPago").modal("show");
     });
 
-    // Buscador general de la tabla
-    $("#buscar_pago").on("keyup", function() {
-        var valor = $(this).val().toLowerCase();
-        var filasFiltradas = 0;
-        
-        $("#cuerpoTablaPagos tr").filter(function() {
-            var fecha = $(this).find("td:eq(1)").text().toLowerCase();
-            var cedula = $(this).find("td:eq(2)").text().toLowerCase();
-            var nombre = $(this).find("td:eq(3)").text().toLowerCase();
-            var referencia = $(this).find("td:eq(4)").text().toLowerCase();
-
-            var coincide = cedula.indexOf(valor) > -1 || nombre.indexOf(valor) > -1 || referencia.indexOf(valor) > -1 || fecha.indexOf(valor) > -1;
-            $(this).toggle(coincide);
-            if(coincide) filasFiltradas++;
-        });
-
-        if(valor === ""){
-            paginarTabla(1);
-        } else {
-            $("#infoPaginacion").text("Mostrando resultados de búsqueda (" + filasFiltradas + ")");
-            $("#contenedorPaginacion").empty(); 
-        }
-    });
 });
 
-// ==========================================
 // FUNCIONES DE SELECCIÓN Y ACCIÓN 
-// ==========================================
-
 function colocacliente(tr) {
     var id = $(tr).find("td:eq(0)").text();
     var cedula = $(tr).find("td:eq(1)").text();
@@ -138,32 +180,65 @@ function colocacliente(tr) {
 }
 
 function aprobar_pago(pos) {
-    var linea = $(pos).closest('tr');
-    var idPago = linea.find("td:eq(0)").text(); 
+    var d = tablaPagos.row($(pos).closest('tr')).data();
 
-    if (confirm("¿Estás seguro de que deseas APROBAR este pago?")) {
+    alertaAprobarPago(function() {
         var datos = new FormData();
         datos.append('accion', 'aprobar');
-        datos.append('idPago', idPago);
+        datos.append('idPago', d.id_pago);
         enviaAjax(datos);
-    }
+    });
 }
 
 function rechazar_pago(pos) {
-    var linea = $(pos).closest('tr');
-    var idPago = linea.find("td:eq(0)").text(); 
+    var d = tablaPagos.row($(pos).closest('tr')).data();
 
-    if (confirm("¿Estás seguro de que deseas RECHAZAR/ANULAR este pago?")) {
+    alertaRechazarPago(function() {
         var datos = new FormData();
         datos.append('accion', 'rechazar');
-        datos.append('idPago', idPago);
+        datos.append('idPago', d.id_pago);
         enviaAjax(datos);
-    }
+    });
 }
 
-// ==========================================
+// Nueva función para ver los detalles estilo factura
+function ver_detalles(btn) {
+    var fecha = $(btn).data('fecha');
+    var cliente = $(btn).data('cliente');
+    var cedula = $(btn).data('cedula');
+    var referencia = $(btn).data('referencia');
+    var monto = $(btn).data('monto');
+    
+    var metodo = $(btn).data('metodo');
+    var mcedula = $(btn).data('mcedula');
+    var mtelefono = $(btn).data('mtelefono');
+
+    var textoMetodo = metodo.toLowerCase();
+
+    if (textoMetodo === 'zelle') {
+        $("#iconoMetodo").removeClass("bi-bank").addClass("bi-currency-exchange");
+        $("#lblMetodo1").html('Correo: <span class="fw-bold text-dark">' + mcedula + '</span>');
+        $("#lblMetodo2").html('Titular: <span class="fw-bold text-dark">' + mtelefono + '</span>');
+    } else {
+        if (textoMetodo.indexOf('banco') === -1) {
+            metodo = "Banco " + metodo;
+        }
+        $("#iconoMetodo").removeClass("bi-currency-exchange").addClass("bi-bank");
+        $("#lblMetodo1").html('Cédula/RIF: <span class="fw-bold text-dark">' + mcedula + '</span>');
+        $("#lblMetodo2").html('Teléfono: <span class="fw-bold text-dark">' + mtelefono + '</span>');
+    }
+
+    $("#detMetodo").text(metodo);
+    $("#detFecha").text(fecha);
+    $("#detCedula").text(cedula);
+    $("#detCliente").text(cliente);
+    $("#detReferencia").text(referencia);
+    $("#detMonto").text("$" + monto);
+
+    $("#modalDetallePago").modal("show");
+}
+
 // VALIDACIÓN ANTES DE ENVIAR
-// ==========================================
 function validarEnvio() {
     if($("#idCliente").val() == "" || $("#clienteInfo").val().trim() == ""){
         mostrarMensaje("Debe seleccionar un Cliente");
@@ -192,11 +267,6 @@ function validarEnvio() {
     return true;
 }
 
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje);
-    $("#mostrarModal").modal("show");
-    setTimeout(function() { $("#mostrarModal").modal("hide") }, 5000);
-}
 
 function validarkeypress(er, e){
     key = e.keyCode;
@@ -218,9 +288,7 @@ function validarkeyup(er, etiqueta, etiquetamensaje, mensaje){
     }
 }
 
-// ==========================================
 // AJAX PRINCIPAL
-// ==========================================
 function enviaAjax(datos){
     $.ajax({
         async: true,
@@ -236,8 +304,7 @@ function enviaAjax(datos){
             try{
                 var lee = JSON.parse(respuesta);
                 if(lee.resultado == 'consultar'){
-                    $("#cuerpoTablaPagos").html(lee.mensaje);
-                    paginarTabla(1); 
+                    // Ya no se inyecta HTML manual; DataTables maneja el renderizado con .ajax.reload()
                 } 
                 else if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
@@ -265,10 +332,7 @@ function enviaAjax(datos){
     });
 }
 
-// ==========================================
 // FUNCIONES PARA LLENAR LOS SELECTS
-// ==========================================
-
 function cargarMembresias() {
     $.ajax({
         url: "index.php?pagina=clientes_pagos",
@@ -301,46 +365,7 @@ function cargarMetodos() {
     });
 }
 
-// ==========================================
-// PAGINACIÓN Y LIMPIEZA
-// ==========================================
-
-function paginarTabla(pagina) {
-    paginaActual = pagina;
-    var filas = $("#cuerpoTablaPagos tr");
-    var totalFilas = filas.length;
-    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
-    
-    var inicio = (paginaActual - 1) * filasPorPagina;
-    var fin = inicio + filasPorPagina;
-
-    filas.hide().slice(inicio, fin).show();
-    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " pagos");
-
-    var htmlBotones = "";
-    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
-
-    var l = null;
-    for (var i = 1; i <= totalPaginas; i++) {
-        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
-            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
-            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
-            l = i;
-        } else if (l != null && i != l + 1 && l != '...') {
-            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
-            l = '...';
-        }
-    }
-
-    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
-
-    $("#contenedorPaginacion").html(htmlBotones);
-}
-
 function limpia(){
-    // Limpiamos los nuevos inputs del cliente
     $("#idCliente").val("");
     $("#clienteInfo").val("");
     

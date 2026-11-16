@@ -40,7 +40,7 @@ if($nivel != "" && ($pagina == "login" || $pagina == "principal")) {
             $pagina = "clientes"; 
             break;
         case 2: // Usuario (Cliente)
-            $pagina = "principal_cliente";
+            $pagina = "clientes_rutina";
             break;
         default:
             $pagina = "login";
@@ -52,7 +52,7 @@ if($nivel != "" && ($pagina == "login" || $pagina == "principal")) {
 if($nivel != ""){
     // si intenta entrar a 'admin' y no es administrador ni recepcionista
     if($pagina == "admin" && ($nivel != 1 && $nivel != 4)){
-        $pagina = ($nivel == 5) ? "clientes" : "principal_cliente"; 
+        $pagina = ($nivel == 5) ? "clientes" : "clientes_rutina"; 
     }
     
     // si un cliente intenta entrar a modulos de los empleados

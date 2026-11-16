@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 04-11-2026 a las 21:42:44
+-- Tiempo de generación: 14-11-2026 a las 03:10:16
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -47,8 +47,12 @@ CREATE TABLE `cliente` (
 --
 
 INSERT INTO `cliente` (`id_cliente`, `cedula`, `nombre`, `apellido`, `telefono`, `correo`, `contrasena`, `id_membresia`, `estado`, `id_rol`, `racha_actual`, `fecha_ultimo_entrenamiento`) VALUES
-(38, '32600068', 'Jesus', 'Cordero', '04142345656', 'jesus@gmail.com', '$2y$10$EN66ZCZ4Asy.FPY6RfR5quf13yCWH2Plqq5LhIXJh2u81qwNn6NBS', 1, 1, 2, 1, '2026-11-02'),
-(39, '33560098', 'Luis', 'Alvarado', '04127389712', 'luisalvarad@gmail.com', '$2y$10$/GDmk7Pbg6fxkgmnfhtFoOEcKnuMwRjv24FOXhDiakQ6rzOpnRkCG', 1, 1, 2, 0, NULL);
+(38, '32600068', 'Jesus', 'Cordero', '04142345656', 'jesus@gmail.com', '$2y$10$EN66ZCZ4Asy.FPY6RfR5quf13yCWH2Plqq5LhIXJh2u81qwNn6NBS', 1, 0, 2, 2, '2026-11-11'),
+(39, '33560098', 'Luis', 'Alvarado', '04127389712', 'luisalvarad@gmail.com', '$2y$10$/GDmk7Pbg6fxkgmnfhtFoOEcKnuMwRjv24FOXhDiakQ6rzOpnRkCG', 1, 1, 2, 0, NULL),
+(40, '30088283', 'Jose j j j j j j j j j j j j', 'Escalona', '04120587814', 'joseaee@gmail.xom', '$2y$10$V.E15eU.Ksv3vAUAwX1c5.j5Cp0ooXGDf2BB7sHu/nVkgkmmbIgMC', 1, 0, 2, 0, NULL),
+(41, '23123213213', 'jdksjkdjksjklajda jdsjfdsl', 'klsamjkdjsla', '22132131231', 'q@gmail.com', '$2y$10$CWk9oKsqxUY93CRdncuf1ejNmlsTxQoH9Gic58zyF542/pN33uHb2', 3, 0, 2, 0, NULL),
+(42, '32600985', 'Nica', 'Nor', '041249387362', 'nicanor@gmail.com', '$2y$10$KySQsDi1AV4lab6p6vnOoOh9ZJa6xpdvfdw9Ptgw38LvrLdWwQjUi', 1, 1, 2, 1, '2026-11-12'),
+(44, '31560097', 'Abelardo', 'Delaspriella', '04129383749', 'jesusillo@gmail.com', '$2y$10$AJwlnvHHIDdkwenQxFJJ9Oa.AVyNlN/Ta4Ng760lPr910dxN6rvMG', 1, 1, 2, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -69,8 +73,11 @@ CREATE TABLE `detalleRutina` (
 --
 
 INSERT INTO `detalleRutina` (`id_detalle`, `id_rutina`, `id_ejercicio`, `series`, `repeticiones`) VALUES
-(7, 17, 1, 3, '10'),
-(8, 17, 6, 3, '12');
+(16, 20, 1, 4, '10'),
+(17, 20, 6, 4, '12'),
+(18, 20, 1, 5, '5'),
+(19, 22, 6, 4, '12'),
+(20, 22, 3, 5, '34');
 
 -- --------------------------------------------------------
 
@@ -95,9 +102,8 @@ INSERT INTO `ejercicio` (`id_ejercicio`, `nombre`, `imagen`, `descripcion`) VALU
 (3, 'Peso Muerto', NULL, NULL),
 (4, 'Dominadas', NULL, NULL),
 (5, 'Remo con barra', NULL, NULL),
-(6, 'Press Militar', NULL, NULL),
-(7, 'Zancadas', NULL, NULL),
-(8, 'Curl Biceps', NULL, NULL);
+(6, 'Press Militar', NULL, ''),
+(21, 'Abdominales', NULL, '');
 
 -- --------------------------------------------------------
 
@@ -130,7 +136,7 @@ INSERT INTO `empleado` (`id_empleado`, `cedula`, `nombre`, `apellido`, `telefono
 (9, '31560008', 'administrador', 'admin', '04128675940', 'correo@gmail.com', '$2y$10$L7a1AbBqtyYmdu/A8W.42.R4XO6eRln9eIVZOzzfP..LLSkxOodo2', 0, 1),
 (10, '11254789', 'maria', 'perez', '04128574563', 'maria2026@gmail.com', '$2y$10$VvrKIVw98zz6W5QC/q0WvOua7vUKtsIA66/Y09S976VRzvgaZLwVq', 0, 1),
 (11, '31560042', 'Bruce', 'Wayne', '04129573523', 'batman@gmail.com', '$2y$10$LhQfETPnEpew2tkCV50YpeF8P6mvQ0/Pn0FtoH14lnp6YmNhGtePK', 1, 5),
-(12, '32560987', 'Jolyne', 'Kujo', '04248573526', 'jolyne@gmail.com', '$2y$10$HFTk1Lp4G/RgkZhPI46kwOrew7lRbm.Hbu0dC9mBLrqYSgvbZMOCG', 1, 4);
+(12, '32560987', 'Jolina', 'Kujo', '04248573526', 'jolyne@gmail.com', '$2y$10$HFTk1Lp4G/RgkZhPI46kwOrew7lRbm.Hbu0dC9mBLrqYSgvbZMOCG', 1, 4);
 
 -- --------------------------------------------------------
 
@@ -149,7 +155,7 @@ CREATE TABLE `membresia` (
 --
 
 INSERT INTO `membresia` (`id_membresia`, `tipo`, `monto`) VALUES
-(1, 'Mensualidad Estándar', 30.00),
+(1, 'Mensualidad Estándarr', 30.00),
 (2, 'Semanal Estándar', 10.00),
 (3, 'Diario Estándar', 3.00);
 
@@ -172,9 +178,10 @@ CREATE TABLE `metodos_pago` (
 --
 
 INSERT INTO `metodos_pago` (`id_metodo`, `banco`, `cedula`, `telefono`, `status`) VALUES
-(2, 'Venezuela', '31560041', '04128574348', 1),
+(2, 'Venezuela', '31560041', '04128574343', 1),
 (3, 'Venezuela', '32600068', '04245174317', 0),
-(9, 'Zelle', 'galagym@gmail.com', 'Gala Gym', 1);
+(9, 'Zelle', 'galagyym@gmail.com', 'Gala Gym', 1),
+(10, 'mercantil', '3260068', '04127865345', 1);
 
 -- --------------------------------------------------------
 
@@ -190,16 +197,22 @@ CREATE TABLE `pago` (
   `id_membresia` int(11) NOT NULL,
   `referencia` varchar(20) NOT NULL,
   `id_metodo` int(11) NOT NULL,
-  `cantidad_periodos` int(11) NOT NULL DEFAULT 1
+  `cantidad_periodos` int(11) NOT NULL DEFAULT 1,
+  `estado_pago` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0: pendiente, 1: aprobado, 2: rechazado'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `pago`
 --
 
-INSERT INTO `pago` (`id_pago`, `fecha`, `monto`, `id_cliente`, `id_membresia`, `referencia`, `id_metodo`, `cantidad_periodos`) VALUES
-(12, '2026-10-28', 90.00, 38, 1, '123456789111', 2, 3),
-(13, '2026-10-28', 6.00, 38, 3, '123123123123', 2, 2);
+INSERT INTO `pago` (`id_pago`, `fecha`, `monto`, `id_cliente`, `id_membresia`, `referencia`, `id_metodo`, `cantidad_periodos`, `estado_pago`) VALUES
+(12, '2026-10-28', 90.00, 38, 1, '123456789111', 2, 3, 1),
+(13, '2026-10-28', 6.00, 38, 3, '123123123123', 2, 2, 1),
+(14, '2026-11-07', 50.00, 38, 1, '12345', 9, 1, 1),
+(15, '2026-11-07', 360.00, 38, 1, '3737373337', 2, 12, 2),
+(16, '2026-11-08', 222222.00, 38, 1, '122222', 2, 1, 1),
+(17, '2026-11-11', 30.00, 38, 1, '123456', 10, 1, 0),
+(18, '2026-11-11', 6.00, 38, 3, '1234567f', 9, 2, 0);
 
 -- --------------------------------------------------------
 
@@ -241,7 +254,8 @@ CREATE TABLE `rutina` (
 --
 
 INSERT INTO `rutina` (`id_rutina`, `nombre`, `id_empleado`, `id_cliente`) VALUES
-(17, 'Pecho', NULL, 38);
+(20, 'Pechoo', 8, 38),
+(22, 'Hombro', 8, 42);
 
 --
 -- Índices para tablas volcadas
@@ -323,19 +337,19 @@ ALTER TABLE `rutina`
 -- AUTO_INCREMENT de la tabla `cliente`
 --
 ALTER TABLE `cliente`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT de la tabla `detalleRutina`
 --
 ALTER TABLE `detalleRutina`
-  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `ejercicio`
 --
 ALTER TABLE `ejercicio`
-  MODIFY `id_ejercicio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id_ejercicio` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `empleado`
@@ -347,19 +361,19 @@ ALTER TABLE `empleado`
 -- AUTO_INCREMENT de la tabla `membresia`
 --
 ALTER TABLE `membresia`
-  MODIFY `id_membresia` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_membresia` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `metodos_pago`
 --
 ALTER TABLE `metodos_pago`
-  MODIFY `id_metodo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_metodo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `pago`
 --
 ALTER TABLE `pago`
-  MODIFY `id_pago` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_pago` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
@@ -371,7 +385,7 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT de la tabla `rutina`
 --
 ALTER TABLE `rutina`
-  MODIFY `id_rutina` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id_rutina` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Restricciones para tablas volcadas

@@ -1,4 +1,6 @@
-<?php require_once("comunes/encabezado.php"); ?>
+<?php 
+require_once("comunes/encabezado.php"); 
+?>
 
 <div class="container-fluid">
     <div class="row">
@@ -10,37 +12,30 @@
             </div>
 
             <div class="bg-white p-4 shadow-sm border">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-clipboard2-pulse"></i> Rutinas</h6>
-                    <div class="d-flex gap-2 align-items-center" style="max-width: 450px; width: 100%;">
-                        <input type="text" class="form-control form-control-sm rounded-0" id="buscar_rutina" placeholder="Buscar...">
-                        <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap" id="btnNuevaRutina">
-                            REGISTRAR
-                        </button>
-                    </div>
-                </div>
+                
+                <!-- Botón de registrar suelto (DataTables inyectará su buscador y selector arriba automáticamente) -->
+                <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap mb-3" id="btnNuevaRutina">
+                    REGISTRAR
+                </button>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle small" id="tablaRutinas">
+                    <table class="table table-hover align-middle small w-100" id="tablaRutinas">
                         <thead class="table-light">
                             <tr class="text-muted">
-                                <th style="display:none">ID</th>
+                                <!-- Columna oculta para el ID -->
+                                <th class="d-none">ID</th>
+                                
+                                <!-- Columnas visibles -->
                                 <th><i class="bi bi-card-text"></i> NOMBRE DE RUTINA</th>
                                 <th><i class="bi bi-person-badge"></i> ENTRENADOR</th>
                                 <th><i class="bi bi-person-check"></i> CLIENTE ASIGNADO</th>
                                 <th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th>
                             </tr>
                         </thead>
-                        <tbody class="fw-bold" id="cuerpoTablaRutinas"></tbody>
+                        <tbody class="fw-bold"></tbody>
                     </table>
                 </div>
 
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-                    <span class="text-muted small" id="infoPaginacion">Mostrando 0 rutinas</span>
-                    <nav>
-                        <ul class="pagination pagination-sm m-0" id="contenedorPaginacion"></ul>
-                    </nav>
-                </div>
             </div>
         </main>
     </div>
@@ -61,7 +56,7 @@
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">NOMBRE DE LA RUTINA</label>
-                        <input type="text" class="form-control rounded-0" id="nombreRutina" name="nombreRutina" placeholder="Ej: HIPERMAXHULKGOLku" required>
+                        <input type="text" class="form-control rounded-0" id="nombreRutina" name="nombreRutina" placeholder="Ej: Lunes - Pecho" required>
                         <span id="snombreRutina" class="text-danger small"></span>
                     </div>
 
@@ -168,7 +163,8 @@
     </div>
 </div>
 
-<?php require_once("comunes/modal.php"); ?>
-<?php require_once("comunes/modal_eliminar.php"); ?>
-<?php require_once("comunes/pie.php"); ?>
-<script src="js/rutinas.js?v=<?php echo time(); ?>"></script>
+
+<?php 
+require_once("comunes/pie.php"); 
+?>
+<script src="js/rutinas.js"></script>

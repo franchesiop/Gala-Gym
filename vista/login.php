@@ -1,11 +1,8 @@
 <?php require_once("comunes/encabezado.php"); ?>
 
-<!-- Contenedor Principal a pantalla completa -->
-<div class="position-relative min-vh-100 w-100 overflow-hidden d-flex align-items-center justify-content-center">
+<!-- Contenedor Principal a pantalla completa con la clase de fondo CSS -->
+<div class="login-bg position-relative min-vh-100 w-100 overflow-hidden d-flex align-items-center justify-content-center">
     
-    <!-- Imagen de fondo natural, sin capa oscura -->
-    <img src="img/pesas.webp" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover z-0" alt="Fondo Login">
-
     <!-- Contenedor relativo para que la tarjeta flote sobre el fondo (z-2) -->
     <div class="position-relative z-2 w-100 px-3 d-flex justify-content-center">
         
@@ -49,6 +46,5 @@
 
 <?php 
 require_once("comunes/pie.php");
-require_once("comunes/modal.php");
 ?>
-<script src="js/login.js?v=<?php echo time(); ?>"></script>
+<script src="js/login.js"></script>

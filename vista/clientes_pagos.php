@@ -10,41 +10,32 @@
             </div>
 
             <div class="bg-white p-4 shadow-sm border">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-cash-coin"></i> Gestión de Pagos</h6>
-                    
-                    <div class="d-flex gap-2 align-items-center" style="max-width: 450px; width: 100%;">
-                        <input type="text" class="form-control form-control-sm rounded-0" id="buscar_pago" placeholder="Buscar por cédula o referencia...">
-                        <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap" id="btnNuevoPago">
-                            REGISTRAR
-                        </button>
-                    </div>
-                </div>
+                
+                <!-- Botón de registrar suelto (DataTables inyectará su buscador y selector arriba automáticamente) -->
+                <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap mb-3" id="btnNuevoPago">
+                    REGISTRAR
+                </button>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle small" id="tablaPagos">
+                    <table class="table table-hover align-middle small w-100" id="tablaPagos">
                         <thead class="table-light">
                             <tr class="text-muted">
-                                <th><i class="bi bi-calendar-event"></i> FECHA</th>
-                                <th><i class="bi bi-person-badge"></i> CÉDULA</th>
-                                <th><i class="bi bi-person-circle"></i> CLIENTE</th>
-                                <th><i class="bi bi-receipt"></i> REFERENCIA</th>
-                                <th><i class="bi bi-currency-dollar"></i> MONTO</th>
-                                <th><i class="bi bi-bank"></i> MÉTODO</th>
-                                <th><i class="bi bi-info-circle"></i> ESTADO</th>
-                                <th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th>
+                                <th class="d-none">ID PAGO</th>
+                <th class="d-none">CÉDULA</th>
+                
+                <!-- Estas 6 columnas son las visibles en pantalla -->
+                <th><i class="bi bi-calendar-event"></i> FECHA</th>
+                <th><i class="bi bi-person-circle"></i> CLIENTE</th>
+                <th><i class="bi bi-receipt"></i> REFERENCIA</th>
+                <th><i class="bi bi-currency-dollar"></i> MONTO</th>
+                <th><i class="bi bi-info-circle"></i> ESTADO</th>
+                <th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th>
                             </tr>
                         </thead>
-                        <tbody class="fw-bold" id="cuerpoTablaPagos"></tbody>
+                        <tbody class="fw-bold"></tbody>
                     </table>
                 </div>
 
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-                    <span class="text-muted small" id="infoPaginacion">Mostrando 0 pagos</span>
-                    <nav>
-                        <ul class="pagination pagination-sm m-0" id="contenedorPaginacion"></ul>
-                    </nav>
-                </div>
             </div>
         </main>
     </div>
@@ -60,7 +51,6 @@
        </div>
        <div class="modal-body p-4">
             <form id="formPago">
-                <!-- NUEVO SELECTOR DE CLIENTE TIPO RUTINAS -->
                 <div class="mb-3">
                     <label class="form-label small fw-bold">CLIENTE</label>
                     <div class="input-group">
@@ -120,7 +110,7 @@
    </div>
 </div>
 
-<!-- NUEVO MODAL: Listado de Clientes -->
+<!-- Modal Listado de Clientes -->
 <div class="modal fade" id="modal_clientes" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-0 border-0 shadow">
@@ -150,8 +140,62 @@
     </div>
 </div>
 
+<!-- NUEVO MODAL: Detalle (Factura) -->
+<div class="modal fade" id="modalDetallePago" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-0 border-0 shadow">
+            <div class="modal-header bg-dark text-white rounded-0">
+                <h5 class="modal-title fw-bold small text-uppercase">Detalle de Pago</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="text-center mb-4">
+                    <i class="bi bi-bank fs-2 text-muted mb-2" id="iconoMetodo"></i>
+                    <p class="text-muted small fw-bold mb-1" style="font-size: 0.75rem;">PAGO ACREDITADO EN:</p>
+                    <h5 class="fw-bold m-0 text-uppercase text-dark" id="detMetodo"></h5>
+                    
+                    <div class="mt-2 text-muted small" style="font-size: 0.8rem;">
+                        <div id="lblMetodo1">Cédula/RIF: <span class="fw-bold text-dark" id="detMetodoCedula"></span></div>
+                        <div id="lblMetodo2">Teléfono: <span class="fw-bold text-dark" id="detMetodoTelefono"></span></div>
+                    </div>
+                </div>
+                
+                <div class="border-top border-dark border-2 border-dashed my-3" style="border-style: dashed !important; opacity: 0.2;"></div>
+
+                <ul class="list-group list-group-flush rounded-0 bg-transparent">
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent small px-0">
+                        <span class="fw-bold text-muted">FECHA</span>
+                        <span id="detFecha"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent small px-0">
+                        <span class="fw-bold text-muted">CÉDULA CLIENTE</span>
+                        <span id="detCedula"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent small px-0">
+                        <span class="fw-bold text-muted">CLIENTE</span>
+                        <span id="detCliente"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent small px-0">
+                        <span class="fw-bold text-muted">REFERENCIA</span>
+                        <span id="detReferencia"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent small px-0 mt-2">
+                        <span class="fw-bold text-dark">MONTO TOTAL</span>
+                        <span id="detMonto" class="fw-bold fs-5 text-success"></span>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer justify-content-center border-0 bg-light">
+                <button type="button" data-bs-dismiss="modal" class="btn btn-dark rounded-0 small fw-bold px-5">CERRAR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php 
 require_once("comunes/modal.php"); 
+require_once("comunes/modal_confirmar.php"); 
+require_once("comunes/modal_rechazar.php");  
 require_once("comunes/pie.php"); 
 ?>
-<script src="js/clientes_pagos.js?v=<?php echo time(); ?>"></script>
+<script src="js/clientes_pagos.js?v="></script>

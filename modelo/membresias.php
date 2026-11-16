@@ -103,37 +103,14 @@ class membresias extends datos {
         try{
             $resultado = $co->query("SELECT * FROM membresia");
             if($resultado){
-                $respuesta = '';
-                foreach($resultado as $fila){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td style='display:none'>" . $fila['id_membresia'] . "</td>";
-                    $respuesta .= "<td>" . $fila['tipo'] . "</td>";
-                    $respuesta .= "<td>" . $fila['monto'] . "</td>";
-
-                    $respuesta .= "<td>";
-                    $respuesta .= "<div class='d-flex justify-content-center'>";
-        
-                    $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>";
-                    $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>";
-                    $respuesta .= "</div>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
-                if($respuesta == ""){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td colspan='3' class='text-center text-muted'>";
-                    $respuesta .= "<span><i class='bi bi-card-list fs-1' style='color: #17120b'></i></span>";
-                    $respuesta .= "<h5 class='text-dashboard'> No hay Membresías Registradas </h5>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
+                // Extraemos todos los registros puros en un array asociativo
+                $datos = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = $respuesta;
+                $r['mensaje'] = $datos; 
             } else {
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = '';
+                $r['mensaje'] = [];
             }
         } catch(Exception $e){
             $r['resultado'] = 'error';

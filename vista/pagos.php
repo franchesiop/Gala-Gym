@@ -10,44 +10,34 @@ require_once("comunes/encabezado.php");
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light">
             <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom bg-white px-3 mt-3 shadow-sm">
-                <h5 class="fw-bold text-uppercase m-0 small">Panel / Pagos</h5>
+                <h5 class="fw-bold text-uppercase m-0 small">Panel / Métodos de Pago</h5>
             </div>
 
             <div class="bg-white p-4 shadow-sm border">
                 
-                <!-- Buscador en tiempo real y botón de registro -->
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
-                    <h6 class="fw-bold m-0 text-uppercase"><i class="bi bi-credit-card-2-front"></i> Métodos de Pago</h6>
-                    
-                    <div class="d-flex gap-2 align-items-center" style="max-width: 450px; width: 100%;">
-                        <input type="text" class="form-control form-control-sm rounded-0" id="buscar_pago" placeholder="Buscar...">
-                        <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap" id="btnNuevoPago" data-bs-toggle="modal" data-bs-target="#modalPago">
-                            REGISTRAR
-                        </button>
-                    </div>
-                </div>
+                <!-- Botón de registrar suelto (DataTables inyectará su buscador y selector arriba automáticamente) -->
+                <button type="button" class="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-nowrap mb-3" id="btnNuevoPago" data-bs-toggle="modal" data-bs-target="#modalPago">
+                    REGISTRAR
+                </button>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle small" id="tablaPagos">
+                    <table class="table table-hover align-middle small w-100" id="tablaPagos">
                         <thead class="table-light">
                             <tr class="text-muted">
+                                <!-- Columnas ocultas necesarias para que el JS lea los IDs y datos al editar/eliminar -->
+                                <th class="d-none">ID MÉTODO</th>
+                                <th class="d-none">DATO 1</th>
+                                <th class="d-none">DATO 2</th>
+                                <th class="d-none">DATO 3</th>
+
+                                <!-- Columnas visibles -->
                                 <th><i class="bi bi-currency-euro"></i> TIPO</th>
                                 <th><i class="bi bi-coin"></i> BANCO / NOMBRE</th>
                                 <th class="text-center"><i class="bi bi-gear"></i> OPCIONES</th>
                             </tr>
                         </thead>
-                        <tbody class="fw-bold" id="cuerpoTablaPagos"></tbody>
+                        <tbody class="fw-bold"></tbody>
                     </table>
-                </div>
-
-                <!-- Paginación dinámica (Estándar Bootstrap) -->
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-                    <span class="text-muted small" id="infoPaginacion">Mostrando 0 métodos de pago</span>
-                    <nav>
-                        <ul class="pagination pagination-sm m-0" id="contenedorPaginacion">
-                            <!-- Los botones se generan dinámicamente por JS -->
-                        </ul>
-                    </nav>
                 </div>
 
             </div>
@@ -110,7 +100,5 @@ require_once("comunes/encabezado.php");
 
 <?php 
 require_once("comunes/pie.php"); 
-require_once("comunes/modal.php"); 
-require_once("comunes/modal_eliminar.php"); 
 ?>
-<script src="js/pagos.js?v=<?php echo time(); ?>"></script>
+<script src="js/pagos.js"></script>

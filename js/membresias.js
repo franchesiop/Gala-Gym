@@ -1,46 +1,84 @@
-var paginaActual = 1;
-var filasPorPagina = 10;
+// Variable global para controlar la instancia de DataTables
+var tablaMembresias;
 
 function consultar(){
-    var datos = new FormData();
-    datos.append('accion', 'consultar');
-    enviaAjax(datos);
+    if ($.fn.DataTable.isDataTable('#tablaMembresias')) {
+        tablaMembresias.ajax.reload(null, false);
+        return;
+    }
+
+    tablaMembresias = $('#tablaMembresias').DataTable({
+        autoWidth: false,
+        order: [],                       // Sin orden inicial por defecto
+        lengthChange: false,             // Quita el selector de cantidad de registros por defecto
+        layout: {
+            topStart: { div: { html: '<h6 class="fw-bold text-uppercase m-0"><i class="bi bi-cash-stack"></i> Membresías</h6>' } },
+            topEnd: [
+                { search: { placeholder: 'Buscar...', text: '' } },
+                document.getElementById('btnNuevoPlan')
+            ]
+        },
+        ajax: {
+            url: "index.php?pagina=membresias",
+            type: "POST",
+            data: function (d) { d.accion = 'consultar'; },
+            dataSrc: "mensaje" // Los datos puros en formato JSON vienen en 'mensaje'
+        },
+        columns: [
+            { data: "id_membresia", visible: false }, // 0: ID Oculto
+            { data: "tipo" },                          // 1: Tipo de Plan (Visible)
+            { 
+                data: "monto",                         // 2: Costo (Visible)
+                render: function (data) {
+                    return "$" + data;                 // Opcional: le agrega el signo de dólar estético
+                }
+            },
+            {
+                data: null,                            // 3: Opciones (Visible)
+                orderable: false,
+                className: "text-center",
+                render: function () {
+                    return `<div class='d-flex justify-content-center'>
+                                <button type='button' class='btn btn-dark text-white small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>
+                                <button type='button' class='btn btn-danger small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>
+                            </div>`;
+                }
+            }
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+        }
+    });
 }
 
 $(document).ready(function(){
 
     consultar();
+    
     $("#formMembresia").on("submit", function(e){
         e.preventDefault();
-        });
-
-    
+    });
     
     // Validacion de datos
     // Validacion nombre
     $("#nombrePlan").on("keypress", function(e){
-        // Regex para un solo carácter: Solo letras, acentos, ñ y espacios. Nada de = _ o números.
         validarkeypress(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]$/, e);
     });
     
     $("#nombrePlan").on("keyup", function(){
-        // Regex para la cadena completa: entre 3 y 100 caracteres.
         validarkeyup(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,100}$/, $(this), $("#snombrePlan"), "Solo letras (entre 3 y 100 caracteres)");
     });
 
     $("#costoPlan").on("keypress", function(e){
-        // Regex para un solo carácter: Exclusivamente números del 0 al 9.
         validarkeypress(/^[0-9]$/, e);
     });
     
     $("#costoPlan").on("keyup", function(){
-        // Regex para la cadena completa: 1 o más números.
         validarkeyup(/^[0-9]+$/, $(this), $("#scostoPlan"), "Solo se aceptan números");
     });
 
     // Botón Guardar / Modificar
     $("#btnGuardar").on("click", function() {
-        // Guardar (Incluir)
         if($(this).text().toLowerCase() == 'incluir'){
             if(validarEnvio()){
                 var datos = new FormData();
@@ -50,7 +88,6 @@ $(document).ready(function(){
                 enviaAjax(datos);
             }
         }
-        // Modificar
         else if($(this).text().toLowerCase() == 'modificar'){
             if(validarEnvio()){
                 var datos = new FormData();
@@ -61,9 +98,9 @@ $(document).ready(function(){
                 enviaAjax(datos);
             }
         }
-    }); // 
+    });
 
-    // Botón Nuevo Ejercicio
+    // Botón Nuevo Plan
     $("#btnNuevoPlan").on("click", function(){
         limpia();
         $("#btnGuardar").text("INCLUIR"); 
@@ -73,24 +110,14 @@ $(document).ready(function(){
     // Botón Eliminar del Modal
     $("#btnEliminar").on("click", function(){
         var id_membresia = $("#idMembresia").val(); 
-        
-        // Pasa el ID al modal de confirmación
-        $("#id_eliminar_global").val(id_membresia);
-        
-        // Oculta el modal de edición y abre el de confirmación
         $("#modalMembresia").modal("hide");
-        $("#modal_eliminar").modal("show");
-    });
 
-    // Evento del botón "SÍ, ELIMINAR" 
-    $("#btnConfirmarEliminar").on("click", function(){
-        var id_membresia = $("#id_eliminar_global").val(); 
-        
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('id_membresia', id_membresia);
-        
-        enviaAjax(datos);
+        alertaEliminar(function() {
+            var datos = new FormData();
+            datos.append('accion', 'eliminar');
+            datos.append('id_membresia', id_membresia);
+            enviaAjax(datos);
+        });
     });
 
     // Botón Incluir alternativo 
@@ -99,29 +126,7 @@ $(document).ready(function(){
         $("#btnGuardar").text("incluir");
         $("#modalUsuario").modal("show");
     });
-
-    // Buscador en tiempo real
-    $("#buscar_membresia").on("keyup", function() {
-        var valor = $(this).val().toLowerCase();
-        var filasFiltradas = 0;
-        
-        $("#cuerpoTablaMembresias tr").filter(function() {
-            var plan = $(this).find("td:eq(1)").text().toLowerCase();
-            var costo = $(this).find("td:eq(2)").text().toLowerCase();
-
-            var coincide = plan.indexOf(valor) > -1 || costo.indexOf(valor) > -1;
-            $(this).toggle(coincide);
-            if(coincide) filasFiltradas++;
-        });
-
-        if(valor === ""){
-            paginarTabla(1);
-        } else {
-            $("#infoPaginacion").text("Mostrando resultados (" + filasFiltradas + ")");
-            $("#contenedorPaginacion").empty(); 
-        }
-    });
-}); // Fin del $(document).ready
+});
 
 // Validar antes de enviar
 function validarEnvio() {
@@ -136,12 +141,7 @@ function validarEnvio() {
     return true;
 }
 
-// Función para mostrar el mensaje modal
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje);
-    $("#mostrarModal").modal("show");
-    setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
-}
+
 
 // Función para validar por keypress
 function validarkeypress(er,e){
@@ -165,28 +165,28 @@ function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
     }
 }
 
-// Función para llenar el formulario al editar
+// Función para llenar el formulario al editar usando DataTables
 function pone(pos){
-    var linea = $(pos).closest('tr');
+    var d = tablaMembresias.row($(pos).closest('tr')).data();
     
-    $("#idMembresia").val(linea.find("td:eq(0)").text());
-    $("#nombrePlan").val(linea.find("td:eq(1)").text()); 
-    $("#costoPlan").val(linea.find("td:eq(2)").text());
+    $("#idMembresia").val(d.id_membresia);
+    $("#nombrePlan").val(d.tipo); 
+    $("#costoPlan").val(d.monto);
 
     $("#btnGuardar").text('MODIFICAR');
     $("#modalMembresia").modal("show");
 }
 
-// Función eliminar directa desde la tabla
-// Función eliminar directa desde la tabla
+// Función eliminar directa desde la tabla usando DataTables
 function eliminar(pos){
-    var linea = $(pos).closest('tr');
-    var id_membresia = $(linea).find("td:eq(0)").text();
+    var d = tablaMembresias.row($(pos).closest('tr')).data();
 
-    // Guardamos el ID en el input oculto del modal 
-    $("#id_eliminar_global").val(id_membresia);
-    
-    $("#modal_eliminar").modal("show");
+    alertaEliminar(function() {
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('id_membresia', d.id_membresia);
+        enviaAjax(datos);
+    });
 }
 
 // Función AJAX
@@ -204,17 +204,14 @@ function enviaAjax(datos){
             try {
                 var lee = JSON.parse(respuesta);
                 
-                // Si la acción fue consultar, dibuja las filas en la tabla
                 if(lee.resultado == 'consultar'){
-                    $("#cuerpoTablaMembresias").html(lee.mensaje);
-                    paginarTabla(1);
+                    // DataTables se encarga de recargar y actualizar automáticamente mediante ajax.reload()
                 } 
-                // Si se incluyó con éxito, limpia, cierra el modal y recarga la tabla
                 else if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Membresía Registrada'){
                         $("#modalMembresia").modal("hide");
-                        consultar(); // <-- vuelve a llamar a la base de datos para actualizar la vista
+                        consultar(); 
                     }
                 }
                else if(lee.resultado == 'modificar'){
@@ -228,7 +225,6 @@ function enviaAjax(datos){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Membresía Eliminada'){
                         $("#modalMembresia").modal("hide");
-                        $("#modal_eliminar").modal("hide");
                         consultar();
                     }
                 } 
@@ -242,40 +238,6 @@ function enviaAjax(datos){
     });
 }
 
-function paginarTabla(pagina) {
-    paginaActual = pagina;
-    var filas = $("#cuerpoTablaMembresias tr");
-    var totalFilas = filas.length;
-    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
-    
-    var inicio = (paginaActual - 1) * filasPorPagina;
-    var fin = inicio + filasPorPagina;
-
-    filas.hide().slice(inicio, fin).show();
-    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " membresías");
-
-    var htmlBotones = "";
-
-    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
-
-    var l = null;
-    for (var i = 1; i <= totalPaginas; i++) {
-        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
-            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
-            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
-            l = i;
-        } else if (l != null && i != l + 1 && l != '...') {
-            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
-            l = '...';
-        }
-    }
-
-    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
-
-    $("#contenedorPaginacion").html(htmlBotones);
-}
 // Limpiar formulario
 function limpia(){
     $("#idMembresia").val("");

@@ -127,51 +127,27 @@ class clientes extends datos {
         return $r;
     }
    function consultar(){
-        $co = $this->conecta();
-        $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $r = array();
-        try{
-            $resultado = $co->query("SELECT * FROM cliente WHERE estado = 1");
-            if($resultado){
-                $respuesta = '';
-                foreach($resultado as $fila){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td>" . $fila['cedula'] . "</td>";
-                    $respuesta .= "<td>" . $fila['nombre'] . "</td>";
-                    $respuesta .= "<td>" . $fila['apellido'] . "</td>";
-                    $respuesta .= "<td>" . $fila['telefono'] . "</td>";
-                    $respuesta .= "<td style='display:none'>" . $fila['correo'] . "</td>";
-                    $respuesta .= "<td style='display:none'>" . $fila['id_membresia'] . "</td>";
-                   // $respuesta .= "<td>" . $fila['contrasena'] . "</td>";
-                    $respuesta .= "<td>";
-                        $respuesta .= "<div class='d-flex justify-content-center'>";
-                        $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>";
-                        $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
-                if($respuesta == ""){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td colspan = '5' class='text-center text-muted py-4>'";
-                    $respuesta .= "<span><i class='bi bi-person-fill fs-1' style='color: #17120b'></i></span>";
-                    $respuesta .= "<h5 class= 'text-dashboard'> No hay cientes Registrados </h5>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
-                $r['resultado'] = 'consultar';
-                $r['mensaje'] = $respuesta;
-            } else {
-                $r['resultado'] = 'consultar';
-                $r['mensaje'] = '';
-            }
-        } catch(Exception $e){
-            $r['resultado'] = 'error';
-            $r['mensaje'] = $e->getMessage();
+    $co = $this->conecta();
+    $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $r = array();
+    try{
+        $resultado = $co->query("SELECT * FROM cliente WHERE estado = 1");
+        if($resultado){
+            // Extraemos los datos puros en un arreglo asociativo
+            $datos = $resultado->fetchAll(PDO::FETCH_ASSOC);
+            
+            $r['resultado'] = 'consultar';
+            $r['mensaje'] = $datos; 
+        } else {
+            $r['resultado'] = 'consultar';
+            $r['mensaje'] = [];
         }
-        return $r;
+    } catch(Exception $e){
+        $r['resultado'] = 'error';
+        $r['mensaje'] = $e->getMessage();
     }
+    return $r;
+}
 
     function existe($cedula){
         $co = $this->conecta();

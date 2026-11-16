@@ -142,41 +142,14 @@ class ejercicio extends datos {
         try{
             $resultado = $co->query("SELECT * FROM ejercicio ORDER BY id_ejercicio DESC");
             if($resultado){
-                $respuesta = '';
-                foreach($resultado as $fila){
-                    $img = (!empty($fila['imagen']) && file_exists($fila['imagen'])) ? $fila['imagen'] : 'img/default.jpg';
-                    $desc = !empty($fila['descripcion']) ? $fila['descripcion'] : 'Sin descripción';
-                    $descHTML = !empty($fila['descripcion']) ? $fila['descripcion'] : '<span class="text-muted fst-italic">Sin descripción</span>';
-
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td style='display:none'>" . $fila['id_ejercicio'] . "</td>";
-                    $respuesta .= "<td style='width: 80px;'><img src='" . $img . "' alt='ejercicio' style='width:45px; height:45px; object-fit:cover; border-radius:6px;' class='shadow-sm border'></td>";
-                    $respuesta .= "<td>" . $fila['nombre'] . "</td>";
-                    $respuesta .= "<td><div style='max-height: 45px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>" . $descHTML . "</div></td>";
-                    $respuesta .= "<td style='display:none'>" . $desc . "</td>";
-                    $respuesta .= "<td class='text-center' style='width: 120px;'>";
-                    $respuesta .= "<div class='d-flex justify-content-center'>";
-                    $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>";
-                    $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>";
-                    $respuesta .= "</div>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
-                if($respuesta == ""){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td colspan='6' class='text-center text-muted py-4'>";
-                    $respuesta .= "<span><i class='bi bi-card-list fs-1' style='color: #17120b'></i></span>";
-                    $respuesta .= "<h5 class='text-dashboard mt-2'> No hay Ejercicios Registrados </h5>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
+                // Extraemos todos los registros puros en un array asociativo
+                $datos = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = $respuesta;
+                $r['mensaje'] = $datos; 
             } else {
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = '';
+                $r['mensaje'] = [];
             }
         } catch(Exception $e){
             $r['resultado'] = 'error';

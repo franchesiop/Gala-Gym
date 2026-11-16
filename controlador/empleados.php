@@ -1,7 +1,7 @@
 <?php
 if (!is_file("modelo/".$pagina.".php")){
     echo "Falta definir la clase ".$pagina;
-	exit;
+    exit;
 }
 require_once("modelo/".$pagina.".php");
 
@@ -22,9 +22,15 @@ if(is_file("vista/".$pagina.".php")){
                 break;
 
             case 'incluir':
+                // 1. Formateamos Nombre y Apellido: 1ra letra mayúscula, resto minúscula
+                $nombreFormateado = ucfirst(strtolower($_POST['nombreEmpleado']));
+                $apellidoFormateado = ucfirst(strtolower($_POST['apellidoEmpleado']));
+
+                // 2. Le pasamos las variables formateadas al modelo
                 $o->set_cedulaEmpleado($_POST['cedulaEmpleado']);
-                $o->set_nombreEmpleado($_POST['nombreEmpleado']);
-                $o->set_apellidoEmpleado($_POST['apellidoEmpleado']);
+                $o->set_nombreEmpleado($nombreFormateado);
+                $o->set_apellidoEmpleado($apellidoFormateado);
+                
                 $o->set_tlfEmpleado($_POST['tlfEmpleado']);
                 $o->set_correoEmpleado($_POST['correoEmpleado']);
                 $o->set_contraEmpleado($_POST['contraEmpleado']);
@@ -33,9 +39,15 @@ if(is_file("vista/".$pagina.".php")){
                 break;
 
             case 'modificar':
+                // 1. Formateamos Nombre y Apellido: 1ra letra mayúscula, resto minúscula
+                $nombreFormateado = ucfirst(strtolower($_POST['nombreEmpleado']));
+                $apellidoFormateado = ucfirst(strtolower($_POST['apellidoEmpleado']));
+
+                // 2. Le pasamos las variables formateadas al modelo
                 $o->set_cedulaEmpleado($_POST['cedulaEmpleado']);
-                $o->set_nombreEmpleado($_POST['nombreEmpleado']);
-                $o->set_apellidoEmpleado($_POST['apellidoEmpleado']);
+                $o->set_nombreEmpleado($nombreFormateado);
+                $o->set_apellidoEmpleado($apellidoFormateado);
+                
                 $o->set_tlfEmpleado($_POST['tlfEmpleado']);
                 $o->set_correoEmpleado($_POST['correoEmpleado']);
                 $o->set_contraEmpleado($_POST['contraEmpleado']);

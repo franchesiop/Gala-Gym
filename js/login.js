@@ -72,12 +72,6 @@ function enviaAjax(datos){
     });
 }
 
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje); 
-    $("#mostrarModal").modal("show");
-    setTimeout(function() { $("#mostrarModal").modal("hide"); }, 5000);
-}
-
 function validarkeypress(er,e){
     key = e.keyCode;
     tecla = String.fromCharCode(key);

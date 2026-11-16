@@ -22,7 +22,7 @@ class metodos_pago extends datos {
         $r = array();
         
         try{
-            $inc = $co->prepare("INSERT INTO metodos_pago(banco, cedula, telefono) VALUES (:banco, :cedula, :telefono)");
+            $inc = $co->prepare("INSERT INTO metodos_pago(banco, cedula, telefono, status) VALUES (:banco, :cedula, :telefono, 1)");
             $inc->bindParam(':banco', $this->banco);
             $inc->bindParam(':cedula', $this->cedula);
             $inc->bindParam(':telefono', $this->telefono);
@@ -45,7 +45,7 @@ class metodos_pago extends datos {
         
         if($this->existe($this->id_metodo)){
             try{
-                $mod = $co->prepare("UPDATE metodos_pago SET banco = :banco, cedula = :cedula, telefono = :telefono WHERE id_metodo = :id_metodo");
+                $mod = $co->prepare("UPDATE metodos_pago SET banco = :banco, cedula = :cedula, telefono = :telefono WHERE id_metodo = :id_metodo AND status = 1");
 
                 $mod->bindParam(':banco', $this->banco);
                 $mod->bindParam(':cedula', $this->cedula);
@@ -73,8 +73,8 @@ class metodos_pago extends datos {
         
         if($this->existe($this->id_metodo)){
             try{
-                // elminado logico
-                $eli = $co->prepare("UPDATE metodos_pago SET status = 0 WHERE id_metodo = :id_metodo");
+                // eliminado lógico
+                $eli = $co->prepare("UPDATE metodos_pago SET status = 0 WHERE id_metodo = :id_metodo AND status = 1");
                 $eli->bindParam(':id_metodo', $this->id_metodo);
                 $eli->execute();
 
@@ -100,45 +100,13 @@ class metodos_pago extends datos {
             $resultado = $co->query("SELECT * FROM metodos_pago WHERE status = 1");
             
             if($resultado){
-                $respuesta = '';
-                foreach($resultado as $fila){
-                    $esZelle = (strtolower($fila['banco']) === 'zelle');
-                    $etiquetaMetodo = $esZelle ? "ZELLE" : "PAGO MÓVIL";
-                    $detalle = $esZelle ? $fila['telefono'] : $fila['banco']; 
-
-                    $respuesta .= "<tr>";
-                        $respuesta .= "<td style='display:none'>" . $fila['id_metodo'] . "</td>";
-                       
-                        $respuesta .= "<td style='display:none'>" . $fila['banco'] . "</td>";
-                        $respuesta .= "<td style='display:none'>" . $fila['cedula'] . "</td>";
-                        $respuesta .= "<td style='display:none'>" . $fila['telefono'] . "</td>";
-                        
-                        $respuesta .= "<td>" . $etiquetaMetodo . "</span></td>";
-                        $respuesta .= "<td>" . $detalle . "</td>";
-                        
-                        $respuesta .= "<td>";
-                            $respuesta .= "<div class='d-flex justify-content-center'>";
-                            $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>";
-                            $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>";
-                            $respuesta .= "</div>";
-                        $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
-                if($respuesta == ""){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td colspan = '4' class='text-center text-muted py-4'>";
-                    $respuesta .= "<span><i class='bi bi-wallet2 fs-1' style='color: #17120b'></i></span>";
-                    $respuesta .= "<h5 class= 'text-dashboard'> No hay métodos de pago registrados </h5>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
+                $datos = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = $respuesta;
+                $r['mensaje'] = $datos; 
             } else {
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = '';
+                $r['mensaje'] = [];
             }
         } catch(Exception $e){
             $r['resultado'] = 'error';
@@ -152,7 +120,7 @@ class metodos_pago extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         try{
-            $resultado = $co->prepare("SELECT * FROM metodos_pago WHERE id_metodo = :id_metodo");
+            $resultado = $co->prepare("SELECT * FROM metodos_pago WHERE id_metodo = :id_metodo AND status = 1");
             $resultado->bindParam(':id_metodo', $id_metodo);
             $resultado->execute();
             $fila = $resultado->fetchAll(PDO::FETCH_BOTH);

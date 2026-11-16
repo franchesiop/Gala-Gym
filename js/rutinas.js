@@ -1,11 +1,62 @@
-var paginaActual = 1;
-var filasPorPagina = 10;
+// Variable global para controlar la instancia de DataTables
+var tablaRutinas;
 var filaEjercicioGlobal = null; 
 
 function consultar(){
-    var datos = new FormData();
-    datos.append('accion', 'consultar');
-    enviaAjax(datos);
+    if ($.fn.DataTable.isDataTable('#tablaRutinas')) {
+        tablaRutinas.ajax.reload(null, false);
+        return;
+    }
+
+    tablaRutinas = $('#tablaRutinas').DataTable({
+        autoWidth: false,
+        order: [],                       // Sin orden inicial por defecto
+        lengthChange: false,             // Quita el selector de cantidad de registros por defecto
+        layout: {
+            topStart: { div: { html: '<h6 class="fw-bold text-uppercase m-0"><i class="bi bi-clipboard2-pulse"></i> Rutinas</h6>' } },
+            topEnd: [
+                { search: { placeholder: 'Buscar...', text: '' } },
+                document.getElementById('btnNuevaRutina')
+            ]
+        },
+        ajax: {
+            url: "index.php?pagina=rutinas",
+            type: "POST",
+            data: function (d) { d.accion = 'consultar'; },
+            dataSrc: "mensaje" // Los datos puros en formato JSON vienen en 'mensaje'
+        },
+        columns: [
+            { data: "id_rutina", visible: false }, // 0: ID Oculto
+            { data: "rutina" },                    // 1: Nombre de Rutina (Visible)
+            { 
+                data: null,                        // 2: Entrenador (Visible)
+                render: function (data, type, row) {
+                    return (row.empleado_nombre) ? row.empleado_nombre + " " + row.empleado_apellido : "Desconocido";
+                }
+            },
+            { 
+                data: null,                        // 3: Cliente Asignado (Visible)
+                render: function (data, type, row) {
+                    return (row.cliente_nombre) ? row.cedula + "<br>" + row.cliente_nombre + " " + row.cliente_apellido : "Sin asignar";
+                }
+            },
+            { data: "id_cliente", visible: false },// 4: ID del cliente oculto para la edición
+            {
+                data: null,                        // 5: Opciones (Visible)
+                orderable: false,
+                className: "text-center",
+                render: function () {
+                    return `<div class='d-flex justify-content-center'>
+                                <button type='button' class='btn btn-dark text-white small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>
+                                <button type='button' class='btn btn-danger small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>
+                            </div>`;
+                }
+            }
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+        }
+    });
 }
 
 $(document).ready(function(){
@@ -13,8 +64,8 @@ $(document).ready(function(){
 
     $("#formRutina").on("submit", function(e){ e.preventDefault(); });
 
-    $("#nombreRutina").on("keypress",function(e){ validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e); });
-    $("#nombreRutina").on("keyup",function(){ validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this),$("#snombreRutina"),"Nombre inválido"); });
+    $("#nombreRutina").on("keypress",function(e){ validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC\-]*$/,e); });
+    $("#nombreRutina").on("keyup",function(){ validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC\-]{3,100}$/, $(this),$("#snombreRutina"),"Nombre inválido"); });
 
     $("#contenedorEjercicios").on("keypress", ".input-series", function(e){
         validarkeypress(/^[0-9]$/, e);
@@ -88,8 +139,7 @@ $(document).ready(function(){
                     var html = "";
                     if (data.length > 0) {
                         $.each(data, function(index, ejercicio) {
-                             // Si no hay imagen en BD, le ponemos una por defecto
-                             var rutaImg = (ejercicio.imagen && ejercicio.imagen !== "") ? "img/ejercicios/" + ejercicio.imagen : "img/default.jpg";
+                             var rutaImg = (ejercicio.imagen && ejercicio.imagen !== "") ? ejercicio.imagen : "img/default.jpg";
                              
                              html += `<tr style="cursor:pointer" onclick="colocaejercicio(this);">
                                          <td style="display:none">${ejercicio.id_ejercicio}</td>
@@ -141,37 +191,6 @@ $(document).ready(function(){
         agregarFilaEjercicio(); 
         $("#modalUsuario").modal("show");
     });
-
-    $("#btnConfirmarEliminar").on("click", function(){
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('id_rutina', $("#id_eliminar_global").val());
-        enviaAjax(datos);
-    });
-
-    // Buscador en tiempo real tabla principal
-    $("#buscar_rutina").on("keyup", function() {
-        var valor = $(this).val().toLowerCase();
-        var filasFiltradas = 0;
-        
-        $("#cuerpoTablaRutinas tr").filter(function() {
-            var nombreRutina = $(this).find("td:eq(1)").text().toLowerCase();
-            var entrenador = $(this).find("td:eq(2)").text().toLowerCase();
-            var cliente = $(this).find("td:eq(3)").text().toLowerCase();
-
-            var coincide = nombreRutina.indexOf(valor) > -1 || entrenador.indexOf(valor) > -1 || cliente.indexOf(valor) > -1;
-            $(this).toggle(coincide);
-            if(coincide) filasFiltradas++;
-        });
-
-        if(valor === ""){
-            paginarTabla(1);
-        } else {
-            $("#infoPaginacion").text("Mostrando resultados (" + filasFiltradas + ")");
-            $("#contenedorPaginacion").empty(); 
-        }
-    });
-
 }); 
 
 // ==========================================
@@ -190,7 +209,7 @@ function colocacliente(tr) {
 
 function colocaejercicio(tr) {
     var id = $(tr).find("td:eq(0)").text();
-    var nombre = $(tr).find("td:eq(2)").text(); // El nombre ahora está en la columna 2, no en la 1
+    var nombre = $(tr).find("td:eq(2)").text();
 
     var filaDestino = $("#" + filaEjercicioGlobal);
     
@@ -250,7 +269,7 @@ function empaquetarDatos(accion) {
 }
 
 function validarEnvio() {
-    if(validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $("#nombreRutina"),$("#snombreRutina"),"Nombre Invalido")==0){
+    if(validarkeyup(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC\-]{3,100}$/, $("#nombreRutina"),$("#snombreRutina"),"Nombre Invalido")==0){
         mostrarMensaje("Nombre de Rutina Invalido <br> (Letras/Números entre 3 y 100 caracteres)");
         return false;
     }
@@ -287,11 +306,6 @@ function validarEnvio() {
     return true;
 }
 
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje);
-    $("#mostrarModal").modal("show");
-    setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
-}
 
 function validarkeypress(er,e){
     key = e.keyCode;
@@ -307,15 +321,13 @@ function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
 }
 
 function pone(pos){
-    var linea = $(pos).closest('tr');
-    var idRutina = linea.find("td:eq(0)").text();
-    var nombreRutina = linea.find("td:eq(1)").text();
-    var idCliente = linea.find("td:eq(4)").text(); 
-    var textoCliente = linea.find("td:eq(3)").text(); 
+    var d = tablaRutinas.row($(pos).closest('tr')).data();
     
-    $("#idRutina").val(idRutina);
-    $("#nombreRutina").val(nombreRutina);   
-    $("#idCliente").val(idCliente);
+    $("#idRutina").val(d.id_rutina);
+    $("#nombreRutina").val(d.rutina);   
+    $("#idCliente").val(d.id_cliente);
+    
+    var textoCliente = (d.cliente_nombre) ? d.cedula + " - " + d.cliente_nombre + " " + d.cliente_apellido : "Sin asignar";
     $("#clienteInfo").val(textoCliente);
 
     $("#btnGuardar").text('modificar');
@@ -324,7 +336,7 @@ function pone(pos){
     $.ajax({
         url: "index.php?pagina=rutinas",
         type: "POST",
-        data: { accion: 'consultar_detalles', id_rutina: idRutina },
+        data: { accion: 'consultar_detalles', id_rutina: d.id_rutina },
         success: function(respuesta){
             try {
                 var data = JSON.parse(respuesta);
@@ -340,8 +352,14 @@ function pone(pos){
 }
 
 function eliminar(pos){
-    $("#id_eliminar_global").val($(pos).closest('tr').find("td:eq(0)").text());
-    $("#modal_eliminar").modal("show");
+    var d = tablaRutinas.row($(pos).closest('tr')).data();
+
+    alertaEliminar(function() {
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('id_rutina', d.id_rutina);
+        enviaAjax(datos);
+    });
 }
 
 function enviaAjax(datos){
@@ -356,11 +374,12 @@ function enviaAjax(datos){
         success: function (respuesta){
             try{
                 var lee = JSON.parse(respuesta);
-                if(lee.resultado == 'consultar'){ $("#cuerpoTablaRutinas").html(lee.mensaje); paginarTabla(1); } 
+                if(lee.resultado == 'consultar'){ 
+                    // DataTables se encarga del refresco automático 
+                } 
                 else if(lee.resultado == 'incluir' || lee.resultado == 'modificar' || lee.resultado == 'eliminar'){
                     mostrarMensaje(lee.mensaje);
                     $("#modalUsuario").modal("hide");
-                    $("#modal_eliminar").modal("hide"); 
                     consultar();
                 } else if(lee.resultado == "error"){ mostrarMensaje(lee.mensaje); }
             } catch(e){ alert("Error en JSON: " + e.name); }
@@ -382,39 +401,4 @@ function limpia(){
     $("#sCliente").text("");
     
     $("#contenedorEjercicios").empty();
-}
-
-function paginarTabla(pagina) {
-    paginaActual = pagina;
-    var filas = $("#cuerpoTablaRutinas tr");
-    var totalFilas = filas.length;
-    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
-    
-    var inicio = (paginaActual - 1) * filasPorPagina;
-    var fin = inicio + filasPorPagina;
-
-    filas.hide().slice(inicio, fin).show();
-    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " rutinas");
-
-    var htmlBotones = "";
-
-    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
-
-    var l = null;
-    for (var i = 1; i <= totalPaginas; i++) {
-        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
-            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
-            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
-            l = i;
-        } else if (l != null && i != l + 1 && l != '...') {
-            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
-            l = '...';
-        }
-    }
-
-    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
-
-    $("#contenedorPaginacion").html(htmlBotones);
 }

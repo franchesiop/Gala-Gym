@@ -19,9 +19,9 @@ class clientes_pagos extends datos {
         $r = array();
         try{
             $sql = "SELECT p.id_pago, p.fecha, p.monto, p.referencia, p.estado_pago, p.cantidad_periodos,
-                           c.cedula, c.nombre, c.apellido, 
+                           c.id_cliente, c.cedula, c.nombre, c.apellido, 
                            m.tipo AS membresia, 
-                           mp.banco AS metodo 
+                           mp.banco AS metodo, mp.cedula AS metodo_cedula, mp.telefono AS metodo_telefono 
                     FROM pago p
                     INNER JOIN cliente c ON p.id_cliente = c.id_cliente
                     INNER JOIN membresia m ON p.id_membresia = m.id_membresia
@@ -30,50 +30,14 @@ class clientes_pagos extends datos {
 
             $resultado = $co->query($sql);
             if($resultado){
-                $respuesta = '';
-                foreach($resultado as $fila){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td style='display:none'>" . $fila['id_pago'] . "</td>"; 
-                    $respuesta .= "<td>" . $fila['fecha'] . "</td>";
-                    $respuesta .= "<td>" . $fila['cedula'] . "</td>";
-                    $respuesta .= "<td>" . $fila['nombre'] . " " . $fila['apellido'] . "</td>";
-                    $respuesta .= "<td>" . $fila['referencia'] . "</td>";
-                    $respuesta .= "<td>$" . $fila['monto'] . "</td>";
-                    $respuesta .= "<td>" . $fila['metodo'] . "</td>";
-                    
-                    $estado = $fila['estado_pago'];
-                    if($estado == 0){
-                        $respuesta .= "<td><span class='badge bg-warning text-dark'>Pendiente</span></td>";
-                        $respuesta .= "<td>";
-                        $respuesta .= "<div class='d-flex justify-content-center'>";
-                        $respuesta .= "<button type='button' class='btn btn-success text-white w-80 small-width m-1' onclick='aprobar_pago(this)' title='Aprobar'><i class='bi bi-check-circle'></i></button>";
-                        $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='rechazar_pago(this)' title='Rechazar'><i class='bi bi-x-circle'></i></button>";
-                        $respuesta .= "</div></td>";
-                    } else if($estado == 1) {
-                        $respuesta .= "<td><span class='badge bg-success'>Aprobado</span></td>";
-                        $respuesta .= "<td class='text-center'><i class='bi bi-shield-check text-success fs-5'></i></td>"; 
-                    } else {
-                        $respuesta .= "<td><span class='badge bg-danger'>Rechazado</span></td>";
-                        $respuesta .= "<td class='text-center'><i class='bi bi-shield-x text-danger fs-5'></i></td>"; 
-                    }
-                    
-                    $respuesta .= "</tr>";
-                }
-
-                if($respuesta == ""){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td colspan='8' class='text-center text-muted py-4'>";
-                    $respuesta .= "<span><i class='bi bi-cash-stack fs-1' style='color: #17120b'></i></span>";
-                    $respuesta .= "<h5 class='text-dashboard'> No hay pagos registrados </h5>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
+                // Extraemos todos los registros puros en un array asociativo
+                $datos = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = $respuesta;
+                $r['mensaje'] = $datos; 
             } else {
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = '';
+                $r['mensaje'] = [];
             }
         } catch(Exception $e){
             $r['resultado'] = 'error';

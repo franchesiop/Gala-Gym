@@ -7,8 +7,8 @@ $(document).ready(function(){
     cargarCatalogoEjercicios();
 
     $("#nombre_rutina").on("keypress", function(e){
-        validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]*$/, e);
-    });
+    validarkeypress(/^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC\-]*$/, e);
+});
 
     $("#contenedorEjercicios").on("keypress", ".form-serie-validar", function(e){
         validarkeypress(/^[0-9]$/, e);
@@ -44,13 +44,7 @@ $(document).ready(function(){
         }
     });
 
-    $("#btnConfirmarEliminarRutina").on("click", function(){
-        var id = $("#id_eliminar_rutina").val();
-        var datos = new FormData();
-        datos.append('accionRutina', 'eliminar');
-        datos.append('id_rutina', id);
-        enviaAjax(datos);
-    });
+    
     
     // ==========================================
     // LÓGICA DEL MODAL DE EJERCICIOS
@@ -371,12 +365,6 @@ function limpiarFormulario(){
     $("#contenedorEjercicios").empty(); 
 }
 
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje);
-    $("#mostrarModal").modal("show");
-    setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
-}
-
 function validarkeypress(er, e) {
     var key = e.keyCode || e.which;
     var tecla = String.fromCharCode(key);
@@ -386,7 +374,7 @@ function validarkeypress(er, e) {
 
 function validarEnvioRutina() {
     var nombre = $("#nombre_rutina").val().trim();
-    var regexNombre = /^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/;
+    var regexNombre = /^[A-Za-z0-9\b\s\u00f1\u00d1\u00E0-\u00FC\-]{3,100}$/;
     
     if (!regexNombre.test(nombre)) {
         mostrarMensaje("El nombre de la rutina es inválido (letras/números, entre 3 y 100 caracteres).");
@@ -454,8 +442,12 @@ function editarRutina(id_rutina) {
 }
 
 function modalEliminarRutina(id_rutina) {
-    $("#id_eliminar_rutina").val(id_rutina);
-    $("#modalEliminarRutina").modal("show");
+    alertaEliminar(function() {
+        var datos = new FormData();
+        datos.append('accionRutina', 'eliminar');
+        datos.append('id_rutina', id_rutina);
+        enviaAjax(datos);
+    });
 }
 
 function abrirEntrenamiento(id_rutina, nombre_rutina) {

@@ -1,54 +1,97 @@
-var paginaActual = 1;
-var filasPorPagina = 10;
+// Variable global para controlar la instancia de DataTables
+var tablaClientes;
 
 function consultar(){
-    var datos = new FormData();
-    datos.append('accion', 'consultar');
-    enviaAjax(datos);
+    if ($.fn.DataTable.isDataTable('#tablaClientes')) {
+        tablaClientes.ajax.reload(null, false);
+        return;
+    }
+
+    tablaClientes = $('#tablaClientes').DataTable({
+        autoWidth: false,
+        order: [],                       // sin orden inicial (como empleados)
+        lengthChange: false,             // quita "Mostrar X registros"
+        layout: {
+            topStart: { div: { html: '<h6 class="fw-bold text-uppercase m-0"><i class="bi bi-person"></i> Clientes</h6>' } },
+            topEnd: [
+                { search: { placeholder: 'Buscar...', text: '' } },
+                document.getElementById('btnNuevoCliente')
+            ]
+        },
+        ajax: {
+            url: "index.php?pagina=clientes",
+            type: "POST",
+            data: function (d) { d.accion = 'consultar'; },
+            dataSrc: "mensaje"
+        },
+        columns: [
+            { data: "cedula",       type: "string" },   // evita alineación derecha
+            { data: "nombre" },
+            { data: "apellido" },
+            { data: "telefono",     type: "string" },
+            { data: "correo",       visible: false },   // oculta de verdad
+            { data: "id_membresia", visible: false },
+            {
+                data: null,
+                orderable: false,
+                className: "text-center",
+                render: function () {
+                    return `<div class='d-flex justify-content-center'>
+                                <button type='button' class='btn btn-dark text-white small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>
+                                <button type='button' class='btn btn-danger small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>
+                            </div>`;
+                }
+            }
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+        }
+    });
 }
 
 $(document).ready(function(){
 
     consultar();
+    
     //validacion de datos
     //validacion cedula
     $("#cedulaCliente").on("keypress",function(e){
-        validarkeypress(/^[0-9-\.]*$/,e);
+        validarkeypress(/^[0-9]*$/,e); 
     });
     $("#cedulaCliente").on("keyup",function(){
-        validarkeyup(/^[0-9\.]{7,12}$/,$(this), $("#scedulaCliente"),"Cedula invalida - entre 7 y 12 caracteres");
-	});
+        validarkeyup(/^[0-9]{7,9}$/,$(this), $("#scedulaCliente"),"Cédula inválida - entre 7 y 9 números (sin puntos)");
+    });
 
     //validacion nombre
      $("#nombreCliente").on("keypress",function(e){
-		validarkeypress(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
-	});
-	$("#nombreCliente").on("keyup",function(){
-		validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this),$("#snombreCliente"),"Nombre invalido - entre 3 y 100 caracteres");
-	});
+        validarkeypress(/^[A-Za-z\b\u00f1\u00d1\u00E0-\u00FC]*$/,e);
+    });
+    $("#nombreCliente").on("keyup",function(){
+        validarkeyup(/^[A-Za-z\b\u00f1\u00d1\u00E0-\u00FC]{3,25}$/, $(this),$("#snombreCliente"),"Nombre inválido - sin espacios, entre 3 y 25 letras");
+    });
 
     //validacion apellido
      $("#apellidoCliente").on("keypress",function(e){
-		validarkeypress(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
-	});
-	$("#apellidoCliente").on("keyup",function(){
-		validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $(this),$("#sapellidoCliente"),"Apellido invalido - entre 3 y 100 caracteres");
-	});
+        validarkeypress(/^[A-Za-z\b\u00f1\u00d1\u00E0-\u00FC]*$/,e);
+    });
+    $("#apellidoCliente").on("keyup",function(){
+        validarkeyup(/^[A-Za-z\b\u00f1\u00d1\u00E0-\u00FC]{3,25}$/, $(this),$("#sapellidoCliente"),"Apellido inválido - sin espacios, entre 3 y 25 letras");
+    });
 
     //validacion telefono 
      $("#tlfCliente").on("keypress",function(e){
-        validarkeypress(/^[0-9\-+ ]*$/, e);
+        validarkeypress(/^[0-9]*$/, e); 
     });
     $("#tlfCliente").on("keyup",function(){
-        validarkeyup(/^[0-9\-+ ]{11,12}$/,$(this), $("#stlfCliente"),"Telefono invalido - debe ser: 0000-0000000");
-	});
+        validarkeyup(/^(0412|0422|0414|0424|0416|0426)[0-9]{7}$/,$(this), $("#stlfCliente"),"Teléfono inválido - Ej: 04141234567 (11 números)");
+    });
 
     //validacion correo
     $("#correoCliente").on("keypress",function(e){
         validarkeypress(/^[a-zA-z0-9._@-]*$/, e);
     });
     $("#correoCliente").on("keyup",function() {
-        validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/,$(this), $("#scorreoCliente"),"Correo invalido - entre 2 y 10 caracteres");
+        validarkeyup(/^[a-zA-Z0-9]+([._-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9]+([.-]?[a-zA-Z0-9]+)*\.[a-zA-Z]{2,10}$/,$(this), $("#scorreoCliente"),"Correo inválido - Verifica el formato");
     });
 
     //validar contrasena
@@ -91,76 +134,43 @@ $(document).ready(function(){
                 enviaAjax(datos);
             }
         }
-    
     });
 
-        $("#btnNuevoCliente").on("click", function(){
-     limpia();
-     $("#btnGuardar").text("incluir"); 
-     $("#btnEliminar").hide();
-     cargarMembresias(); 
-     $("#modalUsuario").modal("show");
-});
-
-        $("#btnConfirmarEliminar").on("click", function(){
-        var cedula = $("#id_eliminar_global").val(); 
-        
-        var datos = new FormData();
-        datos.append('accion', 'eliminar');
-        datos.append('cedulaCliente', cedula);
-        
-        enviaAjax(datos);
+    $("#btnNuevoCliente").on("click", function(){
+        limpia();
+        $("#btnGuardar").text("incluir"); 
+        $("#btnEliminar").hide();
+        cargarMembresias(); 
+        $("#modalUsuario").modal("show");
     });
-
-    $("#buscar_cliente").on("keyup", function() {
-    var valor = $(this).val().toLowerCase();
-    var filasFiltradas = 0;
-    
-    $("#cuerpoTablaClientes tr").filter(function() {
-        var cedula = $(this).find("td:eq(0)").text().toLowerCase();
-        var nombre = $(this).find("td:eq(1)").text().toLowerCase();
-        var apellido = $(this).find("td:eq(2)").text().toLowerCase();
-
-        var coincide = cedula.indexOf(valor) > -1 || nombre.indexOf(valor) > -1 || apellido.indexOf(valor) > -1;
-        $(this).toggle(coincide);
-        if(coincide) filasFiltradas++;
-    });
-
-    if(valor === ""){
-        paginarTabla(1);
-    } else {
-        $("#infoPaginacion").text("Mostrando resultados de búsqueda (" + filasFiltradas + ")");
-        $("#contenedorPaginacion").empty(); 
-    }
-});
 
 });
 
 //validar antes de enviar
 function validarEnvio() {
-    //validar cedula
-    if(validarkeyup(/^[0-9\.]{7,12}$/,$("#cedulaCliente"), $("#scedulaCliente"),"Cedula Invalida - (El Formato debe ser: 999999999)")==0){
-        mostrarMensaje("Cedula Invalida <br/>" + "(El formato debe ser: 99999999)");	
-		return false;					
-	}
-    //validar nombre
-     else if(validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $("#nombreCliente"),$("#snombreCliente"),"Nombre Invalido - (Solo letras entre 3 y 100 caracteres)")==0){
-		mostrarMensaje("Nombre Invalido <br>" + "(Solo letras entre 3 y 100 caracteres)");
-		return false;
-	}
+    //validar cedula 
+    if(validarkeyup(/^[0-9]{7,9}$/,$("#cedulaCliente"), $("#scedulaCliente"),"Cédula inválida - (Entre 7 y 9 números, sin puntos)")==0){
+        mostrarMensaje("Cédula Inválida <br/>" + "(Debe tener entre 7 y 9 números, sin puntos ni guiones)");    
+        return false;                   
+    }
+    //validar nombre 
+     else if(validarkeyup(/^[A-Za-z\b\u00f1\u00d1\u00E0-\u00FC]{3,25}$/, $("#nombreCliente"),$("#snombreCliente"),"Nombre inválido - (Un solo nombre, entre 3 y 25 letras)")==0){
+        mostrarMensaje("Nombre Inválido <br>" + "(Debe ser un solo nombre sin espacios, entre 3 y 25 letras)");
+        return false;
+    }
     //validar apellido 
-    else if(validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,100}$/, $("#apellidoCliente"),$("#sapellidoCliente"),"apellido Invalido - (Solo letras entre 3 y 100 caracteres)")==0){
-		mostrarMensaje("Apellido Invalido <br>" + "(Solo letras entre 3 y 100 caracteres)");
-		return false;
-	}
-    //validar telefono
-    else if(validarkeyup(/^[0-9\-+ ]{11,12}$/,$("#tlfCliente"), $("#stlfCliente"),"Telefono Invalido - (Formato de: 0000-0000000)")==0){
-        mostrarMensaje("Telefono Invalido <br>" + "(Formato de: 0000-0000000)");	
-		return false;					
-	}
-    //validar correo
-    else if(validarkeyup(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/, $("#correoCliente"), $("#scorreoCliente"),"Correo Invalido") == 0){
-        mostrarMensaje("Correo Invalido <br/>" + "(Formato incorrecto)");
+    else if(validarkeyup(/^[A-Za-z\b\u00f1\u00d1\u00E0-\u00FC]{3,25}$/, $("#apellidoCliente"),$("#sapellidoCliente"),"Apellido inválido - (Un solo apellido, entre 3 y 25 letras)")==0){
+        mostrarMensaje("Apellido Inválido <br>" + "(Debe ser un solo apellido sin espacios, entre 3 y 25 letras)");
+        return false;
+    }
+    //validar telefono 
+    else if(validarkeyup(/^(0412|0422|0414|0424|0416|0426)[0-9]{7}$/,$("#tlfCliente"), $("#stlfCliente"),"Teléfono inválido - (Ej: 04141234567)")==0){
+        mostrarMensaje("Teléfono Inválido <br>" + "(Debe empezar con prefijo válido y tener 11 números, sin guiones)");    
+        return false;                   
+    }
+    //validar correo 
+    else if(validarkeyup(/^[a-zA-Z0-9]+([._-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9]+([.-]?[a-zA-Z0-9]+)*\.[a-zA-Z]{2,10}$/, $("#correoCliente"), $("#scorreoCliente"),"Correo inválido") == 0){
+        mostrarMensaje("Correo Inválido <br/>" + "(Verifica que el formato sea correcto)");
         return false;
     }
     //validar contrasena
@@ -168,29 +178,23 @@ function validarEnvio() {
         var contra = $("#contraCliente").val();
         var esModificar = ($("#btnGuardar").text().trim().toLowerCase() == 'modificar');
 
-        // solo validamos si no es modificar o si el usuario escribio algo nuevo
         if (!(esModificar && contra === "")) {
-            if (validarkeyup(/^[a-zA-Z0-9!@#$%^&*]{8,20}$/, $("#contraCliente"), $("#scontraCliente"), "Contrasena Invalida") == 0) {
-                mostrarMensaje("Contrasena Invalida <br/> (Debe tener entre 8 y 20 caracteres)");
+            if (validarkeyup(/^[a-zA-Z0-9!@#$%^&*]{8,20}$/, $("#contraCliente"), $("#scontraCliente"), "Contraseña inválida") == 0) {
+                mostrarMensaje("Contraseña Inválida <br/> (Debe tener entre 8 y 20 caracteres)");
                 return false;
             }
         }
     }
     return true;
 }
-//fucncion para mostrar el mensaje modal
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje);
-    $("#mostrarModal").modal("show");
-    setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
-}
+
 
 // funcion apra validar por keypress
 function validarkeypress(er,e){
     key = e.keyCode;
     tecla = String.fromCharCode(key);
     a = er.test(tecla);
-	if(!a){
+    if(!a){
         e.preventDefault();
     }
 }
@@ -209,37 +213,31 @@ function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
 
 // funcion para llenar el formulario
 function pone(pos){
-    linea = $(pos).closest('tr');
-    
-    $("#cedulaCliente").val(linea.find("td:eq(0)").text());
-    $("#nombreCliente").val(linea.find("td:eq(1)").text());   
-    $("#apellidoCliente").val(linea.find("td:eq(2)").text()); 
-    $("#tlfCliente").val(linea.find("td:eq(3)").text());      
-    $("#correoCliente").val(linea.find("td:eq(4)").text()); 
-    var idMembresia = linea.find("td:eq(5)").text();
-    cargarMembresias(idMembresia); 
-    $("#contraCliente").val();
+    var d = tablaClientes.row($(pos).closest('tr')).data();
+
+    $("#cedulaCliente").val(d.cedula);
+    $("#nombreCliente").val(d.nombre);
+    $("#apellidoCliente").val(d.apellido);
+    $("#tlfCliente").val(d.telefono);
+    $("#correoCliente").val(d.correo);
+    cargarMembresias(d.id_membresia);
+    $("#contraCliente").val("");
     $("#btnGuardar").text('modificar');
-   
     $("#modalUsuario").modal("show");
 }
 
 function eliminar(pos){
-    var linea = $(pos).closest('tr');
-    var cedula = $(linea).find("td:eq(0)").text();
+    var d = tablaClientes.row($(pos).closest('tr')).data();
 
-    // Guardamos la cédula en el input oculto del modal genérico
-    $("#id_eliminar_global").val(cedula);
-    
-    // Mostramos el modal de Bootstrap
-    $("#modal_eliminar").modal("show");
+    alertaEliminar(function() {
+        var datos = new FormData();
+        datos.append('accion', 'eliminar');
+        datos.append('cedulaCliente', d.cedula);
+        enviaAjax(datos);
+    });
 }
 
-
-
-
 function enviaAjax(datos){
-    
     $.ajax({
         async: true,
         url: "index.php?pagina=clientes",
@@ -254,34 +252,28 @@ function enviaAjax(datos){
             console.log(respuesta);
             try{
                 var lee = JSON.parse(respuesta);
-                if(lee.resultado == 'consultar'){
-                    $("#cuerpoTablaClientes").html(lee.mensaje);
-                    paginarTabla(1); 
-                } 
-                else if(lee.resultado == 'incluir'){
+                
+                // Se eliminó la validación 'consultar' porque DataTables lo dibuja automáticamente
+                if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Cliente Registrado'){
                         $("#modalUsuario").modal("hide");
-                        consultar();
+                        consultar(); // Esto recargará DataTables automáticamente
                     }
                 }
                 else if(lee.resultado == 'modificar'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Cliente Modificado'){
                         $("#modalUsuario").modal("hide");
-                        consultar();
+                        consultar(); // Esto recargará DataTables automáticamente
                     }
                 }
                 else if(lee.resultado == 'eliminar'){
                     mostrarMensaje(lee.mensaje);
                     if(lee.mensaje == 'Cliente Eliminado'){
-                        $("#modal_eliminar").modal("hide"); // <-- Cierra el modal de confirmación
-                        consultar();
+                        consultar(); // Esto recargará DataTables automáticamente
                     }
                 } 
-                else if(lee.resultado == 'buscar'){
-                    $('#listaClientes').html(lee.mensaje);
-                }
                 else if(lee.resultado == "error"){
                     mostrarMensaje(lee.mensaje);
                 }
@@ -319,49 +311,12 @@ function cargarMembresias(valorSeleccionado = "") {
     });
 }
 
-function paginarTabla(pagina) {
-    paginaActual = pagina;
-    var filas = $("#cuerpoTablaClientes tr");
-    var totalFilas = filas.length;
-    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
-    
-    var inicio = (paginaActual - 1) * filasPorPagina;
-    var fin = inicio + filasPorPagina;
-
-    filas.hide().slice(inicio, fin).show();
-    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " clientes");
-
-    var htmlBotones = "";
-
-    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
-
-    var l = null;
-    for (var i = 1; i <= totalPaginas; i++) {
-        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
-            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
-            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
-            l = i;
-        } else if (l != null && i != l + 1 && l != '...') {
-            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
-            l = '...';
-        }
-    }
-
-    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
-
-    $("#contenedorPaginacion").html(htmlBotones);
-}
-
 function limpia(){
     $("#cedulaCliente").val("");
-	$("#nombreCliente").val("");
-	$("#apellidoCliente").val("");
+    $("#nombreCliente").val("");
+    $("#apellidoCliente").val("");
     $("#tlfCliente").val("");
     $("#correoCliente").val("");
     $("#membresiaCliente").val("");
     $("#contraCliente").val("");
 }
-
-

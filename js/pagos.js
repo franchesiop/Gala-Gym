@@ -1,10 +1,64 @@
-var paginaActual = 1;
-var filasPorPagina = 10;
+// Variable global para controlar la instancia de DataTables
+var tablaPagos;
 
 function consultar(){
-    var datos = new FormData();
-    datos.append('accion', 'consultar');
-    enviaAjax(datos);
+    if ($.fn.DataTable.isDataTable('#tablaPagos')) {
+        tablaPagos.ajax.reload(null, false);
+        return;
+    }
+
+    tablaPagos = $('#tablaPagos').DataTable({
+        autoWidth: false,
+        order: [],                       // Sin orden inicial por defecto
+        lengthChange: false,             // Quita el selector "Mostrar X registros" de la vista predeterminada
+        layout: {
+            topStart: { div: { html: '<h6 class="fw-bold text-uppercase m-0"><i class="bi bi-credit-card-2-front"></i> Métodos de Pago</h6>' } },
+            topEnd: [
+                { search: { placeholder: 'Buscar...', text: '' } },
+                document.getElementById('btnNuevoPago')
+            ]
+        },
+        ajax: {
+            url: "index.php?pagina=pagos",
+            type: "POST",
+            data: function (d) { d.accion = 'consultar'; },
+            dataSrc: "mensaje" // Los datos puros en formato JSON vienen en 'mensaje'
+        },
+        columns: [
+            { data: "id_metodo", visible: false }, // 0: ID oculto
+            { data: "banco",     visible: false }, // 1: Banco oculto
+            { data: "cedula",    visible: false }, // 2: Cédula / Correo oculto
+            { data: "telefono",  visible: false }, // 3: Teléfono / Titular oculto
+            { 
+                data: "banco",                         // 4: TIPO (Visible)
+                render: function (data) {
+                    var esZelle = (data.toLowerCase() === 'zelle');
+                    return esZelle ? "ZELLE" : "PAGO MÓVIL";
+                }
+            },
+            { 
+                data: null,                            // 5: BANCO / NOMBRE (Visible)
+                render: function (data, type, row) {
+                    var esZelle = (row.banco.toLowerCase() === 'zelle');
+                    return esZelle ? row.telefono : row.banco; // Si es zelle muestra titular/teléfono según aplique o detalle
+                }
+            },
+            {
+                data: null,                            // 6: OPCIONES (Visible)
+                orderable: false,
+                className: "text-center",
+                render: function () {
+                    return `<div class='d-flex justify-content-center'>
+                                <button type='button' class='btn btn-dark text-white small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>
+                                <button type='button' class='btn btn-danger small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>
+                            </div>`;
+                }
+            }
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
+        }
+    });
 }
 
 $(document).ready(function(){
@@ -40,8 +94,6 @@ $(document).ready(function(){
     });
 
     // validaciones dinamicas
-
-    // dato 1 (solo aplica para nombre de banco en pago movil)
     $("#input_dato_1").on("keypress",function(e){
         if($("#banco").val() === "Pago Móvil") validarkeypress(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
     });
@@ -49,12 +101,11 @@ $(document).ready(function(){
         if($("#banco").val() === "Pago Móvil") validarkeyup(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]{3,50}$/, $(this), $("#sinput_dato_1"),"Banco inválido - entre 3 y 50 caracteres");
     });
 
-    // dato 2 (cedula para pago movil o correo para zelle)
     $("#input_dato_2").on("keypress",function(e){
         if($("#banco").val() === "Pago Móvil") {
-            validarkeypress(/^[0-9\.]*$/,e); // regla cedula
+            validarkeypress(/^[0-9\.]*$/,e);
         } else {
-            validarkeypress(/^[a-zA-z0-9._@-]*$/, e); // regla correo
+            validarkeypress(/^[a-zA-z0-9._@-]*$/, e);
         }
     });
     $("#input_dato_2").on("keyup",function(){
@@ -65,12 +116,11 @@ $(document).ready(function(){
         }
     });
 
-    // dato 3 (telefono para pago movil o titular para zelle)
     $("#input_dato_3").on("keypress",function(e){
         if($("#banco").val() === "Pago Móvil") {
-            validarkeypress(/^[0-9\-+ ]*$/, e); // regal telefono
+            validarkeypress(/^[0-9\-+ ]*$/, e);
         } else {
-            validarkeypress(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e); // regla titular
+            validarkeypress(/^[A-Za-z\b\s\u00f1\u00d1\u00E0-\u00FC]*$/,e);
         }
     });
     $("#input_dato_3").on("keyup",function(){
@@ -81,8 +131,7 @@ $(document).ready(function(){
         }
     });
 
-    //botones
-    
+    // botones
     $("#btnGuardar").on("click", function() {
         if(validarEnvio()){
             var datos = new FormData();
@@ -92,7 +141,6 @@ $(document).ready(function(){
             datos.append('id_metodo', $("#id_metodo").val());
             datos.append('banco', $("#banco").val());
             
-            // empaqueta segun los nombres que espera el controlador
             if($("#banco").val() === "Pago Móvil") {
                 datos.append('nombre_banco', $("#input_dato_1").val());
                 datos.append('cedula', $("#input_dato_2").val());
@@ -106,36 +154,11 @@ $(document).ready(function(){
         }
     });
 
-    
     $("#btnNuevoPago").on("click", function(){
         limpia();
         $("#btnGuardar").text("INCLUIR"); 
         $("#modalPago").modal("show");
     });
-
-    $("#buscar_pago").on("keyup", function() {
-        var valor = $(this).val().toLowerCase();
-        var filasFiltradas = 0;
-        
-        $("#cuerpoTablaPagos tr").filter(function() {
-            // busca en las columnas de Banco/Tipo y los datos extra
-            var banco = $(this).find("td:eq(1)").text().toLowerCase();
-            var dato1 = $(this).find("td:eq(2)").text().toLowerCase();
-            var dato2 = $(this).find("td:eq(3)").text().toLowerCase();
-
-            var coincide = banco.indexOf(valor) > -1 || dato1.indexOf(valor) > -1 || dato2.indexOf(valor) > -1;
-            $(this).toggle(coincide);
-            if(coincide) filasFiltradas++;
-        });
-
-        if(valor === ""){
-            paginarTabla(1);
-        } else {
-            $("#infoPaginacion").text("Mostrando resultados (" + filasFiltradas + ")");
-            $("#contenedorPaginacion").empty(); 
-        }
-    });
-
 });
 
 // funciones
@@ -174,11 +197,6 @@ function validarEnvio() {
     return true;
 }
 
-function mostrarMensaje(mensaje){
-    $("#contenidoModal").html(mensaje);
-    $("#mostrarModal").modal("show");
-    setTimeout(function() {$("#mostrarModal").modal("hide")}, 5000);
-}
 
 function validarkeypress(er,e){
     key = e.keyCode;
@@ -200,28 +218,21 @@ function validarkeyup(er,etiqueta,etiquetamensaje,mensaje){
     }
 }
 
-// funcion para llenar el formulario desde la tabla
+// funcion para llenar el formulario usando DataTables
 function pone(pos){
-    var linea = $(pos).closest('tr');
-    
-    var id_metodo = linea.find("td:eq(0)").text().trim();
-    
-    var banco_db = linea.find("td:eq(1)").text().trim(); 
-    var dato_1 = linea.find("td:eq(2)").text().trim();   
-    var dato_2 = linea.find("td:eq(3)").text().trim();   
+    var d = tablaPagos.row($(pos).closest('tr')).data();
 
-    $("#id_metodo").val(id_metodo);
+    $("#id_metodo").val(d.id_metodo);
 
-    // dispara el .trigger("change") para que el formulario se adapte visualmente antes de meter los datos
-    if(banco_db.toLowerCase() === "zelle") {
+    if(d.banco.toLowerCase() === "zelle") {
         $("#banco").val("Zelle").trigger("change");
-        $("#input_dato_2").val(dato_1); // Correo
-        $("#input_dato_3").val(dato_2); // Titular
+        $("#input_dato_2").val(d.cedula);   // Correo
+        $("#input_dato_3").val(d.telefono); // Titular
     } else {
         $("#banco").val("Pago Móvil").trigger("change");
-        $("#input_dato_1").val(banco_db); // nombre del  banco
-        $("#input_dato_2").val(dato_1); // cedula
-        $("#input_dato_3").val(dato_2); // teleono
+        $("#input_dato_1").val(d.banco);    // Nombre del banco
+        $("#input_dato_2").val(d.cedula);   // Cédula
+        $("#input_dato_3").val(d.telefono); // Teléfono
     }
     
     $("#btnGuardar").text("MODIFICAR");
@@ -229,18 +240,15 @@ function pone(pos){
 }
 
 function eliminar(pos){
-    var linea = $(pos).closest('tr');
-    var id_metodo = $(linea).find("td:eq(0)").text().trim();
-    
-    var detalle = $(linea).find("td:eq(1)").text().trim(); 
+    var d = tablaPagos.row($(pos).closest('tr')).data();
 
-    if(confirm("¿Seguro que deseas eliminar este método de pago?")){
+    alertaEliminar(function() {
         var datos = new FormData();
         datos.append('accion', 'eliminar');
-        datos.append('id_metodo', id_metodo);
+        datos.append('id_metodo', d.id_metodo);
         
         enviaAjax(datos);
-    }
+    });
 }
 
 function enviaAjax(datos){
@@ -258,8 +266,7 @@ function enviaAjax(datos){
             try{
                 var lee = JSON.parse(respuesta);
                 if(lee.resultado == 'consultar'){
-                    $("#cuerpoTablaPagos").html(lee.mensaje);
-                    paginarTabla(1);
+                    // DataTables maneja esto mediante ajax.reload automático en las acciones
                 } 
                 else if(lee.resultado == 'incluir'){
                     mostrarMensaje(lee.mensaje);
@@ -299,44 +306,10 @@ function enviaAjax(datos){
         complete: function () {},
     });
 }
-    function paginarTabla(pagina) {
-    paginaActual = pagina;
-    var filas = $("#cuerpoTablaPagos tr");
-    var totalFilas = filas.length;
-    var totalPaginas = Math.ceil(totalFilas / filasPorPagina);
-    
-    var inicio = (paginaActual - 1) * filasPorPagina;
-    var fin = inicio + filasPorPagina;
-
-    filas.hide().slice(inicio, fin).show();
-    $("#infoPaginacion").text("Mostrando " + (inicio + (totalFilas > 0 ? 1 : 0)) + " a " + (fin > totalFilas ? totalFilas : fin) + " de " + totalFilas + " métodos de pago");
-
-    var htmlBotones = "";
-
-    var prevDisabled = (paginaActual === 1) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} > 1) paginarTabla(${paginaActual - 1}); return false;">&lt;</a></li>`;
-
-    var l = null;
-    for (var i = 1; i <= totalPaginas; i++) {
-        if (i == 1 || i == totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1) || (paginaActual === 1 && i <= 3) || (paginaActual === totalPaginas && i >= totalPaginas - 2)) {
-            var activo = (i === paginaActual) ? "active bg-dark text-white border-dark" : "text-dark";
-            htmlBotones += `<li class="page-item"><a class="page-link ${activo}" href="#" onclick="paginarTabla(${i}); return false;">${i}</a></li>`;
-            l = i;
-        } else if (l != null && i != l + 1 && l != '...') {
-            htmlBotones += `<li class="page-item disabled"><a class="page-link text-dark" href="#">...</a></li>`;
-            l = '...';
-        }
-    }
-
-    var nextDisabled = (paginaActual === totalPaginas || totalPaginas === 0) ? "disabled" : "";
-    htmlBotones += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="if(${paginaActual} < ${totalPaginas}) paginarTabla(${paginaActual + 1}); return false;">&gt;</a></li>`;
-
-    $("#contenedorPaginacion").html(htmlBotones);
-}
 
 function limpia(){
     $("#id_metodo").val("");
-    $("#banco").val("Pago Móvil").trigger("change"); // reinicia el select
+    $("#banco").val("Pago Móvil").trigger("change");
     $("#input_dato_1").val("");
     $("#input_dato_2").val("");
     $("#input_dato_3").val("");

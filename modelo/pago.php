@@ -17,7 +17,6 @@ class pago extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            // trae el monto para poder multiplicar en el js
             $resultado = $co->query("SELECT id_membresia, tipo, monto FROM membresia");
             $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
         } catch(Exception $e) {
@@ -31,7 +30,8 @@ class pago extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            $resultado = $co->query("SELECT id_metodo, banco, telefono FROM metodos_pago WHERE status = 1");
+            // Traemos banco, cedula y telefono para mostrarlos dinámicamente en el resumen
+            $resultado = $co->query("SELECT id_metodo, banco, cedula, telefono FROM metodos_pago WHERE status = 1");
             $datos = $resultado->fetchAll(PDO::FETCH_ASSOC); 
         } catch(Exception $e) {
             $datos = [];

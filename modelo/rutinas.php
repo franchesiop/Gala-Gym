@@ -136,42 +136,14 @@ class rutinas extends datos {
             
             $resultado = $co->query($sql);
             if($resultado){
-                $respuesta = '';
-                foreach($resultado as $fila){
-                    $creador = $fila['empleado_nombre'] ? $fila['empleado_nombre'] . " " . $fila['empleado_apellido'] : "Desconocido";
-                    $cliente = $fila['cliente_nombre'] ? $fila['cedula'] . " - " . $fila['cliente_nombre'] . " " . $fila['cliente_apellido'] : "Sin asignar";
-                    $idClienteAsignado = $fila['id_cliente'] ? $fila['id_cliente'] : "";
-
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td style='display:none'>" . $fila['id_rutina'] . "</td>";
-                    $respuesta .= "<td>" . $fila['rutina'] . "</td>";
-                    $respuesta .= "<td>" . $creador . "</td>";
-                    $respuesta .= "<td>" . $cliente . "</td>"; 
-                    $respuesta .= "<td style='display:none'>" . $idClienteAsignado . "</td>"; 
-                    
-                    $respuesta .= "<td>";
-                    $respuesta .= "<div class='d-flex justify-content-center'>";
-                    $respuesta .= "<button type='button' class='btn btn-dark text-white w-80 small-width m-1' onclick='pone(this)'><i class='bi bi-pencil-square'></i></button>";
-                    $respuesta .= "<button type='button' class='btn btn-danger w-80 small-width m-1' onclick='eliminar(this)'><i class='bi bi-trash'></i></button>";
-                    $respuesta .= "</div>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
-                if($respuesta == ""){
-                    $respuesta .= "<tr>";
-                    $respuesta .= "<td colspan='5' class='text-center text-muted'>";
-                    $respuesta .= "<span><i class='bi bi-clipboard2-pulse fs-1' style='color: #17120b'></i></span>";
-                    $respuesta .= "<h5 class='text-dashboard'> No hay Rutinas Registradas </h5>";
-                    $respuesta .= "</td>";
-                    $respuesta .= "</tr>";
-                }
-
+                // Extraemos todos los registros puros en un array asociativo
+                $datos = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = $respuesta;
+                $r['mensaje'] = $datos; 
             } else {
                 $r['resultado'] = 'consultar';
-                $r['mensaje'] = '';
+                $r['mensaje'] = [];
             }
         } catch(Exception $e){
             $r['resultado'] = 'error';
@@ -186,7 +158,7 @@ class rutinas extends datos {
         $co->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $datos = [];
         try {
-            $sql = "SELECT id_cliente, cedula, nombre, apellido, telefono FROM cliente ORDER BY nombre ASC";
+            $sql = "SELECT id_cliente, cedula, nombre, apellido, telefono FROM cliente WHERE estado = 1 ORDER BY nombre ASC";
             $consulta = $co->query($sql);
             $datos = $consulta->fetchAll(PDO::FETCH_ASSOC);
         } catch(Exception $e) {
